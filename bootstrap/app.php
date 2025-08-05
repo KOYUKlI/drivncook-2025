@@ -3,6 +3,9 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use App\Http\Middleware\AdminMiddleware;
+use App\Http\Middleware\FranchiseMiddleware;
+
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -11,7 +14,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Middlewares globaux ou de groupe par défaut (Laravel les gère déjà)
+        // -> On ajoute nos alias personnalisés :
+        $middleware->alias([
+            'admin'     => AdminMiddleware::class,
+            'franchise' => FranchiseMiddleware::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
