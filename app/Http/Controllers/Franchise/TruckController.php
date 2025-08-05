@@ -12,7 +12,8 @@ class TruckController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index() {
+     public function index()
+    {
         $franchiseId = Auth::user()->franchise_id;
         $trucks = Truck::where('franchise_id', $franchiseId)->get();
         return view('franchise.trucks.index', compact('trucks'));
@@ -21,20 +22,25 @@ class TruckController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create() {
+    public function create()
+    {
         return view('franchise.trucks.create');
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request) {
-        $request->validate(['name'=>'required', 'license_plate'=>'nullable']);
+   public function store(Request $request)
+    {
+        $request->validate([
+            'name'          => 'required|string|max:255',
+            'license_plate' => 'nullable|string|max:50'
+        ]);
         $franchiseId = Auth::user()->franchise_id;
         Truck::create([
-            'name' => $request->name,
+            'name'          => $request->name,
             'license_plate' => $request->license_plate,
-            'franchise_id' => $franchiseId
+            'franchise_id'  => $franchiseId
         ]);
         return redirect()->route('franchise.trucks.index')
                          ->with('success', 'Truck added to your franchise.');
@@ -45,7 +51,10 @@ class TruckController extends Controller
      */
     public function show(Truck $truck)
     {
-        //
+        if ($truck->franchise_id !== Auth::user()->franchise_id) {
+            abort(403);
+        }
+        return view('franchise.trucks.show', compact('truck'));
     }
 
     /**
@@ -53,7 +62,10 @@ class TruckController extends Controller
      */
     public function edit(Truck $truck)
     {
-        //
+        if ($truck->franchise_id !== Auth::user()->franchise_id) {
+            abort(403);
+        }
+        return view('franchise.trucks.edit', compact('truck'));
     }
 
     /**
@@ -61,7 +73,16 @@ class TruckController extends Controller
      */
     public function update(Request $request, Truck $truck)
     {
-        //
+        if ($truck->franchise_id !== Auth::user()->franchise_id) {
+            abort(403);
+        }
+        $request->validate([
+            'name'          => 'required|string|max:255',
+            'license_plate' => 'nullable|string|max:50'
+        ]);
+        $truck->update($request->only('name', 'license_plate'));
+        return redirect()->route('franchise.trucks.index')
+                         ->with('success', 'Truck information updated.');
     }
 
     /**
@@ -69,6 +90,11 @@ class TruckController extends Controller
      */
     public function destroy(Truck $truck)
     {
-        //
+        if ($truck->franchise_id !== Auth::user()->franchise_id) {
+            abort(403);
+        }
+        $truck->delete();
+        return redirect()->route('franchise.trucks.index')
+                         ->with('success', 'Truck removed from your franchise.');
     }
 }
