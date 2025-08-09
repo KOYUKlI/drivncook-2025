@@ -34,7 +34,7 @@ class WarehouseController extends Controller
     {
         $request->validate([
             'name'         => 'required|string|max:255',
-            'location'     => 'required|string|max:255',
+            'location'     => 'nullable|string|max:255',
             'franchise_id' => 'required|exists:franchises,id'
         ]);
     Warehouse::create($request->only('name', 'location', 'franchise_id'));
@@ -67,7 +67,7 @@ class WarehouseController extends Controller
     {
         $request->validate([
             'name'         => 'required|string|max:255',
-            'location'     => 'required|string|max:255',
+            'location'     => 'nullable|string|max:255',
             'franchise_id' => 'required|exists:franchises,id'
         ]);
         $warehouse->update($request->only('name', 'location', 'franchise_id'));

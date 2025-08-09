@@ -3,7 +3,7 @@
 @section('content')
 <div class="flex items-center justify-between mb-4">
     <h1 class="page-title">Franchise: {{ $franchise->name }}</h1>
-    <a href="{{ route('admin.franchisees.edit', $franchise) }}" class="btn-secondary">Edit</a>
+    <a href="{{ route('admin.franchisees.edit', ['franchisee' => $franchise->getRouteKey()]) }}" class="btn-secondary">Edit</a>
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">

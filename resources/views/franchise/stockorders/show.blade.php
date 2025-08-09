@@ -40,10 +40,11 @@
                         <li class="flex items-center justify-between">
                             <span>{{ $item->quantity }} × {{ $item->supply->name }}</span>
                             @if($stockOrder->status === 'pending')
-                                <form action="{{ route('franchise.stockorders.items.destroy', [$stockOrder, $item]) }}" method="POST" onsubmit="return confirm('Remove this item?')">
-                                    @csrf @method('DELETE')
-                                    <button class="btn-link text-red-600">Remove</button>
-                                </form>
+                                <button type="button" class="btn-link text-red-600" x-data x-on:click="$dispatch('open-modal', 'remove-item-{{ $item->id }}')">Remove</button>
+                                <x-confirm-delete :name="'remove-item-' . $item->id"
+                                    :action="route('franchise.stockorders.items.destroy', [$stockOrder, $item])"
+                                    title="Remove item"
+                                    :message="'Remove ' . $item->supply->name . ' from this order?'" />
                             @endif
                         </li>
                     @endforeach
@@ -54,11 +55,12 @@
 
             @if($stockOrder->status === 'pending')
             <div class="mt-4">
-                <form action="{{ route('franchise.stockorders.items.store', $stockOrder) }}" method="POST" class="flex items-end gap-3">
+                <form action="{{ route('franchise.stockorders.items.store', $stockOrder) }}" method="POST" class="flex items-end gap-3" x-data="{ q: '', filter(e){ this.q = e.target.value.toLowerCase(); $el.querySelectorAll('option').forEach(o=>{ o.hidden = this.q && !o.textContent.toLowerCase().includes(this.q); }); } }">
                     @csrf
                     <div>
                         <label class="form-label">Supply</label>
-                        <select name="supply_id" class="form-select">
+                        <input type="text" placeholder="Search supply..." class="form-input mb-1 w-64" x-on:input="filter($event)">
+                        <select name="supply_id" class="form-select w-64">
                             @foreach($supplies as $supply)
                                 <option value="{{ $supply->id }}">{{ $supply->name }}</option>
                             @endforeach
@@ -74,10 +76,13 @@
             @endif
 
             @if($stockOrder->status === 'pending')
-                <form action="{{ route('franchise.stockorders.complete', $stockOrder) }}" method="POST" class="mt-6">
-                    @csrf
-                    <button class="btn-primary" onclick="return confirm('Valider la réception et clôturer la commande ?')">Marquer comme terminée</button>
-                </form>
+                <button type="button" class="btn-primary mt-6" x-data x-on:click="$dispatch('open-modal', 'complete-order-{{ $stockOrder->id }}')">Marquer comme terminée</button>
+                <x-confirm-delete :name="'complete-order-' . $stockOrder->id"
+                    :action="route('franchise.stockorders.complete', $stockOrder)"
+                    method="POST"
+                    title="Clôturer la commande"
+                    message="Valider la réception et clôturer la commande ?"
+                    confirmLabel="Confirmer" />
             @endif
         </div>
     </div>

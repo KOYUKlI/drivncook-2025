@@ -22,12 +22,13 @@
                     <td>{{ $truck->name }}</td>
                     <td>{{ $truck->license_plate }}</td>
                     <td class="text-center space-x-2">
-                        <a href="{{ route('franchise.trucks.show', $truck) }}" class="btn-link">View</a>
-                        <a href="{{ route('franchise.trucks.edit', $truck) }}" class="btn-link">Edit</a>
-                        <form action="{{ route('franchise.trucks.destroy', $truck) }}" method="POST" class="inline">
-                            @csrf @method('DELETE')
-                            <button type="submit" onclick="return confirm('Confirm delete?')" class="btn-link text-red-600">Delete</button>
-                        </form>
+                        <a href="{{ route('franchise.trucks.show', ['truck' => $truck]) }}" class="btn-link">View</a>
+                        <a href="{{ route('franchise.trucks.edit', ['truck' => $truck]) }}" class="btn-link">Edit</a>
+                        <button type="button" class="btn-link text-red-600" x-data x-on:click="$dispatch('open-modal', 'delete-truck-{{ $truck->id }}')">Delete</button>
+                        <x-confirm-delete :name="'delete-truck-' . $truck->id"
+                            :action="route('franchise.trucks.destroy', ['truck' => $truck])"
+                            title="Delete truck"
+                            :message="'Delete ' . $truck->name . '?'" />
                     </td>
                 </tr>
             @endforeach

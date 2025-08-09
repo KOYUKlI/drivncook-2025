@@ -27,10 +27,11 @@
                         <td>{{ number_format($rec->cost ?? 0, 2) }} €</td>
                         <td class="text-center">
                             <a href="{{ route('franchise.maintenance.edit', $rec) }}" class="btn-link">Edit</a>
-                            <form action="{{ route('franchise.maintenance.destroy', $rec) }}" method="POST" class="inline" onsubmit="return confirm('Delete this record?')">
-                                @csrf @method('DELETE')
-                                <button class="btn-link text-red-600">Delete</button>
-                            </form>
+                            <button type="button" class="btn-link text-red-600" x-data x-on:click="$dispatch('open-modal', 'delete-maint-{{ $rec->id }}')">Delete</button>
+                            <x-confirm-delete :name="'delete-maint-' . $rec->id"
+                                :action="route('franchise.maintenance.destroy', $rec)"
+                                title="Delete maintenance record"
+                                :message="'Delete record #' . $rec->id . '?'" />
                         </td>
                     </tr>
                 @empty

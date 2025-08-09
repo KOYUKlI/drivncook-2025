@@ -34,11 +34,11 @@
           </td>
           <td class="space-x-2">
             <a class="btn btn-secondary btn-sm" href="{{ route('admin.suppliers.edit', $supplier) }}">Edit</a>
-            <form class="inline" method="POST" action="{{ route('admin.suppliers.destroy', $supplier) }}" onsubmit="return confirm('Delete this supplier?')">
-              @csrf
-              @method('DELETE')
-              <button class="btn btn-danger btn-sm" type="submit">Delete</button>
-            </form>
+      <button class="btn btn-danger btn-sm" type="button" x-data x-on:click="$dispatch('open-modal', 'delete-supplier-{{ $supplier->id }}')">Delete</button>
+      <x-confirm-delete :name="'delete-supplier-' . $supplier->id"
+        :action="route('admin.suppliers.destroy', $supplier)"
+        title="Delete supplier"
+        :message="'Are you sure you want to delete ' . $supplier->name . '?'" />
           </td>
         </tr>
         @endforeach

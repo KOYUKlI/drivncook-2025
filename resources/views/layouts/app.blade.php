@@ -36,6 +36,8 @@
                             <a href="{{ route('admin.trucks.index') }}" class="sidebar-link {{ request()->is('admin/trucks*') ? 'sidebar-link-active' : '' }}">Trucks</a>
                             <a href="{{ route('admin.warehouses.index') }}" class="sidebar-link {{ request()->is('admin/warehouses*') ? 'sidebar-link-active' : '' }}">Warehouses</a>
                             <a href="{{ route('admin.supplies.index') }}" class="sidebar-link {{ request()->is('admin/supplies*') ? 'sidebar-link-active' : '' }}">Supplies</a>
+                            <a href="{{ route('admin.inventory.index') }}" class="sidebar-link {{ request()->is('admin/inventory*') ? 'sidebar-link-active' : '' }}">Inventory</a>
+                            <a href="{{ route('admin.dishes.index') }}" class="sidebar-link {{ request()->is('admin/dishes*') ? 'sidebar-link-active' : '' }}">Dishes</a>
                             @if(Route::has('admin.suppliers.index'))
                                 <a href="{{ route('admin.suppliers.index') }}" class="sidebar-link {{ request()->is('admin/suppliers*') ? 'sidebar-link-active' : '' }}">Suppliers</a>
                             @endif
@@ -44,6 +46,8 @@
                             @endif
                             @if(Route::has('admin.franchisees.index'))
                                 <a href="{{ route('admin.franchisees.index') }}" class="sidebar-link {{ request()->is('admin/franchisees*') ? 'sidebar-link-active' : '' }}">Franchisees</a>
+                                <a href="{{ route('admin.locations.index') }}" class="sidebar-link {{ request()->is('admin/locations*') ? 'sidebar-link-active' : '' }}">Locations</a>
+                                <a href="{{ route('admin.deployments.index') }}" class="sidebar-link {{ request()->is('admin/deployments*') ? 'sidebar-link-active' : '' }}">Deployments</a>
                             @endif
                             @if(Route::has('admin.sales.index'))
                                 <a href="{{ route('admin.sales.index') }}" class="sidebar-link {{ request()->is('admin/sales*') ? 'sidebar-link-active' : '' }}">Sales</a>
@@ -101,6 +105,7 @@
                         {{ $slot ?? '' }}
                     @endif
                 </main>
+                @stack('modals')
             </div>
 
         </div>
@@ -109,5 +114,6 @@
     <footer class="fixed bottom-0 inset-x-0 h-16 bg-white border-t border-gray-200 z-50 flex items-center justify-center text-sm text-gray-500 px-4">
         <p>&copy; {{ date('Y') }} Driv'n Cook. All rights reserved.</p>
     </footer>
+    @stack('modals')
 </body>
 </html>

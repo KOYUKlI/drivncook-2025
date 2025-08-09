@@ -42,10 +42,11 @@
                         <a href="{{ route('franchise.stockorders.show', $order) }}" class="btn-link">View</a>
                         @if($order->status === 'pending')
                             <a href="{{ route('franchise.stockorders.edit', $order) }}" class="btn-link">Edit</a>
-                            <form action="{{ route('franchise.stockorders.destroy', $order) }}" method="POST" class="inline">
-                                @csrf @method('DELETE')
-                                <button type="submit" onclick="return confirm('Cancel this order?')" class="btn-link text-red-600">Cancel</button>
-                            </form>
+                            <button type="button" class="btn-link text-red-600" x-data x-on:click="$dispatch('open-modal', 'cancel-order-{{ $order->id }}')">Cancel</button>
+                            <x-confirm-delete :name="'cancel-order-' . $order->id"
+                                :action="route('franchise.stockorders.destroy', $order)"
+                                title="Cancel order"
+                                :message="'Cancel order #' . $order->id . '?'" />
                         @endif
                     </td>
                 </tr>

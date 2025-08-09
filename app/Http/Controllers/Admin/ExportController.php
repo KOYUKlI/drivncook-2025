@@ -22,9 +22,10 @@ class ExportController extends Controller
         $dompdf->setPaper('A4', 'portrait');
         $dompdf->render();
 
+        $disposition = request()->boolean('download') ? 'attachment' : 'inline';
         return response($dompdf->output(), 200, [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="sales.pdf"',
+            'Content-Disposition' => $disposition . '; filename="sales.pdf"',
         ]);
     }
 }

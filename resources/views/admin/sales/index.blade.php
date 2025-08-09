@@ -3,7 +3,10 @@
 @section('content')
 <div class="flex items-center justify-between mb-4">
         <h1 class="page-title">Sales</h1>
-        <a href="{{ route('admin.exports.sales.pdf') }}" target="_blank" class="btn-secondary">Export PDF</a>
+        <div class="flex gap-2">
+            <a href="{{ route('admin.exports.sales.pdf', ['download' => 1]) }}" class="btn-secondary">Download PDF</a>
+            <button type="button" class="btn-primary" x-data x-on:click="$dispatch('open-modal', 'preview-sales-pdf')">Preview PDF</button>
+        </div>
     </div>
 
 <div class="card">
@@ -35,3 +38,20 @@
     </div>
 </div>
 @endsection
+
+@push('modals')
+    <x-modal name="preview-sales-pdf" maxWidth="2xl">
+        <div class="p-4">
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="text-lg font-semibold">Sales PDF Preview</h2>
+                <div class="flex gap-2">
+                    <a href="{{ route('admin.exports.sales.pdf', ['download' => 1]) }}" class="btn-secondary">Download</a>
+                    <button class="btn-outline" x-on:click="$dispatch('close-modal', 'preview-sales-pdf')">Close</button>
+                </div>
+            </div>
+            <div class="border rounded overflow-hidden" style="height: 75vh;">
+                <iframe src="{{ route('admin.exports.sales.pdf') }}" class="w-full h-full" title="Sales PDF"></iframe>
+            </div>
+        </div>
+    </x-modal>
+@endpush

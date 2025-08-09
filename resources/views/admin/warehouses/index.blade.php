@@ -26,10 +26,11 @@
                     <td class="text-center space-x-2">
                         <a href="{{ route('admin.warehouses.show', $warehouse) }}" class="btn-link">View</a>
                         <a href="{{ route('admin.warehouses.edit', $warehouse) }}" class="btn-link">Edit</a>
-                        <form action="{{ route('admin.warehouses.destroy', $warehouse) }}" method="POST" class="inline">
-                            @csrf @method('DELETE')
-                            <button type="submit" onclick="return confirm('Confirm delete?')" class="btn-link text-red-600">Delete</button>
-                        </form>
+                        <button type="button" class="btn-link text-red-600" x-data x-on:click="$dispatch('open-modal', 'delete-warehouse-{{ $warehouse->id }}')">Delete</button>
+                        <x-confirm-delete :name="'delete-warehouse-' . $warehouse->id"
+                            :action="route('admin.warehouses.destroy', $warehouse)"
+                            title="Delete warehouse"
+                            :message="'Delete ' . $warehouse->name . '?'" />
                     </td>
                 </tr>
             @endforeach

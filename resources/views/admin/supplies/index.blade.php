@@ -27,10 +27,13 @@
                     <div class="inline-flex items-center gap-3">
                         <a href="{{ route('admin.supplies.show', $supply) }}" class="btn-link">View</a>
                         <a href="{{ route('admin.supplies.edit', $supply) }}" class="text-amber-600 hover:underline">Edit</a>
-                        <form action="{{ route('admin.supplies.destroy', $supply) }}" method="POST" onsubmit="return confirm('Confirm delete?')">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="text-red-600 hover:underline">Delete</button>
-                        </form>
+                        <button type="button" class="text-red-600 hover:underline"
+                            x-data
+                            x-on:click="$dispatch('open-modal', 'delete-supply-{{ $supply->id }}')">Delete</button>
+                        <x-confirm-delete :name="'delete-supply-' . $supply->id"
+                            :action="route('admin.supplies.destroy', $supply)"
+                            title="Delete supply"
+                            :message="'Are you sure you want to delete ' . $supply->name . '?'" />
                     </div>
                 </td>
             </tr>

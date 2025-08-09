@@ -3,7 +3,7 @@
 @section('content')
 <div class="flex items-center justify-between mb-4">
   <h1 class="page-title">Truck Details</h1>
-  <a href="{{ route('admin.trucks.edit', $truck) }}" class="btn-secondary">Edit</a>
+    <a href="{{ route('admin.trucks.edit', ['truck' => $truck]) }}" class="btn-secondary">Edit</a>
 </div>
 
 <div class="card max-w-xl">

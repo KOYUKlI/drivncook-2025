@@ -34,7 +34,7 @@ class TruckController extends Controller
     {
         $request->validate([
             'name'          => 'required|string|max:255',
-            'license_plate' => 'nullable|string|max:50'
+            'license_plate' => 'nullable|string|max:50|unique:trucks,license_plate'
         ]);
         $franchiseId = Auth::user()->franchise_id;
         Truck::create([
@@ -78,7 +78,7 @@ class TruckController extends Controller
         }
         $request->validate([
             'name'          => 'required|string|max:255',
-            'license_plate' => 'nullable|string|max:50'
+            'license_plate' => 'nullable|string|max:50|unique:trucks,license_plate,'.$truck->id
         ]);
         $truck->update($request->only('name', 'license_plate'));
         return redirect()->route('franchise.trucks.index')

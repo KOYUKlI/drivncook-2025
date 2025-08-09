@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasUlidRouteKey;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class StockOrderItem extends Model {
-    use HasFactory;
-    protected $fillable = ['stock_order_id', 'supply_id', 'quantity'];
+    use HasFactory, HasUlidRouteKey;
+    protected $fillable = ['stock_order_id', 'supply_id', 'quantity', 'ulid'];
 
     public function stockOrder(): BelongsTo {
         return $this->belongsTo(StockOrder::class);

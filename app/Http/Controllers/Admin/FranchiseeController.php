@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Franchise;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class FranchiseeController extends Controller
 {
@@ -14,6 +16,12 @@ class FranchiseeController extends Controller
     public function index()
     {
         $franchises = Franchise::all();
+        // Backfill ULIDs if missing to ensure route generation works
+        $franchises->filter(fn($f) => empty($f->ulid))
+            ->each(function(Franchise $f) {
+                DB::table('franchises')->where('id', $f->id)->update(['ulid' => (string) Str::ulid()]);
+                $f->refresh();
+            });
         return view('admin.franchisees.index', compact('franchises'));
     }
 
@@ -43,6 +51,10 @@ class FranchiseeController extends Controller
      */
     public function show(Franchise $franchise)
     {
+        if (empty($franchise->ulid)) {
+            DB::table('franchises')->where('id', $franchise->id)->update(['ulid' => (string) Str::ulid()]);
+            $franchise->refresh();
+        }
         // Charger les relations pour afficher les détails (camions, entrepôts, etc.)
         $franchise->load(['trucks', 'warehouses', 'users']);
         return view('admin.franchisees.show', compact('franchise'));
@@ -53,6 +65,10 @@ class FranchiseeController extends Controller
      */
     public function edit(Franchise $franchise)
     {
+        if (empty($franchise->ulid)) {
+            DB::table('franchises')->where('id', $franchise->id)->update(['ulid' => (string) Str::ulid()]);
+            $franchise->refresh();
+        }
         return view('admin.franchisees.edit', compact('franchise'));
     }
 

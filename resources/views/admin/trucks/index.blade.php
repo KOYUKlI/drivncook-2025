@@ -25,12 +25,13 @@
                 <td>{{ $truck->franchise->name }}</td>
                 <td class="text-center">
                     <div class="inline-flex items-center gap-3">
-                        <a href="{{ route('admin.trucks.show', $truck) }}" class="btn-link">View</a>
-                        <a href="{{ route('admin.trucks.edit', $truck) }}" class="text-amber-600 hover:underline">Edit</a>
-                        <form action="{{ route('admin.trucks.destroy', $truck) }}" method="POST" onsubmit="return confirm('Confirm delete?')">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="text-red-600 hover:underline">Delete</button>
-                        </form>
+                        <a href="{{ route('admin.trucks.show', ['truck' => $truck]) }}" class="btn-link">View</a>
+                        <a href="{{ route('admin.trucks.edit', ['truck' => $truck]) }}" class="text-amber-600 hover:underline">Edit</a>
+                        <button type="button" class="text-red-600 hover:underline" x-data x-on:click="$dispatch('open-modal', 'delete-admin-truck-{{ $truck->id }}')">Delete</button>
+                        <x-confirm-delete :name="'delete-admin-truck-' . $truck->id"
+                            :action="route('admin.trucks.destroy', ['truck' => $truck])"
+                            title="Delete truck"
+                            :message="'Delete ' . $truck->name . '?'" />
                     </div>
                 </td>
             </tr>

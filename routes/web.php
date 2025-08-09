@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\{ DashboardController as AdminDashboardController
     SupplyController as AdminSupplyController,
     SupplierController as AdminSupplierController,
     CommissionController as AdminCommissionController };
+use App\Http\Controllers\Admin\{ LocationController as AdminLocationController, TruckDeploymentController as AdminTruckDeploymentController };
 use App\Http\Controllers\Franchise\{ DashboardController as FranchiseDashboardController,
     TruckController as FranchiseTruckController,
     StockOrderController as FranchiseStockOrderController };
@@ -24,14 +25,22 @@ Route::get('/dashboard', function () {
 
 // Routes accessibles seulement après authentication
 Route::middleware('auth')->group(function () {
-    Route::middleware('admin')->prefix('admin')->as('admin.')->group(function() {
+    Route::middleware('admin')->prefix('admin')->as('admin.')->scopeBindings()->group(function() {
         // Dashboard (admin home)
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
         // CRUD resources for admin
         Route::resource('trucks', AdminTruckController::class);
         Route::resource('warehouses', AdminWarehouseController::class);
-        Route::resource('franchisees', AdminFranchiseeController::class);
-        Route::resource('supplies', AdminSupplyController::class);
+    Route::resource('franchisees', AdminFranchiseeController::class);
+    Route::resource('locations', AdminLocationController::class);
+    Route::resource('deployments', AdminTruckDeploymentController::class);
+    Route::resource('supplies', AdminSupplyController::class);
+    // Inventory explorer (read-only index/show)
+    Route::resource('inventory', \App\Http\Controllers\Admin\InventoryController::class)->only(['index','show']);
+    // Dishes CRUD + Ingredients (BOM)
+    Route::resource('dishes', \App\Http\Controllers\Admin\DishController::class);
+    Route::post('dishes/{dish}/ingredients', [\App\Http\Controllers\Admin\DishIngredientController::class, 'store'])->name('dishes.ingredients.store');
+    Route::delete('dishes/{dish}/ingredients/{ingredient}', [\App\Http\Controllers\Admin\DishIngredientController::class, 'destroy'])->name('dishes.ingredients.destroy');
     Route::resource('suppliers', AdminSupplierController::class);
     Route::resource('commissions', AdminCommissionController::class)->only(['index','show','update']);
         // Sales: only index and show (admin can view sales but not create)
@@ -40,7 +49,7 @@ Route::middleware('auth')->group(function () {
     Route::get('exports/sales.pdf', [\App\Http\Controllers\Admin\ExportController::class, 'salesPdf'])->name('exports.sales.pdf');
     });
     // Groupe de routes Franchise (prefix 'franchise/*', name prefix 'franchise.')
-    Route::middleware('franchise')->prefix('franchise')->as('franchise.')->group(function() {
+    Route::middleware('franchise')->prefix('franchise')->as('franchise.')->scopeBindings()->group(function() {
         // Dashboard (franchise home)
         Route::get('/dashboard', [FranchiseDashboardController::class, 'index'])->name('dashboard');
         // CRUD resources for franchise

@@ -25,11 +25,28 @@
       <input type="hidden" name="action" value="pending" />
       <button class="btn btn-secondary">Mark pending</button>
     </form>
-    <form method="POST" action="{{ route('admin.commissions.update', $commission) }}" onsubmit="return confirm('Cancel this commission?')">
-      @csrf @method('PUT')
-      <input type="hidden" name="action" value="cancel" />
-      <button class="btn btn-danger">Cancel</button>
-    </form>
+  <button type="button" class="btn btn-danger" x-data x-on:click="$dispatch('open-modal', 'cancel-commission-{{ $commission->id }}')">Cancel</button>
+  <x-confirm-delete :name="'cancel-commission-' . $commission->id"
+    :action="route('admin.commissions.update', $commission)"
+    method="POST"
+    title="Cancel commission"
+    :message="'Cancel commission for ' . ($commission->franchisee->name ?? ('#'.$commission->franchisee_id)) . ' (' . $commission->period_year . '-' . str_pad($commission->period_month, 2, '0', STR_PAD_LEFT) . ')?'">
+    <x-slot name="slot">
+      <div class="p-6">
+        <h2 class="text-lg font-medium text-gray-900">Cancel commission</h2>
+        <p class="mt-2 text-sm text-gray-600">This will set the commission status to cancelled. Are you sure?</p>
+        <div class="mt-6 flex justify-end gap-3">
+          <button type="button" class="btn-secondary" x-on:click="$dispatch('close-modal', 'cancel-commission-{{ $commission->id }}')">Keep</button>
+          <form method="POST" action="{{ route('admin.commissions.update', $commission) }}">
+            @csrf
+            @method('PUT')
+            <input type="hidden" name="action" value="cancel" />
+            <button class="btn-danger">Confirm cancel</button>
+          </form>
+        </div>
+      </div>
+    </x-slot>
+  </x-confirm-delete>
   </div>
 </div>
 @endsection

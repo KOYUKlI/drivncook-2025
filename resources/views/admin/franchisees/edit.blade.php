@@ -3,7 +3,7 @@
 @section('content')
 <h1 class="page-title mb-4">Edit Franchise</h1>
 
-<form action="{{ route('admin.franchisees.update', $franchise) }}" method="POST" class="max-w-md">
+<form action="{{ route('admin.franchisees.update', ['franchisee' => $franchise->getRouteKey()]) }}" method="POST" class="max-w-md">
     @csrf @method('PUT')
     <div class="form-group">
         <label class="form-label">Name</label>

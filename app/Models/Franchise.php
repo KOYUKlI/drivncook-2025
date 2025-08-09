@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasUlidRouteKey;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -9,8 +10,8 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 
 class Franchise extends Model {
-    use HasFactory;
-    protected $fillable = ['name'];
+    use HasFactory, HasUlidRouteKey;
+    protected $fillable = ['name','ulid'];
 
     // Relations:
     public function trucks(): HasMany {

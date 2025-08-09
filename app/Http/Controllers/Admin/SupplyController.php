@@ -33,10 +33,11 @@ class SupplyController extends Controller
     public function store(Request $request): RedirectResponse
     {
         // Validation des champs (modèle: name, unit, cost)
+        $units = implode(',', config('units.allowed', ['kg','g','L','ml','pc','pack']));
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-            'sku'  => 'nullable|string|max:64',
-            'unit' => 'nullable|string|max:50',
+            'sku'  => 'nullable|string|max:190|unique:supplies,sku',
+            'unit' => 'nullable|in:'.$units,
             'cost' => 'nullable|numeric|min:0',
         ]);
 
@@ -70,10 +71,11 @@ class SupplyController extends Controller
     public function update(Request $request, Supply $supply): RedirectResponse
     {
         // Validation des champs (modèle: name, unit, cost)
+        $units = implode(',', config('units.allowed', ['kg','g','L','ml','pc','pack']));
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-            'sku'  => 'nullable|string|max:64',
-            'unit' => 'nullable|string|max:50',
+            'sku'  => 'nullable|string|max:190|unique:supplies,sku,'.$supply->id,
+            'unit' => 'nullable|in:'.$units,
             'cost' => 'nullable|numeric|min:0',
         ]);
 

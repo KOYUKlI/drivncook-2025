@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Truck;
 use App\Models\Franchise;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class TruckController extends Controller
 {
@@ -14,7 +15,10 @@ class TruckController extends Controller
      */
     public function index()
     {
-        $trucks = Truck::with('franchise')->get();
+    $trucks = Truck::with('franchise')->get();
+    // Backfill missing ULIDs defensively (in case legacy rows missed migration)
+    $trucks->filter(fn($t) => empty($t->ulid))
+           ->each(function($t){ $t->ulid = (string) Str::ulid(); $t->save(); });
         return view('admin.trucks.index', compact('trucks'));
     }
 
@@ -35,7 +39,7 @@ class TruckController extends Controller
     {
         $request->validate([
             'name'         => 'required|string|max:255',
-            'license_plate'=> 'nullable|string|max:50',
+            'license_plate'=> 'nullable|string|max:50|unique:trucks,license_plate',
             'franchise_id' => 'required|exists:franchises,id'
         ]);
         Truck::create($request->only('name', 'license_plate', 'franchise_id'));
@@ -68,7 +72,7 @@ class TruckController extends Controller
     {
         $request->validate([
             'name'         => 'required|string|max:255',
-            'license_plate'=> 'nullable|string|max:50',
+            'license_plate'=> 'nullable|string|max:50|unique:trucks,license_plate,'.$truck->id,
             'franchise_id' => 'required|exists:franchises,id'
         ]);
         $truck->update($request->only('name', 'license_plate', 'franchise_id'));
