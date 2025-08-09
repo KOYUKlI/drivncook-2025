@@ -14,18 +14,14 @@
             @csrf
 
             <div>
-                <x-primary-button>
-                    {{ __('Resend Verification Email') }}
-                </x-primary-button>
+                <button class="btn-primary">{{ __('Resend Verification Email') }}</button>
             </div>
         </form>
 
         <form method="POST" action="{{ route('logout') }}">
             @csrf
 
-            <button type="submit" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                {{ __('Log Out') }}
-            </button>
+            <button type="submit" class="text-sm text-amber-700 hover:text-amber-900 hover:underline">{{ __('Log Out') }}</button>
         </form>
     </div>
 </x-guest-layout>

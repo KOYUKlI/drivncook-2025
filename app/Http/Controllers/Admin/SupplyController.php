@@ -35,6 +35,7 @@ class SupplyController extends Controller
         // Validation des champs (modèle: name, unit, cost)
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
+            'sku'  => 'nullable|string|max:64',
             'unit' => 'nullable|string|max:50',
             'cost' => 'nullable|numeric|min:0',
         ]);
@@ -71,6 +72,7 @@ class SupplyController extends Controller
         // Validation des champs (modèle: name, unit, cost)
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
+            'sku'  => 'nullable|string|max:64',
             'unit' => 'nullable|string|max:50',
             'cost' => 'nullable|numeric|min:0',
         ]);

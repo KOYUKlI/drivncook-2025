@@ -10,13 +10,16 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class StockOrder extends Model
 {
     use HasFactory;
-    protected $fillable = ['truck_id', 'warehouse_id', 'status', 'ordered_at'];
+    protected $fillable = ['truck_id', 'warehouse_id', 'supplier_id', 'status', 'ordered_at'];
 
     public function truck(): BelongsTo {
         return $this->belongsTo(Truck::class);
     }
     public function warehouse(): BelongsTo {
         return $this->belongsTo(Warehouse::class);
+    }
+    public function supplier(): BelongsTo {
+        return $this->belongsTo(Supplier::class);
     }
     public function items(): HasMany {
         return $this->hasMany(StockOrderItem::class);

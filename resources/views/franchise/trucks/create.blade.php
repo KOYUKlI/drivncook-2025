@@ -11,8 +11,8 @@
         @error('name') <p class="form-error">{{ $message }}</p> @enderror
     </div>
     <div class="form-group">
-        <label class="form-label">License Plate (optional)</label>
-        <input type="text" name="license_plate" value="{{ old('license_plate') }}" class="form-input">
+        <label class="form-label">License Plate (optionnel)</label>
+        <input type="text" name="license_plate" value="{{ old('license_plate') }}" class="form-input" placeholder="AA-123-AA" pattern="[A-Z0-9\-\s]{0,15}">
         @error('license_plate') <p class="form-error">{{ $message }}</p> @enderror
     </div>
     <button type="submit" class="btn-primary">Add Truck</button>

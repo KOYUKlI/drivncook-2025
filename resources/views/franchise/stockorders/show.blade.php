@@ -15,8 +15,16 @@
                 <dd class="col-span-2 text-sm text-gray-900">{{ $stockOrder->truck->name }}</dd>
             </div>
             <div class="py-3 grid grid-cols-3 gap-4">
-                <dt class="text-sm font-medium text-gray-500">Warehouse</dt>
-                <dd class="col-span-2 text-sm text-gray-900">{{ $stockOrder->warehouse->name }}</dd>
+                <dt class="text-sm font-medium text-gray-500">Target</dt>
+                <dd class="col-span-2 text-sm text-gray-900">
+                    @if($stockOrder->warehouse)
+                        Warehouse: {{ $stockOrder->warehouse->name }}
+                    @elseif($stockOrder->supplier)
+                        Supplier: {{ $stockOrder->supplier->name }}
+                    @else
+                        —
+                    @endif
+                </dd>
             </div>
             <div class="py-3 grid grid-cols-3 gap-4">
                 <dt class="text-sm font-medium text-gray-500">Ordered Date</dt>
@@ -51,7 +59,7 @@
                     <div>
                         <label class="form-label">Supply</label>
                         <select name="supply_id" class="form-select">
-                            @foreach(\App\Models\Supply::all() as $supply)
+                            @foreach($supplies as $supply)
                                 <option value="{{ $supply->id }}">{{ $supply->name }}</option>
                             @endforeach
                         </select>
@@ -63,6 +71,13 @@
                     <button class="btn-secondary">Add Item</button>
                 </form>
             </div>
+            @endif
+
+            @if($stockOrder->status === 'pending')
+                <form action="{{ route('franchise.stockorders.complete', $stockOrder) }}" method="POST" class="mt-6">
+                    @csrf
+                    <button class="btn-primary" onclick="return confirm('Valider la réception et clôturer la commande ?')">Marquer comme terminée</button>
+                </form>
             @endif
         </div>
     </div>

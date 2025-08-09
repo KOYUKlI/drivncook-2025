@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Supply extends Model {
     use HasFactory;
-    protected $fillable = ['name', 'unit', 'cost'];
+    protected $fillable = ['name', 'sku', 'unit', 'cost'];
 
     public function stockOrderItems(): HasMany {
         return $this->hasMany(StockOrderItem::class);

@@ -6,8 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\StockOrder;
 use App\Models\Truck;
 use App\Models\Warehouse;
+use App\Models\Supplier;
+use App\Models\Supply;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Services\InventoryService;
 
 class StockOrderController extends Controller
 {
@@ -18,10 +21,10 @@ class StockOrderController extends Controller
     {
         $franchiseId = Auth::user()->franchise_id;
         // Récupérer toutes les commandes de stock de ce franchisé (avec camion et entrepôt)
-        $orders = StockOrder::whereHas('truck', function($query) use ($franchiseId) {
+    $orders = StockOrder::whereHas('truck', function($query) use ($franchiseId) {
                         $query->where('franchise_id', $franchiseId);
                    })
-                   ->with(['truck', 'warehouse'])
+           ->with(['truck', 'warehouse', 'supplier'])
                    ->orderByDesc('ordered_at')
                    ->get();
         return view('franchise.stockorders.index', compact('orders'));
@@ -33,9 +36,10 @@ class StockOrderController extends Controller
     public function create()
     {
         $franchiseId = Auth::user()->franchise_id;
-        $trucks = Truck::where('franchise_id', $franchiseId)->get();
-        $warehouses = Warehouse::where('franchise_id', $franchiseId)->get();
-        return view('franchise.stockorders.create', compact('trucks', 'warehouses'));
+    $trucks = Truck::where('franchise_id', $franchiseId)->get();
+    $warehouses = Warehouse::where('franchise_id', $franchiseId)->get();
+    $suppliers = Supplier::query()->where('is_active', true)->orderBy('name')->get();
+    return view('franchise.stockorders.create', compact('trucks', 'warehouses', 'suppliers'));
     }
 
     /**
@@ -45,22 +49,29 @@ class StockOrderController extends Controller
     {
         $request->validate([
             'truck_id'     => 'required|exists:trucks,id',
-            'warehouse_id' => 'required|exists:warehouses,id',
-            // pas de validation de 'items' ici, les items seront ajoutés séparément si applicable
+            'warehouse_id' => 'nullable|exists:warehouses,id',
+            'supplier_id'  => 'nullable|exists:suppliers,id',
         ]);
+        if (! $request->warehouse_id && ! $request->supplier_id) {
+            return back()->withErrors(['warehouse_id' => 'Select a warehouse or a supplier', 'supplier_id' => 'Select a warehouse or a supplier'])->withInput();
+        }
+        if ($request->warehouse_id && $request->supplier_id) {
+            return back()->withErrors(['warehouse_id' => 'Choose only one target', 'supplier_id' => 'Choose only one target'])->withInput();
+        }
         $franchiseId = Auth::user()->franchise_id;
         // Vérifier que le truck et le warehouse appartiennent bien à la franchise du user
         $truck = Truck::findOrFail($request->truck_id);
-        $warehouse = Warehouse::findOrFail($request->warehouse_id);
-        if ($truck->franchise_id !== $franchiseId || $warehouse->franchise_id !== $franchiseId) {
+    $warehouse = $request->warehouse_id ? Warehouse::findOrFail($request->warehouse_id) : null;
+    if ($truck->franchise_id !== $franchiseId || ($warehouse && $warehouse->franchise_id !== $franchiseId)) {
             abort(403);
         }
         // Créer la commande de stock (statut initial "pending")
         StockOrder::create([
-            'truck_id'    => $request->truck_id,
-            'warehouse_id'=> $request->warehouse_id,
-            'status'      => 'pending',
-            'ordered_at'  => now()
+            'truck_id'     => $request->truck_id,
+            'warehouse_id' => $request->warehouse_id,
+            'supplier_id'  => $request->supplier_id,
+            'status'       => 'pending',
+            'ordered_at'   => now()
         ]);
         return redirect()->route('franchise.stockorders.index')
                          ->with('success', 'Stock order placed successfully.');
@@ -75,8 +86,26 @@ class StockOrderController extends Controller
         if ($stockOrder->truck->franchise_id !== Auth::user()->franchise_id) {
             abort(403);
         }
-        $stockOrder->load(['items.supply', 'truck', 'warehouse']);
-        return view('franchise.stockorders.show', compact('stockOrder'));
+    $stockOrder->load(['items.supply', 'truck', 'warehouse','supplier']);
+    $supplies = Supply::orderBy('name')->get();
+    return view('franchise.stockorders.show', compact('stockOrder','supplies'));
+    }
+
+    public function complete(StockOrder $stockOrder, InventoryService $inventoryService)
+    {
+        if ($stockOrder->truck->franchise_id !== Auth::user()->franchise_id) {
+            abort(403);
+        }
+        if ($stockOrder->status !== 'pending') {
+            return redirect()->route('franchise.stockorders.show', $stockOrder)
+                             ->with('error', 'Cette commande n\'est pas modifiable.');
+        }
+        // mark completed and receive into inventory if warehouse target
+        $stockOrder->status = 'completed';
+        $stockOrder->save();
+        $inventoryService->receiveStockOrder($stockOrder->load('items'));
+        return redirect()->route('franchise.stockorders.show', $stockOrder)
+                         ->with('success', 'Commande de stock terminée et réceptionnée.');
     }
 
     /**
@@ -93,9 +122,10 @@ class StockOrderController extends Controller
                              ->with('error', 'This order can no longer be edited.');
         }
         $franchiseId = Auth::user()->franchise_id;
-        $trucks = Truck::where('franchise_id', $franchiseId)->get();
-        $warehouses = Warehouse::where('franchise_id', $franchiseId)->get();
-        return view('franchise.stockorders.edit', compact('stockOrder', 'trucks', 'warehouses'));
+    $trucks = Truck::where('franchise_id', $franchiseId)->get();
+    $warehouses = Warehouse::where('franchise_id', $franchiseId)->get();
+    $suppliers = Supplier::query()->where('is_active', true)->orderBy('name')->get();
+    return view('franchise.stockorders.edit', compact('stockOrder', 'trucks', 'warehouses', 'suppliers'));
     }
 
     /**
@@ -112,19 +142,26 @@ class StockOrderController extends Controller
         }
         $request->validate([
             'truck_id'     => 'required|exists:trucks,id',
-            'warehouse_id' => 'required|exists:warehouses,id'
+            'warehouse_id' => 'nullable|exists:warehouses,id',
+            'supplier_id'  => 'nullable|exists:suppliers,id',
         ]);
+        if (! $request->warehouse_id && ! $request->supplier_id) {
+            return back()->withErrors(['warehouse_id' => 'Select a warehouse or a supplier', 'supplier_id' => 'Select a warehouse or a supplier'])->withInput();
+        }
+        if ($request->warehouse_id && $request->supplier_id) {
+            return back()->withErrors(['warehouse_id' => 'Choose only one target', 'supplier_id' => 'Choose only one target'])->withInput();
+        }
         // Vérifier de nouveau l'appartenance du truck/warehouse
         $franchiseId = Auth::user()->franchise_id;
         $truck = Truck::findOrFail($request->truck_id);
-        $warehouse = Warehouse::findOrFail($request->warehouse_id);
-        if ($truck->franchise_id !== $franchiseId || $warehouse->franchise_id !== $franchiseId) {
+        $warehouse = $request->warehouse_id ? Warehouse::findOrFail($request->warehouse_id) : null;
+        if ($truck->franchise_id !== $franchiseId || ($warehouse && $warehouse->franchise_id !== $franchiseId)) {
             abort(403);
         }
         $stockOrder->update([
             'truck_id'     => $request->truck_id,
-            'warehouse_id' => $request->warehouse_id
-            // on ne change pas 'status' ni 'ordered_at' ici
+            'warehouse_id' => $request->warehouse_id,
+            'supplier_id'  => $request->supplier_id,
         ]);
         return redirect()->route('franchise.stockorders.index')
                          ->with('success', 'Stock order updated successfully.');

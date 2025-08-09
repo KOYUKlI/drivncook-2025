@@ -19,13 +19,24 @@
             @error('truck_id') <p class="form-error">{{ $message }}</p> @enderror
         </div>
         <div class="form-group">
-            <label class="form-label">Warehouse</label>
+            <label class="form-label">Warehouse (or Supplier below)</label>
             <select name="warehouse_id" class="form-select">
+                <option value="">-- none --</option>
                 @foreach($warehouses as $warehouse)
                     <option value="{{ $warehouse->id }}" @selected(old('warehouse_id', $stockOrder->warehouse_id) == $warehouse->id)>{{ $warehouse->name }}</option>
                 @endforeach
             </select>
             @error('warehouse_id') <p class="form-error">{{ $message }}</p> @enderror
+        </div>
+        <div class="form-group">
+            <label class="form-label">Supplier</label>
+            <select name="supplier_id" class="form-select">
+                <option value="">-- none --</option>
+                @foreach($suppliers as $supplier)
+                    <option value="{{ $supplier->id }}" @selected(old('supplier_id', $stockOrder->supplier_id) == $supplier->id)>{{ $supplier->name }}</option>
+                @endforeach
+            </select>
+            @error('supplier_id') <p class="form-error">{{ $message }}</p> @enderror
         </div>
         <button type="submit" class="btn-primary">Update Order</button>
         <a href="{{ route('franchise.stockorders.index') }}" class="btn-link ml-3">Cancel</a>

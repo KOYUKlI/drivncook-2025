@@ -13,7 +13,7 @@
                 <tr>
                     <th>Order #</th>
                     <th>Truck</th>
-                    <th>Warehouse</th>
+                    <th>Target</th>
                     <th>Status</th>
                     <th>Date</th>
                     <th class="text-center">Actions</th>
@@ -24,7 +24,15 @@
                 <tr>
                     <td>#{{ $order->id }}</td>
                     <td>{{ $order->truck->name }}</td>
-                    <td>{{ $order->warehouse->name }}</td>
+                    <td>
+                        @if($order->warehouse)
+                            Warehouse: {{ $order->warehouse->name }}
+                        @elseif($order->supplier)
+                            Supplier: {{ $order->supplier->name }}
+                        @else
+                            —
+                        @endif
+                    </td>
                     <td>
                         @php($s = $order->status)
                         <span class="badge {{ $s === 'pending' ? 'badge-warning' : ($s === 'completed' ? 'badge-success' : 'badge-muted') }}">{{ ucfirst($s) }}</span>

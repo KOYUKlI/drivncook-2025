@@ -15,20 +15,25 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased bg-gray-50 text-gray-900">
-        <div class="min-h-screen">
+        <div class="min-h-screen flex flex-col">
             <nav class="bg-white border-b border-gray-200">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center">
                     <a href="/" class="flex items-center gap-2 font-semibold">
                         <span class="inline-block h-2.5 w-2.5 rounded-full bg-amber-500"></span>
                         <span>Driv'n Cook</span>
                     </a>
-                    <div class="text-sm text-gray-500 hidden sm:block">Welcome</div>
                 </div>
             </nav>
 
             <!-- Page Content -->
-            <main>
-                {{ $slot }}
+            <main class="flex-1 flex items-center justify-center px-4">
+                <div class="w-full max-w-md">
+                    <div class="card">
+                        <div class="card-body">
+                            {{ $slot }}
+                        </div>
+                    </div>
+                </div>
             </main>
         </div>
     </body>

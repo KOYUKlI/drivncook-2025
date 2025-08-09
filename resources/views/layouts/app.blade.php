@@ -11,19 +11,22 @@
     </script>
     <style>[x-cloak]{display:none !important}</style>
     </head>
-<body class="min-h-screen bg-gray-50 text-gray-900 antialiased" x-data="{ sidebarOpen: false }">
-    <div class="flex min-h-screen">
-        <!-- Sidebar -->
-        <aside class="sidebar w-64 fixed inset-y-0 left-0 z-40 transform transition-transform duration-200 md:static md:translate-x-0" :class="{ '-translate-x-full': !sidebarOpen, 'translate-x-0': sidebarOpen }" x-cloak>
-            <div class="sidebar-header">
-                <a href="{{ url('/') }}" class="sidebar-brand">
-                    <span class="inline-block h-2.5 w-2.5 rounded-full bg-amber-500"></span>
-                    <span>Driv'n Cook</span>
-                </a>
-                <button class="md:hidden p-2 rounded hover:bg-gray-100" @click="sidebarOpen = false" aria-label="Close sidebar">
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
-            </div>
+    <body class="min-h-screen bg-gray-50 text-gray-900 antialiased" x-data="{ sidebarOpen: false }">
+        <!-- Global Header (full width) -->
+        <header class="fixed top-0 inset-x-0 h-16 bg-white border-b border-gray-200 z-50 flex items-center px-4 gap-3">
+            <button class="md:hidden p-2 rounded hover:bg-gray-100" @click="sidebarOpen = true" aria-label="Open sidebar">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+            <a href="/" class="flex items-center gap-2 font-semibold">
+                <span class="inline-block h-2.5 w-2.5 rounded-full bg-amber-500"></span>
+                <span>Driv'n Cook</span>
+            </a>
+            <div class="ms-auto text-sm text-gray-600 hidden md:block">{{ auth()->user()->name ?? '' }}</div>
+        </header>
+
+        <div class="flex min-h-screen pt-16 pb-16">
+    <!-- Sidebar (between header and footer) -->
+    <aside class="sidebar w-60 md:w-56 fixed left-0 top-16 bottom-16 z-40 transform transition-transform duration-200 md:translate-x-0" :class="{ '-translate-x-full': !sidebarOpen, 'translate-x-0': sidebarOpen }" x-cloak>
             <nav class="sidebar-nav overflow-y-auto">
                 @auth
                     @if(auth()->user()->role === 'admin')
@@ -33,6 +36,12 @@
                             <a href="{{ route('admin.trucks.index') }}" class="sidebar-link {{ request()->is('admin/trucks*') ? 'sidebar-link-active' : '' }}">Trucks</a>
                             <a href="{{ route('admin.warehouses.index') }}" class="sidebar-link {{ request()->is('admin/warehouses*') ? 'sidebar-link-active' : '' }}">Warehouses</a>
                             <a href="{{ route('admin.supplies.index') }}" class="sidebar-link {{ request()->is('admin/supplies*') ? 'sidebar-link-active' : '' }}">Supplies</a>
+                            @if(Route::has('admin.suppliers.index'))
+                                <a href="{{ route('admin.suppliers.index') }}" class="sidebar-link {{ request()->is('admin/suppliers*') ? 'sidebar-link-active' : '' }}">Suppliers</a>
+                            @endif
+                            @if(Route::has('admin.commissions.index'))
+                                <a href="{{ route('admin.commissions.index') }}" class="sidebar-link {{ request()->is('admin/commissions*') ? 'sidebar-link-active' : '' }}">Commissions</a>
+                            @endif
                             @if(Route::has('admin.franchisees.index'))
                                 <a href="{{ route('admin.franchisees.index') }}" class="sidebar-link {{ request()->is('admin/franchisees*') ? 'sidebar-link-active' : '' }}">Franchisees</a>
                             @endif
@@ -65,49 +74,40 @@
             </nav>
         </aside>
 
-        <!-- Overlay for mobile -->
-        <div class="fixed inset-0 bg-black/30 z-30 md:hidden" x-show="sidebarOpen" @click="sidebarOpen = false" x-cloak></div>
+    <!-- Overlay for mobile -->
+    <div class="fixed inset-0 bg-black/30 z-30 md:hidden" x-show="sidebarOpen" @click="sidebarOpen = false" x-cloak></div>
 
-        <!-- Main content -->
-        <div class="flex-1 flex flex-col min-w-0 md:ml-64">
-            <!-- Top bar -->
-            <header class="h-16 bg-white border-b border-gray-200 flex items-center px-4 gap-3 sticky top-0 z-30">
-                <button class="md:hidden p-2 rounded hover:bg-gray-100" @click="sidebarOpen = true" aria-label="Open sidebar">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-                </button>
-                <div class="font-semibold">{{ config('app.name', "Driv'n Cook") }}</div>
-                <div class="ms-auto hidden md:block text-sm text-gray-500">{{ auth()->user()->name ?? '' }}</div>
-            </header>
+    <!-- Main content -->
+    <div class="flex-1 flex flex-col min-w-0 md:ml-56">
 
-            <!-- Optional header slot for component-based pages -->
-            @if (!empty($header ?? null))
-                <div class="px-4 mt-4">
-                    {{ $header }}
+            <div class="ps-3 pe-4 md:ps-4 max-w-none">
+                <!-- Optional header slot for component-based pages -->
+                @if (!empty($header ?? null))
+                    <div class="mt-4">
+                        {{ $header }}
+                    </div>
+                @endif
+
+                <!-- Flash messages -->
+                <div class="mt-4">
+                    <x-flash />
                 </div>
-            @endif
 
-            <!-- Flash messages -->
-            <div class="px-4 mt-4">
-                <x-flash />
+                <!-- Page Content -->
+                <main class="py-6 max-w-none">
+                    @hasSection('content')
+                        @yield('content')
+                    @else
+                        {{ $slot ?? '' }}
+                    @endif
+                </main>
             </div>
 
-            <!-- Page Content -->
-            <main class="px-4 py-6">
-                @hasSection('content')
-                    @yield('content')
-                @else
-                    {{ $slot ?? '' }}
-                @endif
-            </main>
-
-            <!-- Footer -->
-            <footer class="mt-auto border-t border-gray-200 py-6 text-sm text-gray-500 px-4">
-                <div class="flex items-center justify-between">
-                    <p>&copy; {{ date('Y') }} Driv'n Cook. All rights reserved.</p>
-                    <p class="hidden sm:block">Powered by Laravel & Tailwind CSS</p>
-                </div>
-            </footer>
         </div>
     </div>
+    <!-- Global Footer (full width) -->
+    <footer class="fixed bottom-0 inset-x-0 h-16 bg-white border-t border-gray-200 z-50 flex items-center justify-center text-sm text-gray-500 px-4">
+        <p>&copy; {{ date('Y') }} Driv'n Cook. All rights reserved.</p>
+    </footer>
 </body>
 </html>

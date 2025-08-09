@@ -21,7 +21,7 @@
     </head>
     <body class="bg-gray-50 text-gray-900">
         <nav class="bg-white border-b border-gray-200">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
                 <a href="/" class="flex items-center gap-2 font-semibold">
                     <span class="inline-block h-2.5 w-2.5 rounded-full bg-amber-500"></span>
                     <span>Driv'n Cook</span>
@@ -40,10 +40,10 @@
         </nav>
 
         <main>
-            <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
                 <div class="text-center">
-                    <h1 class="text-4xl font-bold tracking-tight">Welcome to Driv'n Cook</h1>
-                    <p class="mt-3 text-gray-600">Manage trucks, supplies, and stock orders with a clean, modern dashboard.</p>
+            <h1 class="text-4xl md:text-5xl font-bold tracking-tight">Welcome to Driv'n Cook</h1>
+            <p class="mt-4 text-gray-600 max-w-2xl mx-auto">Manage trucks, supplies, and stock orders with a clean, modern dashboard.</p>
                     <div class="mt-8 space-x-3">
                         @auth
                             <a href="{{ url('/dashboard') }}" class="btn-primary inline-flex">Go to Dashboard</a>

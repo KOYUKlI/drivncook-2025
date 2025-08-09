@@ -7,7 +7,9 @@ use App\Http\Controllers\Admin\{ DashboardController as AdminDashboardController
     WarehouseController as AdminWarehouseController,
     FranchiseeController as AdminFranchiseeController,
     SalesController as AdminSalesController,
-    SupplyController as AdminSupplyController };
+    SupplyController as AdminSupplyController,
+    SupplierController as AdminSupplierController,
+    CommissionController as AdminCommissionController };
 use App\Http\Controllers\Franchise\{ DashboardController as FranchiseDashboardController,
     TruckController as FranchiseTruckController,
     StockOrderController as FranchiseStockOrderController };
@@ -30,6 +32,8 @@ Route::middleware('auth')->group(function () {
         Route::resource('warehouses', AdminWarehouseController::class);
         Route::resource('franchisees', AdminFranchiseeController::class);
         Route::resource('supplies', AdminSupplyController::class);
+    Route::resource('suppliers', AdminSupplierController::class);
+    Route::resource('commissions', AdminCommissionController::class)->only(['index','show','update']);
         // Sales: only index and show (admin can view sales but not create)
         Route::resource('sales', AdminSalesController::class)->only(['index', 'show']);
     // Exports
@@ -42,6 +46,8 @@ Route::middleware('auth')->group(function () {
         // CRUD resources for franchise
         Route::resource('trucks', FranchiseTruckController::class);
         Route::resource('stockorders', FranchiseStockOrderController::class);
+        Route::post('stockorders/{stockorder}/complete', [FranchiseStockOrderController::class, 'complete'])
+            ->name('stockorders.complete');
         // Nested: add/remove items to a stock order
         Route::post('stockorders/{stockorder}/items', [\App\Http\Controllers\Franchise\StockOrderItemController::class, 'store'])
             ->name('stockorders.items.store');

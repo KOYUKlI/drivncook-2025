@@ -12,13 +12,23 @@
         @error('name') <p class="form-error">{{ $message }}</p> @enderror
     </div>
     <div class="form-group">
+        <label class="form-label">SKU (référence)</label>
+        <input type="text" name="sku" value="{{ old('sku', $supply->sku) }}" class="form-input" placeholder="ex: BUN-001" />
+        @error('sku') <p class="form-error">{{ $message }}</p> @enderror
+    </div>
+    <div class="form-group">
         <label class="form-label">Unit</label>
-        <input type="text" name="unit" value="{{ old('unit', $supply->unit) }}" class="form-input">
+        <select name="unit" class="form-select">
+            <option value="">-- Select unit --</option>
+            @foreach(['kg','g','L','ml','pc','pack'] as $u)
+                <option value="{{ $u }}" @selected(old('unit', $supply->unit)===$u)>{{ $u }}</option>
+            @endforeach
+        </select>
         @error('unit') <p class="form-error">{{ $message }}</p> @enderror
     </div>
     <div class="form-group">
         <label class="form-label">Cost</label>
-        <input type="number" step="0.01" name="cost" value="{{ old('cost', $supply->cost) }}" class="form-input">
+        <input type="number" step="0.01" min="0" name="cost" value="{{ old('cost', $supply->cost) }}" class="form-input" placeholder="0.00">
         @error('cost') <p class="form-error">{{ $message }}</p> @enderror
     </div>
     <div class="flex items-center gap-3">
