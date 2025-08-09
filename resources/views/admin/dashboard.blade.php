@@ -1,34 +1,34 @@
 @extends('layouts.app')
 
 @section('content')
-    <h1 class="text-2xl font-bold mb-6">Dashboard Administrateur</h1>
+    <h1 class="page-title mb-6">Dashboard Administrateur</h1>
 
     <!-- Indicateurs clés -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-white p-6 rounded shadow">
+        <div class="card"><div class="card-body">
             <h2 class="text-sm text-gray-500">Total Trucks</h2>
             <p class="text-2xl font-semibold">{{ $truckCount }}</p>
-        </div>
-        <div class="bg-white p-6 rounded shadow">
+        </div></div>
+        <div class="card"><div class="card-body">
             <h2 class="text-sm text-gray-500">Total Warehouses</h2>
             <p class="text-2xl font-semibold">{{ $warehouseCount }}</p>
-        </div>
-        <div class="bg-white p-6 rounded shadow">
+        </div></div>
+        <div class="card"><div class="card-body">
             <h2 class="text-sm text-gray-500">Total Franchisees</h2>
             <p class="text-2xl font-semibold">{{ $franchiseCount }}</p>
-        </div>
-        <div class="bg-white p-6 rounded shadow">
+        </div></div>
+        <div class="card"><div class="card-body">
             <h2 class="text-sm text-gray-500">Total Sales (Count)</h2>
             <p class="text-2xl font-semibold">{{ $totalSalesCount }}</p>
-        </div>
-        <div class="bg-white p-6 rounded shadow">
+        </div></div>
+        <div class="card"><div class="card-body">
             <h2 class="text-sm text-gray-500">Total Sales (Revenue)</h2>
             <p class="text-2xl font-semibold">{{ number_format($totalSalesSum, 2) }} €</p>
-        </div>
-        <div class="bg-white p-6 rounded shadow">
+        </div></div>
+        <div class="card"><div class="card-body">
             <h2 class="text-sm text-gray-500">Pending Stock Orders</h2>
             <p class="text-2xl font-semibold">{{ $pendingStockOrders }}</p>
-        </div>
+        </div></div>
     </div>
 
     <!-- Graphique des ventes (exemple : ventes par mois) -->
@@ -39,29 +39,33 @@
 
     <!-- (Optionnel) Tableau des dernières commandes de stock en attente -->
     @if(isset($latestPendingOrders))
-        <div class="mt-8">
-            <h2 class="text-lg font-bold mb-2">Recent Pending Stock Orders</h2>
-            <table class="min-w-full bg-white shadow rounded overflow-hidden">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Order #</th>
-                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Franchise</th>
-                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Date</th>
-                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Status</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200 text-sm">
-                    @foreach($latestPendingOrders as $order)
-                        <tr>
-                            <td class="px-4 py-2">{{ $order->id }}</td>
-                            <td class="px-4 py-2">{{ $order->truck->franchise->name ?? '-' }}</td>
-                            <td class="px-4 py-2">{{ $order->created_at->format('d/m/Y') }}</td>
-                            <td class="px-4 py-2 text-yellow-600 font-semibold">Pending</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
+                <div class="mt-8 card">
+                        <div class="card-header">
+                            <h2 class="text-lg font-bold">Recent Pending Stock Orders</h2>
+                        </div>
+                        <div class="card-body p-0">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Order #</th>
+                                        <th>Franchise</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($latestPendingOrders as $order)
+                                    <tr>
+                                        <td>{{ $order->id }}</td>
+                                        <td>{{ $order->truck->franchise->name ?? '-' }}</td>
+                                        <td>{{ $order->created_at->format('d/m/Y') }}</td>
+                                        <td><span class="badge badge-warning">Pending</span></td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                </div>
     @endif
 @endsection
 

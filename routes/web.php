@@ -32,6 +32,8 @@ Route::middleware('auth')->group(function () {
         Route::resource('supplies', AdminSupplyController::class);
         // Sales: only index and show (admin can view sales but not create)
         Route::resource('sales', AdminSalesController::class)->only(['index', 'show']);
+    // Exports
+    Route::get('exports/sales.pdf', [\App\Http\Controllers\Admin\ExportController::class, 'salesPdf'])->name('exports.sales.pdf');
     });
     // Groupe de routes Franchise (prefix 'franchise/*', name prefix 'franchise.')
     Route::middleware('franchise')->prefix('franchise')->as('franchise.')->group(function() {
@@ -40,7 +42,14 @@ Route::middleware('auth')->group(function () {
         // CRUD resources for franchise
         Route::resource('trucks', FranchiseTruckController::class);
         Route::resource('stockorders', FranchiseStockOrderController::class);
+        // Nested: add/remove items to a stock order
+        Route::post('stockorders/{stockorder}/items', [\App\Http\Controllers\Franchise\StockOrderItemController::class, 'store'])
+            ->name('stockorders.items.store');
+        Route::delete('stockorders/{stockorder}/items/{item}', [\App\Http\Controllers\Franchise\StockOrderItemController::class, 'destroy'])
+            ->name('stockorders.items.destroy');
         // (Note: Warehouses are managed by admin; franchisee does not have direct warehouse routes)
+    // Maintenance records
+    Route::resource('maintenance', \App\Http\Controllers\Franchise\MaintenanceRecordController::class)->except(['show']);
     });
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

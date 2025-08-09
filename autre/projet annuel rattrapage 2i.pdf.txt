@@ -1,0 +1,84 @@
+﻿DRIV'N	COOK	
+ 
+C'est à Paris, dans le 12ème arrondissement, que s'est créée Driv'n Cook, basée sur un concept de food trucks proposant des plats de qualité, à base de produits frais, bruts et majoritairement locaux. Après un lancement réussi en 2013, Driv'n Cook a décidé de s'orienter vers un système de franchise, et a déjà convaincu une trentaine de licenciés. Actuellement, d'autres signatures sont en cours. Son ambition est de se déployer dans toute l'Ile de France, avant d'envisager un développement sur d'autres régions françaises.  
+Le fonctionnement en est assez simple : Driv'n Cook propose un camion à chaque licencié, et en échange, celui-ci s'engage à respecter les conditions suivantes : 
+• Donner un droit d'entrée de 50 000,00 €, 
+• Verser 4% du chiffre d'affaires à la société mère, 
+• Acheter le stock (ingrédients, plats préparés, boissons) à hauteur de 80%, le solde pouvant être libre, dans l'un des 4 entrepôts d'Ile de France. Ces entrepôts disposent d'une cuisine dans laquelle les différents plats sont concoctés avec beaucoup d'attention. 
+ 
+Quant à la gestion de la clientèle, Driv'n Cook demande aux franchisés d'être le plus souple possible : ils peuvent acheter sur place, réserver à l'avance, et leur fidélité, gérée par carte numérique imprimable, est récompensée par de multiples avantages (réductions, invitations à des dégustations, prix réduits à l'achat de produits diffusés dans les camions etc …) 
+ 
+Pour mener à bien toutes ses activités, Driv'n Cook emploie aujourd'hui une vingtaine de salariés en CDI à Paris et dans chacun de ses entrepôts. Elle est en contact avec plusieurs centaines de fournisseurs en Ile de France. 
+Depuis la création, le chiffre d’affaires de la société ne cesse d'augmenter avec une croissance à deux chiffres, amenant les dirigeants de Driv'n Cook à moderniser leur système d'information, tant du point de vue du réseau que du point de vue applicatif. 
+Le 29 juillet 2025, Driv'n Cook a donc lancé un appel d'offre afin de réorganiser son système d'information au niveau de la gestion, du site WEB ou encore de l'architecture systèmes et réseaux, appel d'offre auquel il vous faudra répondre, dans le cadre du projet annuel 2024-2025, en tant que prestataire de service. 
+Il comprends trois missions : 
+• 1er lot : Gestion des Services Franchisés 
+ 
+• 2ème lot : Gestion des Services Clients 
+ 
+• 3ème lot : Interconnexion des entrepôts 	 
+Mission 1 : Gestion des Services Franchisés DRIV'N COOK 
+Présentation :  
+Les franchisés sont le premier maillon de la chaîne de vente et leur organisation est donc essentielle au bon fonctionnement de la société. Aussi a-t-elle besoin d'avoir un système fiable capable d'assurer leur gestion au quotidien : achats de franchises, gestion des commandes et entrepôts, déploiement, analyse des ventes sont quelques exemples des différents besoins exprimés par Driv'n Cook. Il a donc été décidé d'opérer une migration de l'ancien système informatique plutôt vétuste (de simples feuilles de calculs Excel) vers un outil plus performant. 
+Il est donc obligatoire de développer un ensemble d'outils permettant de : 
+• enregistrer les différents franchisés, 
+• gérer les achats et entrepôts,  
+• gérer le parc de camions, 
+ 
+Il s'agit d'un minimum à réaliser, mais bien entendu, il est possible d'intégrer de nouveaux modules de gestion. 
+Travail à réaliser 
+L'informatisation de cette mission doit être réalisée de la manière suivante : 
+• Une application WEB (couplage Javascript/PHP ou frameworks) permettra d'assurer une gestion des franchisés, du parc de camions attribués à chaque franchisé (l'envoi de celui-ci dans un emplacement, la gestion pannes et du carnet d'entretien), de l'approvisionnement des franchisés, et des chiffres de ventes et de leur historique. Ceux-ci seront d'ailleurs générés automatiquement au format PDF 
+Les franchisés disposent d'un espace de gestion personnel leur permettant de gérer leur compte et les principales données les concernant. 
+Il y a donc ici à la fois un back-office utilisé par Driv'n Cook, et un front office utilisé par les franchisés. 
+ 
+ 
+Enfin, un serveur WEB personnel devra être configuré pour accueillir le site de Home Service. La démonstration devra être effectuée sur ce serveur (prévoir réécriture d’URL, codes d’erreurs etc …) 
+ 
+ 
+Remarque : un plus serait d'assurer le contrôle de la fourniture des stock (80% vs 20%). 
+ 
+ 	 
+Mission 2 : Gestion des Services Clients DRIV'N COOK 
+ 
+Présentation :  
+La vente aux clients et leur satisfaction sont essentiels à la survie et à l'extension de Driv'n Cook. Il est donc absolument indispensable de prévoir un certain nombre de services leur étant dédiés : 
+• Les commandes par Internet,  
+• La gestion de leur carte de fidélité, 
+• L'organisation d'événements 
+Pour assurer l'ensemble de ces missions, il est donc nécessaire de construire : 
+• une gestion des menus et plats proposés, et des commandes (une simulation du paiement devra être construite); comme il ne peut être question de négliger une clientèle étrangère, cette partie devra être multilingue, 
+• une gestion des cartes de fidélité clients, ceux-ci devront donc disposer d'un compte 
+• chaque mois, une newsletter leur sera envoyée pour les avertir des différents avantages dont ils peuvent disposer, 
+• une gestion des événements (dégustation, achats de produits …) 
+ 
+La liste n'est pas exhaustive, et là-aussi, il est possible de rajouter un certain nombre de modules (comme l'avis des clients), à condition de le faire valider par la direction. 
+Travail à réaliser 
+Mettre en place les outils décrits ci-dessus. 
+Remarques :  
+- la gestion des cartes de fidélité devra être assurée en Java 
+- les responsables de DRIV'N COOK n'ont pas d'avis sur la façon de développer les autres services, il pourra donc s'agir d'une réalisation en C, Python, Ruby, C#, Java, ou encore Web, ou encore avec n'importe quel outil de programmation (langage + SGBD/Fichiers) de votre choix, y compris des langages non vus en cours. Il est bien entendu que la décision devra être justifiée. 
+ 	 
+Mission 3 : Architecture Réseau et Sécurité DRIV'N COOK 
+ 
+Présentation : 
+A l’heure actuelle, tous les services proposés par Driv‘n Cook sont gérés par une équipe administrative sur des tableurs Excel. L’expansion de la société ne permet plus cette méthode de fonctionnement et a donc choisi d’utiliser l’ERP fait en missions 1 et 2. Cet ERP sera centralisé et redondé sur le site principal de Paris et devra être accessible depuis les différents autres sites. 
+Travail à réaliser :  
+Le front office et le back office devront être hébergés sur un ESX VMWare (rajouter Workstation pro ou bien EVE-NG ou Proxmox pour héberger en plus de ESXi), ce qui permettra de faire des « snapshot » notamment pour les sauvegardes. 
+Chaque site actuellement existant devra avoir une connexion VPN sécurisée (IPSec) vers le site de Paris (seuls les flux 80 et/ou 443 des régions vers Paris passeront par ce tunnel). 
+Chaque entrepôt bénéficie d’un accès Internet (configurer donc le PAT Dynamique) pour que les réseaux privés de chaque agence soient translatés sur l’IP publique de chaque lien Internet. Attention, les flux allant vers Internet ne passent pas par le tunnel Ipsec (attention aux ACL). 
+Le réseau Internet peut être simulé par un seul routeur (que l’on appellera FAI).  
+Vous devrez choisir le plan d’adressage privé et public pour la construction de cette maquette. 
+ 
+
+
+
+
+Rattrapage Projet Annuel 2 ESGI A- 2024-2025                                                                                      1 
+
+Rattrapage Projet Annuel 2 ESGI A- 2024-2025                                                                                      1 
+
+
+
+Rattrapage Projet Annuel 2 ESGI A- 2024-2025                                                                                      1 
+

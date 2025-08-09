@@ -8,6 +8,7 @@ services:
     image: sail-8.2/app
     ports:
       - '${APP_PORT:-8000}:80'
+      - '5173:5173'
     environment:
       WWWUSER: '${WWWUSER}'
       LARAVEL_SAIL: 1

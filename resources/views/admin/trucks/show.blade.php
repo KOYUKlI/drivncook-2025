@@ -1,14 +1,31 @@
 @extends('layouts.app')
 
 @section('content')
-<h1 class="text-2xl font-bold mb-4">Truck Details</h1>
-
-<div class="bg-white p-6 rounded shadow max-w-md">
-    <p><strong>Name:</strong> {{ $truck->name }}</p>
-    <p><strong>License Plate:</strong> {{ $truck->license_plate ?? 'N/A' }}</p>
-    <p><strong>Franchise:</strong> {{ $truck->franchise->name }}</p>
-    <!-- On pourrait lister d'autres détails, ex: commandes ou ventes liées -->
+<div class="flex items-center justify-between mb-4">
+  <h1 class="page-title">Truck Details</h1>
+  <a href="{{ route('admin.trucks.edit', $truck) }}" class="btn-secondary">Edit</a>
 </div>
 
-<a href="{{ route('admin.trucks.index') }}" class="inline-block mt-4 text-blue-600 hover:underline">← Back to Trucks list</a>
+<div class="card max-w-xl">
+    <div class="card-body">
+        <dl class="divide-y divide-gray-100">
+            <div class="py-3 grid grid-cols-3 gap-4">
+                <dt class="text-sm font-medium text-gray-500">Name</dt>
+                <dd class="col-span-2 text-sm text-gray-900">{{ $truck->name }}</dd>
+            </div>
+            <div class="py-3 grid grid-cols-3 gap-4">
+                <dt class="text-sm font-medium text-gray-500">License Plate</dt>
+                <dd class="col-span-2 text-sm text-gray-900">{{ $truck->license_plate ?? 'N/A' }}</dd>
+            </div>
+            <div class="py-3 grid grid-cols-3 gap-4">
+                <dt class="text-sm font-medium text-gray-500">Franchise</dt>
+                <dd class="col-span-2 text-sm text-gray-900">{{ $truck->franchise->name }}</dd>
+            </div>
+        </dl>
+    </div>
+</div>
+
+<div class="mt-4">
+  <a href="{{ route('admin.trucks.index') }}" class="btn-link">← Back to Trucks list</a>
+</div>
 @endsection

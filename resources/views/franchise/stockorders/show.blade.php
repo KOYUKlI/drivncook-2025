@@ -1,26 +1,74 @@
 @extends('layouts.app')
 
 @section('content')
-<h1 class="text-2xl font-bold mb-4">Stock Order #{{ $stockOrder->id }}</h1>
+<div class="flex items-center justify-between mb-4">
+    <h1 class="page-title">Stock Order #{{ $stockOrder->id }}</h1>
+    @php($s = $stockOrder->status)
+    <span class="badge {{ $s === 'pending' ? 'badge-warning' : ($s === 'completed' ? 'badge-success' : 'badge-muted') }}">{{ ucfirst($s) }}</span>
+</div>
 
-<div class="bg-white p-6 rounded shadow">
-    <p><strong>Truck:</strong> {{ $stockOrder->truck->name }}</p>
-    <p><strong>Warehouse:</strong> {{ $stockOrder->warehouse->name }}</p>
-    <p><strong>Status:</strong> {{ ucfirst($stockOrder->status) }}</p>
-    <p><strong>Ordered Date:</strong> {{ \Carbon\Carbon::parse($stockOrder->ordered_at)->format('Y-m-d H:i') }}</p>
-    <div class="mt-4">
-        <h2 class="text-xl font-semibold mb-2">Items in Order:</h2>
-        @if($stockOrder->items->count())
-            <ul class="list-disc list-inside">
-                @foreach($stockOrder->items as $item)
-                    <li>{{ $item->quantity }} × {{ $item->supply->name }}</li>
-                @endforeach
-            </ul>
-        @else
-            <p class="text-gray-600">No items added to this order yet.</p>
-        @endif
+<div class="card">
+    <div class="card-body">
+        <dl class="divide-y divide-gray-100">
+            <div class="py-3 grid grid-cols-3 gap-4">
+                <dt class="text-sm font-medium text-gray-500">Truck</dt>
+                <dd class="col-span-2 text-sm text-gray-900">{{ $stockOrder->truck->name }}</dd>
+            </div>
+            <div class="py-3 grid grid-cols-3 gap-4">
+                <dt class="text-sm font-medium text-gray-500">Warehouse</dt>
+                <dd class="col-span-2 text-sm text-gray-900">{{ $stockOrder->warehouse->name }}</dd>
+            </div>
+            <div class="py-3 grid grid-cols-3 gap-4">
+                <dt class="text-sm font-medium text-gray-500">Ordered Date</dt>
+                <dd class="col-span-2 text-sm text-gray-900">{{ \Carbon\Carbon::parse($stockOrder->ordered_at)->format('Y-m-d H:i') }}</dd>
+            </div>
+        </dl>
+
+        <div class="mt-6">
+            <h2 class="text-lg font-semibold mb-2">Items in Order</h2>
+            @if($stockOrder->items->count())
+                <ul class="list-disc list-inside text-sm text-gray-800">
+                    @foreach($stockOrder->items as $item)
+                        <li class="flex items-center justify-between">
+                            <span>{{ $item->quantity }} × {{ $item->supply->name }}</span>
+                            @if($stockOrder->status === 'pending')
+                                <form action="{{ route('franchise.stockorders.items.destroy', [$stockOrder, $item]) }}" method="POST" onsubmit="return confirm('Remove this item?')">
+                                    @csrf @method('DELETE')
+                                    <button class="btn-link text-red-600">Remove</button>
+                                </form>
+                            @endif
+                        </li>
+                    @endforeach
+                </ul>
+            @else
+                <p class="text-gray-600">No items added to this order yet.</p>
+            @endif
+
+            @if($stockOrder->status === 'pending')
+            <div class="mt-4">
+                <form action="{{ route('franchise.stockorders.items.store', $stockOrder) }}" method="POST" class="flex items-end gap-3">
+                    @csrf
+                    <div>
+                        <label class="form-label">Supply</label>
+                        <select name="supply_id" class="form-select">
+                            @foreach(\App\Models\Supply::all() as $supply)
+                                <option value="{{ $supply->id }}">{{ $supply->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">Qty</label>
+                        <input type="number" min="1" name="quantity" value="1" class="form-input w-24">
+                    </div>
+                    <button class="btn-secondary">Add Item</button>
+                </form>
+            </div>
+            @endif
+        </div>
     </div>
 </div>
 
-<a href="{{ route('franchise.stockorders.index') }}" class="inline-block mt-4 text-blue-600 hover:underline">← Back to Stock Orders</a>
+<div class="mt-4">
+    <a href="{{ route('franchise.stockorders.index') }}" class="btn-link">← Back to Stock Orders</a>
+</div>
 @endsection

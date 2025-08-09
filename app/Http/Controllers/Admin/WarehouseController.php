@@ -37,6 +37,9 @@ class WarehouseController extends Controller
             'location'     => 'required|string|max:255',
             'franchise_id' => 'required|exists:franchises,id'
         ]);
+    Warehouse::create($request->only('name', 'location', 'franchise_id'));
+    return redirect()->route('admin.warehouses.index')
+             ->with('success', 'Warehouse created successfully.');
     }
 
     /**

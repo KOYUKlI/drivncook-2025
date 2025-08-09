@@ -1,14 +1,31 @@
 @extends('layouts.app')
 
 @section('content')
-<h1 class="text-2xl font-bold mb-4">Supply Details</h1>
-
-<div class="bg-white p-6 rounded shadow max-w-md">
-    <p><strong>Name:</strong> {{ $supply->name }}</p>
-    <p><strong>Unit:</strong> {{ $supply->unit }}</p>
-    <p><strong>Cost:</strong> ${{ number_format($supply->cost, 2) }}</p>
-    <!-- On pourrait lister combien de fois cet ingrédient a été commandé, etc. -->
+<div class="flex items-center justify-between mb-4">
+  <h1 class="page-title">Supply Details</h1>
+  <a href="{{ route('admin.supplies.edit', $supply) }}" class="btn-secondary">Edit</a>
 </div>
 
-<a href="{{ route('admin.supplies.index') }}" class="inline-block mt-4 text-blue-600 hover:underline">← Back to Supplies list</a>
+<div class="card max-w-xl">
+    <div class="card-body">
+        <dl class="divide-y divide-gray-100">
+            <div class="py-3 grid grid-cols-3 gap-4">
+                <dt class="text-sm font-medium text-gray-500">Name</dt>
+                <dd class="col-span-2 text-sm text-gray-900">{{ $supply->name }}</dd>
+            </div>
+            <div class="py-3 grid grid-cols-3 gap-4">
+                <dt class="text-sm font-medium text-gray-500">Unit</dt>
+                <dd class="col-span-2 text-sm text-gray-900">{{ $supply->unit }}</dd>
+            </div>
+            <div class="py-3 grid grid-cols-3 gap-4">
+                <dt class="text-sm font-medium text-gray-500">Cost</dt>
+                <dd class="col-span-2 text-sm text-gray-900">${{ number_format($supply->cost, 2) }}</dd>
+            </div>
+        </dl>
+    </div>
+</div>
+
+<div class="mt-4">
+  <a href="{{ route('admin.supplies.index') }}" class="btn-link">← Back to Supplies list</a>
+</div>
 @endsection

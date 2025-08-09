@@ -32,11 +32,11 @@ class SupplyController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        // Validation des champs du formulaire
+        // Validation des champs (modèle: name, unit, cost)
         $validatedData = $request->validate([
-            'name'        => 'required|string|max:255',
-            'price'       => 'required|numeric|min:0',
-            'description' => 'nullable|string'
+            'name' => 'required|string|max:255',
+            'unit' => 'nullable|string|max:50',
+            'cost' => 'nullable|numeric|min:0',
         ]);
 
         // Création du produit en base
@@ -68,11 +68,11 @@ class SupplyController extends Controller
      */
     public function update(Request $request, Supply $supply): RedirectResponse
     {
-        // Validation des données du formulaire
+        // Validation des champs (modèle: name, unit, cost)
         $validatedData = $request->validate([
-            'name'        => 'required|string|max:255',
-            'price'       => 'required|numeric|min:0',
-            'description' => 'nullable|string'
+            'name' => 'required|string|max:255',
+            'unit' => 'nullable|string|max:50',
+            'cost' => 'nullable|numeric|min:0',
         ]);
 
         // Mise à jour du produit

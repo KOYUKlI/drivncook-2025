@@ -11,6 +11,6 @@ class MaintenanceRecord extends Model {
     protected $fillable = ['truck_id', 'maintenance_date', 'description', 'cost'];
 
     public function truck(): BelongsTo {
-        return $this->belongsTo(Truck::class);
+    return $this->belongsTo(Truck::class);
     }
 }
