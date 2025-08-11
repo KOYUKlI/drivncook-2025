@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Database\Seeders\MinimalSeed;
 use Database\Seeders\DemoSeed;
+use Database\Seeders\BulkSeed;
 
 class DatabaseSeeder extends Seeder
 {
@@ -24,5 +25,6 @@ class DatabaseSeeder extends Seeder
 
     $this->call(MinimalSeed::class);
     $this->call(DemoSeed::class);
+    $this->call(BulkSeed::class);
     }
 }

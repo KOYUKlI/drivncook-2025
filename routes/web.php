@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\{ DashboardController as AdminDashboardController
     SupplyController as AdminSupplyController,
     SupplierController as AdminSupplierController,
     CommissionController as AdminCommissionController };
+use App\Http\Controllers\Admin\ComplianceController as AdminComplianceController;
 use App\Http\Controllers\Admin\{ LocationController as AdminLocationController, TruckDeploymentController as AdminTruckDeploymentController };
 use App\Http\Controllers\Franchise\{ DashboardController as FranchiseDashboardController,
     TruckController as FranchiseTruckController,
@@ -32,6 +33,9 @@ Route::middleware('auth')->group(function () {
         Route::resource('trucks', AdminTruckController::class);
         Route::resource('warehouses', AdminWarehouseController::class);
     Route::resource('franchisees', AdminFranchiseeController::class);
+    // Manage user attachments to franchisees
+    Route::post('franchisees/{franchisee}/users/attach', [AdminFranchiseeController::class, 'attachUser'])->name('franchisees.users.attach');
+    Route::delete('franchisees/{franchisee}/users/{user}', [AdminFranchiseeController::class, 'detachUser'])->name('franchisees.users.detach');
     Route::resource('locations', AdminLocationController::class);
     Route::resource('deployments', AdminTruckDeploymentController::class);
     Route::resource('supplies', AdminSupplyController::class);
@@ -43,13 +47,17 @@ Route::middleware('auth')->group(function () {
     Route::delete('dishes/{dish}/ingredients/{ingredient}', [\App\Http\Controllers\Admin\DishIngredientController::class, 'destroy'])->name('dishes.ingredients.destroy');
     Route::resource('suppliers', AdminSupplierController::class);
     Route::resource('commissions', AdminCommissionController::class)->only(['index','show','update']);
+    // Compliance 80/20
+    Route::get('compliance', [AdminComplianceController::class, 'index'])->name('compliance.index');
+    Route::get('compliance/{franchisee}/edit', [AdminComplianceController::class, 'edit'])->name('compliance.edit');
+    Route::put('compliance/{franchisee}', [AdminComplianceController::class, 'update'])->name('compliance.update');
         // Sales: only index and show (admin can view sales but not create)
         Route::resource('sales', AdminSalesController::class)->only(['index', 'show']);
     // Exports
     Route::get('exports/sales.pdf', [\App\Http\Controllers\Admin\ExportController::class, 'salesPdf'])->name('exports.sales.pdf');
     });
     // Groupe de routes Franchise (prefix 'franchise/*', name prefix 'franchise.')
-    Route::middleware('franchise')->prefix('franchise')->as('franchise.')->scopeBindings()->group(function() {
+    Route::middleware(['franchise','franchise.attached'])->prefix('franchise')->as('franchise.')->scopeBindings()->group(function() {
         // Dashboard (franchise home)
         Route::get('/dashboard', [FranchiseDashboardController::class, 'index'])->name('dashboard');
         // CRUD resources for franchise

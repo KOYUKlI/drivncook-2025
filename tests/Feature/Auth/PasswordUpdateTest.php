@@ -5,15 +5,17 @@ use Illuminate\Support\Facades\Hash;
 
 test('password can be updated', function () {
     $user = User::factory()->create();
-
+    // Seed session & token via profile page
+    $this->actingAs($user)->get('/profile');
+    $token = session()->token();
     $response = $this
-        ->actingAs($user)
         ->from('/profile')
         ->put('/password', [
+            '_token' => $token,
             'current_password' => 'password',
             'password' => 'new-password',
             'password_confirmation' => 'new-password',
-        ]);
+        ], ['X-CSRF-TOKEN' => $token]);
 
     $response
         ->assertSessionHasNoErrors()
@@ -24,15 +26,16 @@ test('password can be updated', function () {
 
 test('correct password must be provided to update password', function () {
     $user = User::factory()->create();
-
+    $this->actingAs($user)->get('/profile');
+    $token = session()->token();
     $response = $this
-        ->actingAs($user)
         ->from('/profile')
         ->put('/password', [
+            '_token' => $token,
             'current_password' => 'wrong-password',
             'password' => 'new-password',
             'password_confirmation' => 'new-password',
-        ]);
+        ], ['X-CSRF-TOKEN' => $token]);
 
     $response
         ->assertSessionHasErrorsIn('updatePassword', 'current_password')

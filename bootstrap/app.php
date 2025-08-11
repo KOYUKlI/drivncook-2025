@@ -5,6 +5,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\FranchiseMiddleware;
+use App\Http\Middleware\EnsureFranchiseAttached;
 use Illuminate\Console\Scheduling\Schedule;
 use App\Console\Commands\ComputeMonthlyCommissions;
 
@@ -28,6 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin'     => AdminMiddleware::class,
             'franchise' => FranchiseMiddleware::class,
+            'franchise.attached' => EnsureFranchiseAttached::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

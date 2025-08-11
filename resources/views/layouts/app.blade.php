@@ -48,6 +48,9 @@
                                 <a href="{{ route('admin.franchisees.index') }}" class="sidebar-link {{ request()->is('admin/franchisees*') ? 'sidebar-link-active' : '' }}">Franchisees</a>
                                 <a href="{{ route('admin.locations.index') }}" class="sidebar-link {{ request()->is('admin/locations*') ? 'sidebar-link-active' : '' }}">Locations</a>
                                 <a href="{{ route('admin.deployments.index') }}" class="sidebar-link {{ request()->is('admin/deployments*') ? 'sidebar-link-active' : '' }}">Deployments</a>
+                                @if(Route::has('admin.compliance.index'))
+                                    <a href="{{ route('admin.compliance.index') }}" class="sidebar-link {{ request()->is('admin/compliance*') ? 'sidebar-link-active' : '' }}">Compliance 80/20</a>
+                                @endif
                             @endif
                             @if(Route::has('admin.sales.index'))
                                 <a href="{{ route('admin.sales.index') }}" class="sidebar-link {{ request()->is('admin/sales*') ? 'sidebar-link-active' : '' }}">Sales</a>

@@ -7,6 +7,7 @@ use App\Models\Franchise;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use App\Models\User;
 
 class FranchiseeController extends Controller
 {
@@ -15,13 +16,21 @@ class FranchiseeController extends Controller
      */
     public function index()
     {
-        $franchises = Franchise::all();
-        // Backfill ULIDs if missing to ensure route generation works
-        $franchises->filter(fn($f) => empty($f->ulid))
+        // Liste paginée avec compteurs pour éviter le N+1
+        $franchises = Franchise::query()
+            ->withCount(['trucks', 'warehouses'])
+            ->orderBy('name')
+            ->paginate(20);
+
+        // Backfill ULIDs si manquants sans perdre les withCount (pas de refresh)
+        $franchises->getCollection()
+            ->filter(fn($f) => empty($f->ulid))
             ->each(function(Franchise $f) {
-                DB::table('franchises')->where('id', $f->id)->update(['ulid' => (string) Str::ulid()]);
-                $f->refresh();
+                $new = (string) Str::ulid();
+                DB::table('franchises')->where('id', $f->id)->update(['ulid' => $new]);
+                $f->ulid = $new;
             });
+
         return view('admin.franchisees.index', compact('franchises'));
     }
 
@@ -93,5 +102,40 @@ class FranchiseeController extends Controller
         $franchise->delete();
         return redirect()->route('admin.franchisees.index')
                          ->with('success', 'Franchise deleted successfully.');
+    }
+
+    /**
+     * Attach an existing user to the franchise by email and set role to 'franchise'.
+     */
+    public function attachUser(Request $request, Franchise $franchise)
+    {
+        $data = $request->validate([
+            'email' => 'required|email',
+        ]);
+        $user = User::where('email', $data['email'])->first();
+        if (!$user) {
+            return back()->with('error', "Aucun utilisateur avec cet email.");
+        }
+        if ($user->role === 'admin') {
+            return back()->with('error', "Impossible de rattacher un administrateur.");
+        }
+        $user->franchise_id = $franchise->id;
+        $user->role = 'franchise';
+        $user->save();
+        return back()->with('success', 'Utilisateur rattaché au franchisé.');
+    }
+
+    /**
+     * Detach a user from the franchise.
+     */
+    public function detachUser(Franchise $franchise, User $user)
+    {
+        if ($user->franchise_id !== $franchise->id) {
+            return back()->with('error', "Cet utilisateur n'est pas rattaché à ce franchisé.");
+        }
+        // On détache sans changer son rôle (au besoin, on pourra le repasser en 'user')
+        $user->franchise_id = null;
+        $user->save();
+        return back()->with('success', 'Utilisateur détaché du franchisé.');
     }
 }

@@ -14,13 +14,14 @@ test('profile page is displayed', function () {
 
 test('profile information can be updated', function () {
     $user = User::factory()->create();
-
+    $this->actingAs($user)->get('/profile')->assertOk();
+    $token = session()->token();
     $response = $this
-        ->actingAs($user)
         ->patch('/profile', [
+            '_token' => $token,
             'name' => 'Test User',
             'email' => 'test@example.com',
-        ]);
+        ], ['X-CSRF-TOKEN' => $token]);
 
     $response
         ->assertSessionHasNoErrors()
@@ -35,13 +36,14 @@ test('profile information can be updated', function () {
 
 test('email verification status is unchanged when the email address is unchanged', function () {
     $user = User::factory()->create();
-
+    $this->actingAs($user)->get('/profile')->assertOk();
+    $token = session()->token();
     $response = $this
-        ->actingAs($user)
         ->patch('/profile', [
+            '_token' => $token,
             'name' => 'Test User',
             'email' => $user->email,
-        ]);
+        ], ['X-CSRF-TOKEN' => $token]);
 
     $response
         ->assertSessionHasNoErrors()
@@ -52,12 +54,13 @@ test('email verification status is unchanged when the email address is unchanged
 
 test('user can delete their account', function () {
     $user = User::factory()->create();
-
+    $this->actingAs($user)->get('/profile')->assertOk();
+    $token = session()->token();
     $response = $this
-        ->actingAs($user)
         ->delete('/profile', [
+            '_token' => $token,
             'password' => 'password',
-        ]);
+        ], ['X-CSRF-TOKEN' => $token]);
 
     $response
         ->assertSessionHasNoErrors()
@@ -69,13 +72,14 @@ test('user can delete their account', function () {
 
 test('correct password must be provided to delete account', function () {
     $user = User::factory()->create();
-
+    $this->actingAs($user)->get('/profile')->assertOk();
+    $token = session()->token();
     $response = $this
-        ->actingAs($user)
         ->from('/profile')
         ->delete('/profile', [
+            '_token' => $token,
             'password' => 'wrong-password',
-        ]);
+        ], ['X-CSRF-TOKEN' => $token]);
 
     $response
         ->assertSessionHasErrorsIn('userDeletion', 'password')
