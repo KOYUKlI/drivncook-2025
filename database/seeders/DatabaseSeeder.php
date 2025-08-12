@@ -3,11 +3,11 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Database\Seeders\MinimalSeed;
 use Database\Seeders\DemoSeed;
 use Database\Seeders\BulkSeed;
+use Database\Seeders\AdminFranchiseUsersSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -16,15 +16,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::firstOrCreate(
-            ['email' => 'test@example.com'],
-            ['name' => 'Test User', 'password' => 'password', 'role' => 'admin']
-        );
-
-    $this->call(MinimalSeed::class);
-    $this->call(DemoSeed::class);
-    $this->call(BulkSeed::class);
+    // Unified seeding entry point (supports profiles via SEED_PROFILE env)
+    $this->call(BaselineSeeder::class);
     }
 }

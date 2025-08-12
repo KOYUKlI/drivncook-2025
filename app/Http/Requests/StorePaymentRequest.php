@@ -13,7 +13,9 @@ class StorePaymentRequest extends FormRequest
         return [
             'amount' => 'required|numeric|min:0.01',
             'method' => 'required|in:card,cash,voucher',
-            'provider_ref' => 'nullable|string|max:100'
+            'provider_ref' => 'nullable|string|max:100',
+            'provider_ref' => 'nullable|string|max:100',
+            'status' => 'sometimes|in:pending,captured,failed,refunded',
         ];
     }
 }

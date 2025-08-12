@@ -8,6 +8,7 @@ use App\Http\Middleware\FranchiseMiddleware;
 use App\Http\Middleware\EnsureFranchiseAttached;
 use Illuminate\Console\Scheduling\Schedule;
 use App\Console\Commands\ComputeMonthlyCommissions;
+use App\Console\Commands\ComputePurchaseMix;
 
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -18,10 +19,11 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withCommands([
         ComputeMonthlyCommissions::class,
+        ComputePurchaseMix::class,
     ])
     ->withSchedule(function (Schedule $schedule): void {
-        // Compute previous month commissions on the 1st of each month at 02:00
-        $schedule->command('commissions:compute')->monthlyOn(1, '02:00');
+        $schedule->command('commissions:compute')->monthlyOn(1, '01:10');
+        $schedule->command('purchase-mix:compute')->monthlyOn(1, '01:20');
     })
     ->withMiddleware(function (Middleware $middleware): void {
         // Middlewares globaux ou de groupe par défaut (Laravel les gère déjà)

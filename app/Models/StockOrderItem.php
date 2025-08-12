@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class StockOrderItem extends Model {
     use HasFactory, HasUlidRouteKey;
-    protected $fillable = ['stock_order_id', 'supply_id', 'quantity', 'ulid'];
+    protected $fillable = ['stock_order_id', 'supply_id', 'quantity', 'unit_price', 'ulid'];
 
     public function stockOrder(): BelongsTo {
         return $this->belongsTo(StockOrder::class);

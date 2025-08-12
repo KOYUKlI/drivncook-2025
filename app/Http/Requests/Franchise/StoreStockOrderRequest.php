@@ -14,6 +14,7 @@ class StoreStockOrderRequest extends FormRequest
             'truck_id'     => 'required|exists:trucks,id',
             'warehouse_id' => 'nullable|exists:warehouses,id',
             'supplier_id'  => 'nullable|exists:suppliers,id',
+            'status'       => 'sometimes|in:pending,approved,completed,canceled',
         ];
     }
 

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Inventory;
 use App\Models\InventoryAdjustment;
 use App\Models\InventoryMovement;
+use App\Models\InventoryLot;
 use App\Models\StockOrder;
 use App\Models\StockOrderItem;
 use Illuminate\Support\Facades\DB;
@@ -100,4 +101,61 @@ class InventoryService
             ]);
         });
     }
+
+    /**
+     * Decrement inventory for a prepared/confirmed customer order using FIFO lots where available.
+     * Each OrderItem: dish -> ingredients (not yet modeled fully, placeholder for future integration).
+     * For now expects precomputed required supplies array: [inventory_id => qtyNeeded].
+     */
+    public function consume(array $requirements): void
+    {
+        DB::transaction(function () use ($requirements) {
+            foreach ($requirements as $inventoryId => $qtyNeeded) {
+                if ($qtyNeeded <= 0) continue;
+                $inv = Inventory::lockForUpdate()->findOrFail($inventoryId);
+                if ($inv->on_hand < $qtyNeeded) {
+                    abort(422, 'Insufficient stock for inventory '.$inventoryId);
+                }
+
+                // FIFO lots
+                $remaining = $qtyNeeded;
+                $lots = InventoryLot::where('inventory_id', $inventoryId)
+                    ->orderBy('expires_at')
+                    ->orderBy('id')
+                    ->lockForUpdate()->get();
+                foreach ($lots as $lot) {
+                    if ($remaining <= 0) break;
+                    $take = min($lot->qty, $remaining);
+                    if ($take > 0) {
+                        $lot->qty -= $take;
+                        $lot->save();
+                        InventoryMovement::create([
+                            'inventory_id' => $inv->id,
+                            'type' => 'out',
+                            'qty' => $take,
+                            'reason' => 'sale',
+                            'ref_table' => 'inventory_lots',
+                            'ref_id' => $lot->id,
+                            'created_at' => now(),
+                        ]);
+                        $remaining -= $take;
+                    }
+                }
+                // Any remaining taken from bulk (no lot)
+                if ($remaining > 0) {
+                    InventoryMovement::create([
+                        'inventory_id' => $inv->id,
+                        'type' => 'out',
+                        'qty' => $remaining,
+                        'reason' => 'sale',
+                        'ref_table' => null,
+                        'ref_id' => null,
+                        'created_at' => now(),
+                    ]);
+                }
+                $inv->decrement('on_hand', $qtyNeeded);
+            }
+        });
+    }
+
 }

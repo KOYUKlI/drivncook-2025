@@ -18,17 +18,17 @@ it('admin can create, update and delete an inventory lot while on_hand adjusts',
         'qty' => 5.2,
     ])->assertRedirect(route('admin.inventory.show', $inventory));
     $inventory->refresh();
-    expect($inventory->on_hand)->toBeFloat()->toBe(5.2);
+    expect((float)$inventory->on_hand)->toBe(5.2);
     $lot = InventoryLot::where('inventory_id', $inventory->id)->first();
     put(route('admin.inventory.lots.update', [$inventory, $lot]), [
         'lot_code' => 'LOT-001',
         'qty' => 7.0,
     ])->assertRedirect(route('admin.inventory.show', $inventory));
     $inventory->refresh();
-    expect($inventory->on_hand)->toBe(7.0);
+    expect((float)$inventory->on_hand)->toBe(7.0);
     delete(route('admin.inventory.lots.destroy', [$inventory, $lot]))->assertRedirect(route('admin.inventory.show', $inventory));
     $inventory->refresh();
-    expect($inventory->on_hand)->toBe(0.0);
+    expect((float)$inventory->on_hand)->toBe(0.0);
 });
 
 it('rejects duplicate lot code per inventory', function () {
