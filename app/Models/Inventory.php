@@ -17,4 +17,6 @@ class Inventory extends Model
     public function warehouse(): BelongsTo { return $this->belongsTo(Warehouse::class); }
     public function supply(): BelongsTo { return $this->belongsTo(Supply::class); }
     public function movements() { return $this->hasMany(InventoryMovement::class); }
+    public function lots() { return $this->hasMany(InventoryLot::class); }
+    public function adjustments() { return $this->hasMany(InventoryAdjustment::class); }
 }

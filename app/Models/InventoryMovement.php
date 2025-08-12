@@ -11,9 +11,14 @@ class InventoryMovement extends Model
 {
     use HasFactory, HasUlidRouteKey;
 
-    protected $fillable = ['inventory_id','delta','reason','created_at','ulid'];
+    protected $fillable = ['inventory_id','type','qty','reason','ref_table','ref_id','created_at','ulid'];
 
     public $timestamps = false;
+
+    protected $casts = [
+        'qty' => 'decimal:3',
+        'created_at' => 'datetime',
+    ];
 
     public function inventory(): BelongsTo { return $this->belongsTo(Inventory::class); }
 }

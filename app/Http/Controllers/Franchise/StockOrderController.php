@@ -11,6 +11,8 @@ use App\Models\Supply;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Services\InventoryService;
+use App\Http\Requests\Franchise\StoreStockOrderRequest;
+use App\Http\Requests\Franchise\UpdateStockOrderRequest;
 
 class StockOrderController extends Controller
 {
@@ -45,31 +47,21 @@ class StockOrderController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreStockOrderRequest $request)
     {
-        $request->validate([
-            'truck_id'     => 'required|exists:trucks,id',
-            'warehouse_id' => 'nullable|exists:warehouses,id',
-            'supplier_id'  => 'nullable|exists:suppliers,id',
-        ]);
-        if (! $request->warehouse_id && ! $request->supplier_id) {
-            return back()->withErrors(['warehouse_id' => 'Select a warehouse or a supplier', 'supplier_id' => 'Select a warehouse or a supplier'])->withInput();
-        }
-        if ($request->warehouse_id && $request->supplier_id) {
-            return back()->withErrors(['warehouse_id' => 'Choose only one target', 'supplier_id' => 'Choose only one target'])->withInput();
-        }
+        $validated = $request->validated();
         $franchiseId = Auth::user()->franchise_id;
         // Vérifier que le truck et le warehouse appartiennent bien à la franchise du user
-        $truck = Truck::findOrFail($request->truck_id);
-    $warehouse = $request->warehouse_id ? Warehouse::findOrFail($request->warehouse_id) : null;
+        $truck = Truck::findOrFail($validated['truck_id']);
+        $warehouse = $validated['warehouse_id'] ? Warehouse::findOrFail($validated['warehouse_id']) : null;
     if ($truck->franchise_id !== $franchiseId || ($warehouse && $warehouse->franchise_id !== $franchiseId)) {
             abort(403);
         }
         // Créer la commande de stock (statut initial "pending")
         StockOrder::create([
-            'truck_id'     => $request->truck_id,
-            'warehouse_id' => $request->warehouse_id,
-            'supplier_id'  => $request->supplier_id,
+            'truck_id'     => $validated['truck_id'],
+            'warehouse_id' => $validated['warehouse_id'] ?? null,
+            'supplier_id'  => $validated['supplier_id'] ?? null,
             'status'       => 'pending',
             'ordered_at'   => now()
         ]);
@@ -131,7 +123,7 @@ class StockOrderController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, StockOrder $stockOrder)
+    public function update(UpdateStockOrderRequest $request, StockOrder $stockOrder)
     {
         if ($stockOrder->truck->franchise_id !== Auth::user()->franchise_id) {
             abort(403);
@@ -140,28 +132,18 @@ class StockOrderController extends Controller
             return redirect()->route('franchise.stockorders.index')
                              ->with('error', 'This order can no longer be updated.');
         }
-        $request->validate([
-            'truck_id'     => 'required|exists:trucks,id',
-            'warehouse_id' => 'nullable|exists:warehouses,id',
-            'supplier_id'  => 'nullable|exists:suppliers,id',
-        ]);
-        if (! $request->warehouse_id && ! $request->supplier_id) {
-            return back()->withErrors(['warehouse_id' => 'Select a warehouse or a supplier', 'supplier_id' => 'Select a warehouse or a supplier'])->withInput();
-        }
-        if ($request->warehouse_id && $request->supplier_id) {
-            return back()->withErrors(['warehouse_id' => 'Choose only one target', 'supplier_id' => 'Choose only one target'])->withInput();
-        }
+        $validated = $request->validated();
         // Vérifier de nouveau l'appartenance du truck/warehouse
         $franchiseId = Auth::user()->franchise_id;
-        $truck = Truck::findOrFail($request->truck_id);
-        $warehouse = $request->warehouse_id ? Warehouse::findOrFail($request->warehouse_id) : null;
+        $truck = Truck::findOrFail($validated['truck_id']);
+        $warehouse = $validated['warehouse_id'] ? Warehouse::findOrFail($validated['warehouse_id']) : null;
         if ($truck->franchise_id !== $franchiseId || ($warehouse && $warehouse->franchise_id !== $franchiseId)) {
             abort(403);
         }
         $stockOrder->update([
-            'truck_id'     => $request->truck_id,
-            'warehouse_id' => $request->warehouse_id,
-            'supplier_id'  => $request->supplier_id,
+            'truck_id'     => $validated['truck_id'],
+            'warehouse_id' => $validated['warehouse_id'] ?? null,
+            'supplier_id'  => $validated['supplier_id'] ?? null,
         ]);
         return redirect()->route('franchise.stockorders.index')
                          ->with('success', 'Stock order updated successfully.');

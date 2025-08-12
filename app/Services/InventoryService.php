@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\Inventory;
+use App\Models\InventoryAdjustment;
+use App\Models\InventoryMovement;
 use App\Models\StockOrder;
 use App\Models\StockOrderItem;
 use Illuminate\Support\Facades\DB;
@@ -22,7 +24,80 @@ class InventoryService
                     'supply_id' => $item->supply_id,
                 ], [ 'on_hand' => 0 ]);
                 $inv->increment('on_hand', $item->quantity);
+                InventoryMovement::create([
+                    'inventory_id' => $inv->id,
+                    'type' => 'in',
+                    'qty' => $item->quantity,
+                    'reason' => 'purchase',
+                    'ref_table' => 'stock_orders',
+                    'ref_id' => $order->id,
+                    'created_at' => now(),
+                ]);
             }
+        });
+    }
+
+    public function adjust(int $inventoryId, float $qtyDiff, string $reason, ?string $note = null): void
+    {
+        DB::transaction(function () use ($inventoryId, $qtyDiff, $reason, $note) {
+            $inv = Inventory::lockForUpdate()->findOrFail($inventoryId);
+            $inv->on_hand = $inv->on_hand + $qtyDiff;
+            $inv->save();
+
+            InventoryAdjustment::create([
+                'inventory_id' => $inv->id,
+                'qty_diff' => $qtyDiff,
+                'reason' => $reason,
+                'note' => $note,
+                'created_at' => now(),
+            ]);
+            InventoryMovement::create([
+                'inventory_id' => $inv->id,
+                'type' => $qtyDiff >= 0 ? 'in' : 'out',
+                'qty' => abs($qtyDiff),
+                'reason' => 'adjust',
+                'ref_table' => 'inventory_adjustments',
+                'ref_id' => null,
+                'created_at' => now(),
+            ]);
+        });
+    }
+
+    public function transfer(int $fromInventoryId, int $toInventoryId, float $qty): void
+    {
+        if ($qty <= 0) return;
+        DB::transaction(function () use ($fromInventoryId, $toInventoryId, $qty) {
+            $from = Inventory::lockForUpdate()->findOrFail($fromInventoryId);
+            $to = Inventory::lockForUpdate()->findOrFail($toInventoryId);
+            if ($from->supply_id !== $to->supply_id) {
+                abort(422, 'Supply mismatch for transfer');
+            }
+            if ($from->on_hand < $qty) {
+                abort(422, 'Insufficient quantity to transfer');
+            }
+            $from->decrement('on_hand', $qty);
+            $to->increment('on_hand', $qty);
+
+            InventoryMovement::insert([
+                [
+                    'inventory_id' => $from->id,
+                    'type' => 'out',
+                    'qty' => $qty,
+                    'reason' => 'transfer',
+                    'ref_table' => 'inventory',
+                    'ref_id' => $to->id,
+                    'created_at' => now(),
+                ],
+                [
+                    'inventory_id' => $to->id,
+                    'type' => 'in',
+                    'qty' => $qty,
+                    'reason' => 'transfer',
+                    'ref_table' => 'inventory',
+                    'ref_id' => $from->id,
+                    'created_at' => now(),
+                ],
+            ]);
         });
     }
 }

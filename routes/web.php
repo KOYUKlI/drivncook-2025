@@ -40,8 +40,11 @@ Route::middleware('auth')->group(function () {
     Route::resource('locations', AdminLocationController::class);
     Route::resource('deployments', AdminTruckDeploymentController::class);
     Route::resource('supplies', AdminSupplyController::class);
-    // Inventory explorer (read-only index/show)
+    // Inventory explorer + actions
     Route::resource('inventory', \App\Http\Controllers\Admin\InventoryController::class)->only(['index','show']);
+    Route::post('inventory/adjust', [\App\Http\Controllers\Admin\InventoryController::class, 'adjust'])->name('inventory.adjust');
+    Route::post('inventory/move', [\App\Http\Controllers\Admin\InventoryController::class, 'move'])->name('inventory.move');
+    Route::resource('inventory.lots', \App\Http\Controllers\Admin\InventoryLotController::class)->except(['index','show']);
     // Dishes CRUD + Ingredients (BOM)
     Route::resource('dishes', \App\Http\Controllers\Admin\DishController::class);
     Route::post('dishes/{dish}/ingredients', [\App\Http\Controllers\Admin\DishIngredientController::class, 'store'])->name('dishes.ingredients.store');

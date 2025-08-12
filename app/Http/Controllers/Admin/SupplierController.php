@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Supplier;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use App\Http\Requests\Admin\StoreSupplierRequest;
+use App\Http\Requests\Admin\UpdateSupplierRequest;
 use Illuminate\View\View;
 
 class SupplierController extends Controller
@@ -21,15 +23,9 @@ class SupplierController extends Controller
         return view('admin.suppliers.create');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreSupplierRequest $request): RedirectResponse
     {
-        $data = $request->validate([
-            'name' => 'required|string|max:190',
-            'siret' => 'nullable|string|max:20',
-            'contact_email' => 'nullable|email|max:190',
-            'phone' => 'nullable|string|max:40',
-            'is_active' => 'sometimes|boolean',
-        ]);
+        $data = $request->validated();
         $data['is_active'] = $request->boolean('is_active');
         Supplier::create($data);
         return redirect()->route('admin.suppliers.index');
@@ -45,15 +41,9 @@ class SupplierController extends Controller
         return view('admin.suppliers.edit', compact('supplier'));
     }
 
-    public function update(Request $request, Supplier $supplier): RedirectResponse
+    public function update(UpdateSupplierRequest $request, Supplier $supplier): RedirectResponse
     {
-        $data = $request->validate([
-            'name' => 'required|string|max:190',
-            'siret' => 'nullable|string|max:20',
-            'contact_email' => 'nullable|email|max:190',
-            'phone' => 'nullable|string|max:40',
-            'is_active' => 'sometimes|boolean',
-        ]);
+        $data = $request->validated();
         $data['is_active'] = $request->boolean('is_active');
         $supplier->update($data);
         return redirect()->route('admin.suppliers.index');
