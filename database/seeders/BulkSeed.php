@@ -169,6 +169,7 @@ class BulkSeed extends Seeder
             for ($c=0; $c<50; $c++) {
                 $order = CustomerOrder::create([
                     'truck_id' => $truck->id,
+                    'order_type' => 'on_site',
                     'status' => 'completed',
                     'payment_status' => 'paid',
                     'ordered_at' => now()->subDays(rand(0,90))->subMinutes(rand(0, 1440)),

@@ -17,12 +17,12 @@ class ComplianceController extends Controller
 
         $franchises = Franchise::orderBy('name')->get();
         $officialByFranchise = CustomerOrder::query()
-            ->selectRaw('trucks.franchise_id, ROUND(SUM(total_price), 2) as total')
+            ->selectRaw('trucks.franchise_id, ROUND(SUM(customer_orders.total_price), 2) as total')
             ->join('trucks', 'trucks.id', '=', 'customer_orders.truck_id')
-            ->whereYear('ordered_at', $year)
-            ->whereMonth('ordered_at', $month)
-            ->where('status', 'completed')
-            ->where('payment_status', 'paid')
+            ->whereYear('customer_orders.ordered_at', $year)
+            ->whereMonth('customer_orders.ordered_at', $month)
+            ->where('customer_orders.status', 'completed')
+            ->where('customer_orders.payment_status', 'paid')
             ->groupBy('trucks.franchise_id')
             ->pluck('total', 'trucks.franchise_id');
 

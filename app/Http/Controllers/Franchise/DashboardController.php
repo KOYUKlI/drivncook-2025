@@ -21,7 +21,7 @@ class DashboardController extends Controller
         $truckCount    = $franchise->trucks()->count();
         $warehouseCount= $franchise->warehouses()->count();
         $totalOrders   = $franchise->stockOrders()->count();
-        $pendingOrders = $franchise->stockOrders()->where('status', 'pending')->count();
+    $pendingOrders = $franchise->stockOrders()->where('stock_orders.status', 'pending')->count();
 
         return view('franchise.dashboard', compact(
             'truckCount', 'warehouseCount', 'totalOrders', 'pendingOrders'

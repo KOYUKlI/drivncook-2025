@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\{ LocationController as AdminLocationController, 
 use App\Http\Controllers\Franchise\{ DashboardController as FranchiseDashboardController,
     TruckController as FranchiseTruckController,
     StockOrderController as FranchiseStockOrderController };
+use App\Http\Controllers\Admin\{ NewsletterController as AdminNewsletterController, LoyaltyRuleController as AdminLoyaltyRuleController, PaymentController as AdminPaymentController };
 
 Route::get('/', function () {
     return view('welcome');
@@ -47,6 +48,14 @@ Route::middleware('auth')->group(function () {
     Route::delete('dishes/{dish}/ingredients/{ingredient}', [\App\Http\Controllers\Admin\DishIngredientController::class, 'destroy'])->name('dishes.ingredients.destroy');
     Route::resource('suppliers', AdminSupplierController::class);
     Route::resource('commissions', AdminCommissionController::class)->only(['index','show','update']);
+    Route::resource('loyalty-rules', AdminLoyaltyRuleController::class);
+    Route::resource('newsletters', AdminNewsletterController::class);
+    Route::post('newsletters/{newsletter}/send', [AdminNewsletterController::class,'send'])->name('newsletters.send');
+    Route::get('payments', [AdminPaymentController::class,'index'])->name('payments.index');
+    Route::post('sales/{order}/payments', [AdminPaymentController::class,'store'])->name('sales.payments.store');
+    Route::get('payments/{payment}', [AdminPaymentController::class,'show'])->name('payments.show');
+    Route::post('payments/{payment}/capture', [AdminPaymentController::class,'capture'])->name('payments.capture');
+    Route::post('payments/{payment}/refund', [AdminPaymentController::class,'refund'])->name('payments.refund');
     // Compliance 80/20
     Route::get('compliance', [AdminComplianceController::class, 'index'])->name('compliance.index');
     Route::get('compliance/{franchisee}/edit', [AdminComplianceController::class, 'edit'])->name('compliance.edit');

@@ -1,5 +1,9 @@
 <?php
 
+use Tests\Helpers\CsrfTestHelpers;
+
+uses(CsrfTestHelpers::class);
+
 test('registration screen can be rendered', function () {
     $response = $this->get('/register');
 
@@ -7,15 +11,12 @@ test('registration screen can be rendered', function () {
 });
 
 test('new users can register', function () {
-    $this->get('/register')->assertOk();
-    $token = session()->token();
-    $response = $this->post('/register', [
-        '_token' => $token,
+    $response = $this->postWithCsrf('/register', [
         'name' => 'Test User',
         'email' => 'test@example.com',
         'password' => 'password',
         'password_confirmation' => 'password',
-    ], ['X-CSRF-TOKEN' => $token]);
+    ], '/register');
 
     $this->assertAuthenticated();
     $response->assertRedirect(route('dashboard', absolute: false));

@@ -106,7 +106,7 @@ class DemoSeed extends Seeder
         // Customer orders with items
         $order = CustomerOrder::firstOrCreate(
             ['truck_id' => $ptr1->id, 'status' => 'completed', 'ordered_at' => now()->subDay()],
-            ['loyalty_card_id' => $card->id, 'total_price' => 0]
+            ['loyalty_card_id' => $card->id, 'total_price' => 0, 'payment_status' => 'paid', 'order_type' => 'on_site']
         );
         OrderItem::firstOrCreate(
             ['customer_order_id' => $order->id, 'dish_id' => $burger->id],
