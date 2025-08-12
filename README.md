@@ -59,3 +59,25 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## Project Seeding (Consolidated)
+
+This application uses a single consolidated `BaselineSeeder` (run via `DatabaseSeeder`) with selectable profiles using the `SEED_PROFILE` environment variable:
+
+Profiles:
+
+* `minimal` (default) – admin & franchise user, one franchise, two warehouses, core supplies, loyalty rule
+* `demo` – minimal + sample dish (Burger Demo) with ingredients, one truck, completed stock order (inventory received), example customer order
+* `bulk` – demo + extra supplies (up to 60) and extra trucks for the franchise
+
+Usage examples:
+
+```
+php artisan db:seed              # minimal
+SEED_PROFILE=demo php artisan db:seed
+SEED_PROFILE=bulk php artisan db:seed
+```
+
+The seeder is idempotent; re-running with the same profile will not duplicate data.
+
+Legacy seeders (MinimalSeed, DemoSeed, BulkSeed, DeltaBaselineSeeder, AdminFranchiseUsersSeeder) have been removed in favor of this unified approach.
