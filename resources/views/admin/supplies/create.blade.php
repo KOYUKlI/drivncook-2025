@@ -11,8 +11,8 @@
         @error('name') <p class="form-error">{{ $message }}</p> @enderror
     </div>
     <div class="form-group">
-        <label class="form-label">SKU (référence)</label>
-        <input type="text" name="sku" value="{{ old('sku') }}" class="form-input" placeholder="ex: BUN-001" />
+    <label class="form-label">SKU (reference)</label>
+    <input type="text" name="sku" value="{{ old('sku') }}" class="form-input" placeholder="e.g., BUN-001" />
         @error('sku') <p class="form-error">{{ $message }}</p> @enderror
     </div>
     <div class="form-group">

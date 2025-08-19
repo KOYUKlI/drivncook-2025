@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <h1 class="page-title mb-6">Mon Tableau de Bord</h1>
+    <h1 class="page-title mb-6">My Dashboard</h1>
 
     <!-- Indicateurs du franchisé -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

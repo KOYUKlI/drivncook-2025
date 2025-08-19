@@ -76,13 +76,13 @@
             @endif
 
             @if($stockOrder->status === 'pending')
-                <button type="button" class="btn-primary mt-6" x-data x-on:click="$dispatch('open-modal', 'complete-order-{{ $stockOrder->id }}')">Marquer comme terminée</button>
+                <button type="button" class="btn-primary mt-6" x-data x-on:click="$dispatch('open-modal', 'complete-order-{{ $stockOrder->id }}')">Mark as Completed</button>
                 <x-confirm-delete :name="'complete-order-' . $stockOrder->id"
                     :action="route('franchise.stockorders.complete', $stockOrder)"
                     method="POST"
-                    title="Clôturer la commande"
-                    message="Valider la réception et clôturer la commande ?"
-                    confirmLabel="Confirmer" />
+                    title="Close Order"
+                    message="Confirm receipt and close this order?"
+                    confirmLabel="Confirm" />
             @endif
         </div>
     </div>

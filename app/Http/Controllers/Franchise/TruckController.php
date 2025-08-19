@@ -17,7 +17,7 @@ class TruckController extends Controller
         $franchiseId = Auth::user()->franchise_id;
         if (empty($franchiseId)) {
             return redirect()->route('franchise.dashboard')
-                ->with('error', "Votre compte n'est rattaché à aucun franchisé. Contactez un administrateur.");
+                ->with('error', "Your account isn't linked to any franchisee. Please contact an administrator.");
         }
         $trucks = Truck::where('franchise_id', $franchiseId)->get();
         return view('franchise.trucks.index', compact('trucks'));
@@ -30,7 +30,7 @@ class TruckController extends Controller
     {
         if (empty(Auth::user()->franchise_id)) {
             return redirect()->route('franchise.dashboard')
-                ->with('error', "Votre compte n'est rattaché à aucun franchisé. Contactez un administrateur.");
+                ->with('error', "Your account isn't linked to any franchisee. Please contact an administrator.");
         }
         return view('franchise.trucks.create');
     }
@@ -42,7 +42,7 @@ class TruckController extends Controller
     {
         if (empty(Auth::user()->franchise_id)) {
             return redirect()->route('franchise.trucks.index')
-                ->with('error', "Votre compte n'est rattaché à aucun franchisé. Contactez un administrateur.");
+                ->with('error', "Your account isn't linked to any franchisee. Please contact an administrator.");
         }
         // Normalize plate: empty -> null; trim whitespace
         $raw = trim((string) $request->input('license_plate', ''));
@@ -59,8 +59,8 @@ class TruckController extends Controller
             'license_plate' => $plate,
             'franchise_id'  => $franchiseId
         ]);
-        return redirect()->route('franchise.trucks.index')
-                         ->with('success', 'Camion ajouté à votre franchise.');
+    return redirect()->route('franchise.trucks.index')
+             ->with('success', 'Truck added to your franchise.');
     }
 
     /**
@@ -106,8 +106,8 @@ class TruckController extends Controller
             'name' => $request->input('name'),
             'license_plate' => $plate,
         ]);
-        return redirect()->route('franchise.trucks.index')
-                         ->with('success', 'Camion mis à jour.');
+    return redirect()->route('franchise.trucks.index')
+             ->with('success', 'Truck updated.');
     }
 
     /**
@@ -119,7 +119,7 @@ class TruckController extends Controller
             abort(403);
         }
         $truck->delete();
-        return redirect()->route('franchise.trucks.index')
-                         ->with('success', 'Camion supprimé de votre franchise.');
+    return redirect()->route('franchise.trucks.index')
+             ->with('success', 'Truck removed from your franchise.');
     }
 }

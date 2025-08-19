@@ -24,7 +24,7 @@
                         <td>{{ $rec->maintenance_date }}</td>
                         <td>{{ $rec->truck->name }}</td>
                         <td>{{ Str::limit($rec->description, 60) }}</td>
-                        <td>{{ number_format($rec->cost ?? 0, 2) }} €</td>
+                        <td>€ {{ number_format($rec->cost ?? 0, 2) }}</td>
                         <td class="text-center">
                             <a href="{{ route('franchise.maintenance.edit', $rec) }}" class="btn-link">Edit</a>
                             <button type="button" class="btn-link text-red-600" x-data x-on:click="$dispatch('open-modal', 'delete-maint-{{ $rec->id }}')">Delete</button>

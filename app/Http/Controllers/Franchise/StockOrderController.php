@@ -90,14 +90,14 @@ class StockOrderController extends Controller
         }
         if ($stockOrder->status !== 'pending') {
             return redirect()->route('franchise.stockorders.show', $stockOrder)
-                             ->with('error', 'Cette commande n\'est pas modifiable.');
+                             ->with('error', 'This order is not editable.');
         }
         // mark completed and receive into inventory if warehouse target
         $stockOrder->status = 'completed';
         $stockOrder->save();
         $inventoryService->receiveStockOrder($stockOrder->load('items'));
         return redirect()->route('franchise.stockorders.show', $stockOrder)
-                         ->with('success', 'Commande de stock terminée et réceptionnée.');
+                         ->with('success', 'Stock order completed and received.');
     }
 
     /**

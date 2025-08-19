@@ -7,9 +7,9 @@
   </div>
   <div class="card p-4 space-y-2">
     <div><span class="font-medium">Franchisee:</span> {{ $commission->franchisee->name ?? ('#'.$commission->franchisee_id) }}</div>
-    <div><span class="font-medium">Turnover:</span> {{ number_format($commission->turnover, 2) }} €</div>
+  <div><span class="font-medium">Turnover:</span> € {{ number_format($commission->turnover, 2) }}</div>
     <div><span class="font-medium">Rate:</span> {{ number_format($commission->rate, 2) }} %</div>
-    <div><span class="font-medium">Amount:</span> {{ number_format($commission->turnover * ($commission->rate/100), 2) }} €</div>
+  <div><span class="font-medium">Amount:</span> € {{ number_format($commission->turnover * ($commission->rate/100), 2) }}</div>
     <div><span class="font-medium">Status:</span> {{ $commission->status }}</div>
     <div><span class="font-medium">Calculated at:</span> {{ optional($commission->calculated_at)->format('Y-m-d H:i') }}</div>
     <div><span class="font-medium">Paid at:</span> {{ optional($commission->paid_at)->format('Y-m-d H:i') ?: '—' }}</div>

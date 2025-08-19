@@ -13,7 +13,7 @@ class EnsureFranchiseAttached
         $user = $request->user();
         if ($user && $user->role === 'franchise' && empty($user->franchise_id)) {
             return redirect()->route('dashboard')
-                ->with('error', "Votre compte n'est rattaché à aucun franchisé. Contactez un administrateur.");
+                ->with('error', "Your account isn't linked to any franchisee. Please contact an administrator.");
         }
         return $next($request);
     }

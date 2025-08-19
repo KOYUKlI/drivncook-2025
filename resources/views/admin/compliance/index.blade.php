@@ -10,7 +10,7 @@
   </div>
 <div class="card"><div class="card-body p-0">
 <table class="data-table">
-  <thead><tr><th>Franchise</th><th>Officiel (€)</th><th>Externe (€)</th><th>Ratio</th><th class="text-center">Actions</th></tr></thead>
+  <thead><tr><th>Franchise</th><th>Official (€)</th><th>External (€)</th><th>Ratio</th><th class="text-center">Actions</th></tr></thead>
   <tbody>
     @foreach($rows as $row)
       <tr>
@@ -25,7 +25,7 @@
           @endif
         </td>
         <td class="text-center">
-          <a class="btn-link" href="{{ route('admin.compliance.edit', ['franchisee' => $row['f'], 'year' => $year, 'month' => $month]) }}">Edit externe</a>
+          <a class="btn-link" href="{{ route('admin.compliance.edit', ['franchisee' => $row['f'], 'year' => $year, 'month' => $month]) }}">Edit external</a>
         </td>
       </tr>
     @endforeach

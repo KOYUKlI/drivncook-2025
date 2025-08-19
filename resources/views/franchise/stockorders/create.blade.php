@@ -35,7 +35,7 @@
         </select>
         @error('supplier_id') <p class="form-error">{{ $message }}</p> @enderror
     </div>
-    <p class="text-sm text-gray-600 mb-2">Astuce: choisissez <strong>soit</strong> un entrepôt <strong>soit</strong> un fournisseur.</p>
+    <p class="text-sm text-gray-600 mb-2">Tip: choose <strong>either</strong> a warehouse <strong>or</strong> a supplier.</p>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const w = document.getElementById('warehouse_id');

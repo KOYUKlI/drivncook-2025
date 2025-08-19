@@ -13,23 +13,29 @@ use App\Services\InventoryService;
  *  - minimal (default): core users, franchise, warehouses, supplies, loyalty rule
  *  - demo: minimal + sample dish, truck, stock orders, received inventory, one customer order
  *  - bulk: demo + scaled dataset (extra supplies & trucks)
+ *  - real: multi-franchise realistic dataset (multiple warehouses, trucks, dishes, orders, payments, stock orders, compliance scenario)
  */
 class BaselineSeeder extends Seeder
 {
     public function run(): void
     {
         $profile = env('SEED_PROFILE', 'minimal');
-        if (! in_array($profile, ['minimal','demo','bulk'])) {
+        echo "[BaselineSeeder] SEED_PROFILE= {$profile}\n";
+        if (! in_array($profile, ['minimal','demo','bulk','real'])) {
             $profile = 'minimal';
+        }
+        // 'real' profile builds its own larger dataset (still begins with minimal core for consistency)
+        if ($profile === 'real') {
+            echo "[BaselineSeeder] Executing minimal + real dataset seeding...\n";
+            $this->seedMinimal();
+            $this->seedReal();
+            echo "[BaselineSeeder] Real dataset seeding complete.\n";
+            return; // stop here (don't mix with demo/bulk helpers)
         }
 
         $this->seedMinimal();
-        if ($profile === 'demo' || $profile === 'bulk') {
-            $this->seedDemo();
-        }
-        if ($profile === 'bulk') {
-            $this->seedBulk();
-        }
+        if ($profile === 'demo' || $profile === 'bulk') { $this->seedDemo(); }
+        if ($profile === 'bulk') { $this->seedBulk(); }
     }
 
     protected function seedMinimal(): void
@@ -146,5 +152,145 @@ class BaselineSeeder extends Seeder
                 ]);
             }
         }
+    }
+
+    /**
+     * Rich “realistic” dataset across multiple franchises.
+     * Idempotent: deterministic naming so reruns do not duplicate.
+     */
+    protected function seedReal(): void
+    {
+        // Base supplies catalogue (if not already added by minimal)
+        $catalog = [
+            ['name'=>'Pain Burger Brioché','unit'=>'pc','cost'=>0.55],
+            ['name'=>'Steak 180g Premium','unit'=>'kg','cost'=>12.40],
+            ['name'=>'Cheddar Affiné','unit'=>'kg','cost'=>8.10],
+            ['name'=>'Oignon Rouge','unit'=>'kg','cost'=>2.30],
+            ['name'=>'Sauce Signature','unit'=>'kg','cost'=>5.90],
+            ['name'=>'Frites Surgelées','unit'=>'kg','cost'=>1.90],
+            ['name'=>'Boisson Cola 33cl','unit'=>'pc','cost'=>0.42],
+            ['name'=>'Boisson Eau 50cl','unit'=>'pc','cost'=>0.25],
+            ['name'=>'Salade Batavia','unit'=>'kg','cost'=>3.10],
+            ['name'=>'Tomate Ronde','unit'=>'kg','cost'=>2.60],
+        ];
+        foreach ($catalog as $c) { Supply::firstOrCreate(['name'=>$c['name']], $c); }
+
+        // Create additional franchises
+        $franchisesSpec = [
+            ['name'=>'Franchise Paris Centre','email'=>'paris.centre@local.test'],
+            ['name'=>'Franchise Ouest IDF','email'=>'ouest.idf@local.test'],
+            ['name'=>'Franchise Sud IDF','email'=>'sud.idf@local.test'],
+        ];
+
+        foreach ($franchisesSpec as $fSpec) {
+            $fr = Franchise::firstOrCreate(['name'=>$fSpec['name']]);
+            User::firstOrCreate(['email'=>$fSpec['email']], [
+                'name'=>Str::before($fSpec['name'],' ').' Manager',
+                'password'=>Hash::make('password'),
+                'role'=>'franchise',
+                'franchise_id'=>$fr->id,
+            ]);
+            // Warehouses for each franchise (2 each)
+            for ($w=1;$w<=2;$w++) {
+                Warehouse::firstOrCreate([
+                    'name'=>$fr->name.' Entrepôt '.$w,
+                    'franchise_id'=>$fr->id,
+                ], ['location'=>'Secteur '.$w]);
+            }
+            // Trucks (2 each)
+            for ($t=1;$t<=2;$t++) {
+                Truck::firstOrCreate([
+                    'license_plate'=> sprintf('%s-%d%s-%02d', Str::upper(Str::random(2)), rand(10,99), Str::upper(Str::random(1)), $t),
+                ], [
+                    'name'=>$fr->name.' Truck '.$t,
+                    'franchise_id'=>$fr->id,
+                ]);
+            }
+        }
+
+        // Dishes referencing supplies (simple BOM). Use subset of existing supplies.
+        $coreForDish = Supply::whereIn('name',[ 'Pain Burger Brioché','Steak 180g Premium','Cheddar Affiné','Oignon Rouge','Salade Batavia','Tomate Ronde','Sauce Signature' ])->get()->keyBy('name');
+        $dishDefs = [
+            ['Burger Signature', 11.90, [
+                ['Pain Burger Brioché',1,'pc'],
+                ['Steak 180g Premium',0.18,'kg'],
+                ['Cheddar Affiné',0.035,'kg'],
+                ['Oignon Rouge',0.02,'kg'],
+                ['Salade Batavia',0.015,'kg'],
+                ['Tomate Ronde',0.05,'kg'],
+                ['Sauce Signature',0.02,'kg'],
+            ]],
+            ['Burger Classique', 9.90, [
+                ['Pain Burger Brioché',1,'pc'],
+                ['Steak 150g',0.15,'kg'], // fallback to minimal supply if present
+                ['Cheddar',0.03,'kg'],
+                ['Salade Batavia',0.012,'kg'],
+                ['Tomate Ronde',0.04,'kg'],
+            ]],
+            ['Frites Portion', 3.50, [
+                ['Frites Surgelées',0.18,'kg']
+            ]],
+            ['Boisson Cola 33cl', 2.50, [ ['Boisson Cola 33cl',1,'pc'] ]],
+            ['Eau 50cl', 2.00, [ ['Boisson Eau 50cl',1,'pc'] ]],
+        ];
+        foreach ($dishDefs as [$dName,$price,$ingredients]) {
+            $dish = Dish::firstOrCreate(['name'=>$dName], ['price'=>$price,'description'=>$dName]);
+            foreach ($ingredients as [$sName,$qty,$unit]) {
+                $s = Supply::firstWhere('name',$sName);
+                if(!$s) continue;
+                DishIngredient::firstOrCreate([
+                    'dish_id'=>$dish->id,
+                    'supply_id'=>$s->id,
+                ], ['qty_per_dish'=>$qty,'unit'=>$unit]);
+            }
+        }
+
+        // Generate stock orders for each truck; receive them into inventory
+        $allTrucks = Truck::with('franchise')->get();
+        $supplies = Supply::inRandomOrder()->take(8)->get();
+        foreach ($allTrucks as $truck) {
+            $warehouse = Warehouse::where('franchise_id',$truck->franchise_id)->inRandomOrder()->first();
+            if(!$warehouse) continue;
+            for ($i=0;$i<2;$i++) { // two orders each
+                $order = StockOrder::firstOrCreate([
+                    'truck_id'=>$truck->id,
+                    'warehouse_id'=>$warehouse->id,
+                    'status'=>'completed',
+                    'ordered_at'=>now()->subDays( rand(2,7) ),
+                ]);
+                foreach ($supplies->shuffle()->take(5) as $s) {
+                    StockOrderItem::firstOrCreate([
+                        'stock_order_id'=>$order->id,
+                        'supply_id'=>$s->id,
+                    ], ['quantity'=>rand(3,15)]);
+                }
+                try { app(InventoryService::class)->receiveStockOrder($order->load('items')); } catch(\Throwable $e) {}
+            }
+        }
+
+        // Generate customer orders (sales) using available dishes
+        $dishes = Dish::all();
+        foreach ($allTrucks as $truck) {
+            for ($o=0;$o<5;$o++) {
+                $co = CustomerOrder::firstOrCreate([
+                    'truck_id'=>$truck->id,
+                    'ordered_at'=>now()->subHours(rand(8,60)),
+                    'status'=>'completed',
+                    'payment_status'=>'paid',
+                ], ['total_price'=>0,'order_type'=>'on_site']);
+                $pick = $dishes->shuffle()->take(rand(1,3));
+                $total = 0;
+                foreach ($pick as $dish) {
+                    $qty = rand(1,3);
+                    OrderItem::firstOrCreate([
+                        'customer_order_id'=>$co->id,
+                        'dish_id'=>$dish->id,
+                    ], ['quantity'=>$qty,'price'=>$dish->price]);
+                    $total += $qty * (float)$dish->price;
+                }
+                $co->update(['total_price'=>round($total,2)]);
+            }
+        }
+        // Note: commissions & compliance KPIs are computed by scheduled commands, not here.
     }
 }

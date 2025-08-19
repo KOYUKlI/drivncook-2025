@@ -17,7 +17,7 @@
       @forelse($dishes as $dish)
         <tr>
           <td>{{ $dish->name }}</td>
-          <td>{{ number_format($dish->price, 2) }} €</td>
+          <td>€ {{ number_format($dish->price, 2) }}</td>
           <td class="text-center space-x-2">
             <a href="{{ route('admin.dishes.show', $dish) }}" class="btn-link">View</a>
             <a href="{{ route('admin.dishes.edit', $dish) }}" class="btn-link">Edit</a>

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <h1 class="page-title mb-6">Dashboard Administrateur</h1>
+    <h1 class="page-title mb-6">Admin Dashboard</h1>
 
     <!-- Indicateurs clés -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -23,7 +23,7 @@
         </div></div>
         <div class="card"><div class="card-body">
             <h2 class="text-sm text-gray-500">Total Sales (Revenue)</h2>
-            <p class="text-2xl font-semibold">{{ number_format($totalSalesSum, 2) }} €</p>
+            <p class="text-2xl font-semibold">€ {{ number_format($totalSalesSum, 2) }}</p>
         </div></div>
         <div class="card"><div class="card-body">
             <h2 class="text-sm text-gray-500">Pending Stock Orders</h2>

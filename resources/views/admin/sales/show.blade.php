@@ -40,7 +40,7 @@
                     <tr>
                         <td>{{ optional($item->dish)->name }}</td>
                         <td>{{ $item->quantity }}</td>
-                        <td>{{ number_format($item->price ?? 0, 2) }} €</td>
+                        <td>€ {{ number_format($item->price ?? 0, 2) }}</td>
                     </tr>
                 @empty
                     <tr><td colspan="3" class="px-4 py-3 text-gray-500">No items.</td></tr>

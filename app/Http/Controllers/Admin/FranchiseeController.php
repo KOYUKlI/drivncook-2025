@@ -114,15 +114,15 @@ class FranchiseeController extends Controller
         ]);
         $user = User::where('email', $data['email'])->first();
         if (!$user) {
-            return back()->with('error', "Aucun utilisateur avec cet email.");
+            return back()->with('error', "No user exists with that email address.");
         }
         if ($user->role === 'admin') {
-            return back()->with('error', "Impossible de rattacher un administrateur.");
+            return back()->with('error', "You can't attach an administrator.");
         }
         $user->franchise_id = $franchise->id;
         $user->role = 'franchise';
         $user->save();
-        return back()->with('success', 'Utilisateur rattaché au franchisé.');
+    return back()->with('success', 'User attached to the franchisee.');
     }
 
     /**
@@ -131,11 +131,11 @@ class FranchiseeController extends Controller
     public function detachUser(Franchise $franchise, User $user)
     {
         if ($user->franchise_id !== $franchise->id) {
-            return back()->with('error', "Cet utilisateur n'est pas rattaché à ce franchisé.");
+            return back()->with('error', "This user is not attached to this franchisee.");
         }
         // On détache sans changer son rôle (au besoin, on pourra le repasser en 'user')
         $user->franchise_id = null;
         $user->save();
-        return back()->with('success', 'Utilisateur détaché du franchisé.');
+    return back()->with('success', 'User detached from the franchisee.');
     }
 }

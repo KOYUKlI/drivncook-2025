@@ -2,8 +2,8 @@
 
 @section('content')
 <div class="flex items-center justify-between mb-4">
-    <h1 class="page-title">Franchisés</h1>
-    <a href="{{ route('admin.franchisees.create') }}" class="btn-primary">Ajouter un franchisé</a>
+    <h1 class="page-title">Franchisees</h1>
+    <a href="{{ route('admin.franchisees.create') }}" class="btn-primary">Add Franchisee</a>
     </div>
 
 <div class="card">
@@ -11,9 +11,9 @@
         <table class="data-table">
             <thead>
                 <tr>
-                    <th>Nom</th>
-                    <th>Camions</th>
-                    <th>Entrepôts</th>
+                    <th>Name</th>
+                    <th>Trucks</th>
+                    <th>Warehouses</th>
                     <th class="text-center">Actions</th>
                 </tr>
             </thead>
@@ -24,14 +24,14 @@
                         <td>{{ $franchise->trucks_count ?? $franchise->trucks()->count() }}</td>
                         <td>{{ $franchise->warehouses_count ?? $franchise->warehouses()->count() }}</td>
                         <td class="text-center space-x-2">
-                            <a href="{{ route('admin.franchisees.show', ['franchisee' => $franchise->getRouteKey()]) }}" class="btn-link">Voir</a>
-                            <a href="{{ route('admin.franchisees.edit', ['franchisee' => $franchise->getRouteKey()]) }}" class="btn-link">Éditer</a>
+                            <a href="{{ route('admin.franchisees.show', ['franchisee' => $franchise->getRouteKey()]) }}" class="btn-link">View</a>
+                            <a href="{{ route('admin.franchisees.edit', ['franchisee' => $franchise->getRouteKey()]) }}" class="btn-link">Edit</a>
                             <a href="{{ route('admin.compliance.edit', ['franchisee' => $franchise->getRouteKey(), 'year' => now()->year, 'month' => now()->month]) }}" class="btn-link">Compliance</a>
-                            <button type="button" class="btn-link text-red-600" x-data x-on:click="$dispatch('open-modal', 'delete-franchise-{{ $franchise->id }}')">Supprimer</button>
+                            <button type="button" class="btn-link text-red-600" x-data x-on:click="$dispatch('open-modal', 'delete-franchise-{{ $franchise->id }}')">Delete</button>
                             <x-confirm-delete :name="'delete-franchise-' . $franchise->id"
                                 :action="route('admin.franchisees.destroy', ['franchisee' => $franchise->getRouteKey()])"
-                                title="Supprimer le franchisé"
-                                :message="'Supprimer ' . $franchise->name . ' ?'" />
+                                title="Delete Franchisee"
+                                :message="'Delete ' . $franchise->name . '?'" />
                         </td>
                     </tr>
                 @endforeach
