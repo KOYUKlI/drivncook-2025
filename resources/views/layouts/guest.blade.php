@@ -18,7 +18,7 @@
         <div class="min-h-screen flex flex-col">
             <nav class="bg-white border-b border-gray-200">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center">
-                    <a href="/" class="flex items-center gap-2 font-semibold">
+                    <a href="{{ auth()->check() ? (auth()->user()->role === 'admin' ? route('admin.dashboard') : route('franchise.dashboard')) : url('/') }}" class="flex items-center gap-2 font-semibold">
                         <span class="inline-block h-2.5 w-2.5 rounded-full bg-amber-500"></span>
                         <span>Driv'n Cook</span>
                     </a>
@@ -26,14 +26,25 @@
             </nav>
 
             <!-- Page Content -->
-            <main class="flex-1 flex items-center justify-center px-4">
-                <div class="w-full max-w-md">
-                    <div class="card">
-                        <div class="card-body">
-                            {{ $slot }}
+            <main class="flex-1 px-4 py-8">
+                @hasSection('content')
+                    <div class="max-w-7xl mx-auto">
+                        @yield('content')
+                    </div>
+                @else
+                    <div class="min-h-[70vh] flex items-center justify-center">
+                        <div class="w-full max-w-md">
+                            <div class="card">
+                                <div class="card-body">
+                                    {{ $slot ?? '' }}
+                                    <div class="mt-6 text-sm text-center text-gray-600">
+                                        <a href="{{ route('franchise.apply') }}" class="text-amber-700 hover:underline">Devenir franchisé</a>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
+                @endif
             </main>
         </div>
     </body>

@@ -17,11 +17,25 @@
             <button class="md:hidden p-2 rounded hover:bg-gray-100" @click="sidebarOpen = true" aria-label="Open sidebar">
                 <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
             </button>
-            <a href="/" class="flex items-center gap-2 font-semibold">
+            <a href="{{ auth()->check() ? (auth()->user()->role === 'admin' ? route('admin.dashboard') : route('franchise.dashboard')) : url('/') }}" class="flex items-center gap-2 font-semibold">
                 <span class="inline-block h-2.5 w-2.5 rounded-full bg-amber-500"></span>
                 <span>Driv'n Cook</span>
             </a>
-            <div class="ms-auto text-sm text-gray-600 hidden md:block">{{ auth()->user()->name ?? '' }}</div>
+            <div class="ms-auto hidden md:block" x-data="{ open:false }" @click.outside="open=false">
+                @auth
+                <button class="text-sm text-gray-700 hover:text-gray-900 font-medium flex items-center gap-2" @click="open = !open">
+                    <span>{{ auth()->user()->name }}</span>
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <div class="absolute right-4 mt-2 w-44 bg-white border border-gray-200 rounded shadow-md py-1" x-show="open" x-cloak>
+                    <a href="{{ route('profile.edit') }}" class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">Profile</a>
+                    <form action="{{ route('logout') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-gray-50">Logout</button>
+                    </form>
+                </div>
+                @endauth
+            </div>
         </header>
 
         <div class="flex min-h-screen pt-16 pb-16">
@@ -46,6 +60,7 @@
                             @endif
                             @if(Route::has('admin.franchisees.index'))
                                 <a href="{{ route('admin.franchisees.index') }}" class="sidebar-link {{ request()->is('admin/franchisees*') ? 'sidebar-link-active' : '' }}">Franchisees</a>
+                                <a href="{{ route('admin.franchise-applications.index') }}" class="sidebar-link {{ request()->is('admin/franchise-applications*') ? 'sidebar-link-active' : '' }}">Applications</a>
                                 <a href="{{ route('admin.locations.index') }}" class="sidebar-link {{ request()->is('admin/locations*') ? 'sidebar-link-active' : '' }}">Locations</a>
                                 <a href="{{ route('admin.deployments.index') }}" class="sidebar-link {{ request()->is('admin/deployments*') ? 'sidebar-link-active' : '' }}">Deployments</a>
                                 @if(Route::has('admin.compliance.index'))
@@ -75,7 +90,7 @@
                     <div>
                         <div class="sidebar-section-title">Account</div>
                         <a href="{{ route('login') }}" class="sidebar-link">Login</a>
-                        <a href="{{ route('register') }}" class="sidebar-link">Register</a>
+                        <a href="{{ route('franchise.apply') }}" class="sidebar-link">Devenir franchisé</a>
                     </div>
                 @endauth
             </nav>

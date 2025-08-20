@@ -20,6 +20,7 @@ services:
       - sail
     depends_on:
       - mysql
+      - mailpit
 
   mysql:
     image: 'mysql/mysql-server:8.0'
@@ -33,6 +34,16 @@ services:
       MYSQL_PASSWORD: '${DB_PASSWORD}'
     volumes:
       - 'sailmysql:/var/lib/mysql'
+    networks:
+      - sail
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - '${MAILPIT_PORT:-8025}:8025' # Web UI
+      # SMTP port exposed to the network only; app uses hostname "mailpit"
+      # If you want to expose SMTP to host for external testing, uncomment:
+      # - '1025:1025'
     networks:
       - sail
 

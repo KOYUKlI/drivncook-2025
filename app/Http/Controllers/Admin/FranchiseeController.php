@@ -119,6 +119,15 @@ class FranchiseeController extends Controller
         if ($user->role === 'admin') {
             return back()->with('error', "You can't attach an administrator.");
         }
+        // Prevent attaching a user already assigned to a franchise
+        if (!is_null($user->franchise_id)) {
+            if ($user->franchise_id === $franchise->id) {
+                return back()->with('info', 'User is already attached to this franchisee.');
+            }
+            if (!$request->boolean('transfer')) {
+                return back()->with('error', 'User is already attached to another franchisee. To transfer, check "Transfer if already attached".');
+            }
+        }
         $user->franchise_id = $franchise->id;
         $user->role = 'franchise';
         $user->save();

@@ -65,6 +65,10 @@
                     <input type="email" name="email" class="form-input" value="{{ old('email') }}" placeholder="user@example.com">
                     @error('email') <p class="form-error">{{ $message }}</p> @enderror
                 </div>
+                <label class="inline-flex items-center gap-2 text-sm">
+                    <input type="checkbox" name="transfer" value="1" class="rounded border-gray-300" {{ old('transfer') ? 'checked' : '' }}>
+                    <span>Transfer if already attached to another franchise</span>
+                </label>
                 <button type="submit" class="btn-primary">Attach</button>
             </form>
         </div>

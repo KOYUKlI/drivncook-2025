@@ -16,13 +16,33 @@ use App\Http\Controllers\Franchise\{ DashboardController as FranchiseDashboardCo
     TruckController as FranchiseTruckController,
     StockOrderController as FranchiseStockOrderController };
 use App\Http\Controllers\Admin\{ NewsletterController as AdminNewsletterController, LoyaltyRuleController as AdminLoyaltyRuleController, PaymentController as AdminPaymentController };
+use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\FranchiseApplicationController;
+use App\Http\Controllers\Admin\FranchiseApplicationController as AdminFranchiseApplicationController;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
+// Public franchise application
+Route::get('/franchise/apply', [FranchiseApplicationController::class, 'create'])->name('franchise.apply');
+Route::post('/franchise/apply', [FranchiseApplicationController::class, 'store'])
+    ->middleware('throttle:5,1')
+    ->name('franchise.apply.post');
+
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    $user = Auth::user();
+    if (!$user) {
+        return redirect()->route('login');
+    }
+    if ($user->role === 'admin') {
+        return redirect()->route('admin.dashboard');
+    }
+    // Franchise users: if not attached yet, go to profile instead of loop
+    if ($user->role === 'franchise' && empty($user->franchise_id)) {
+        return redirect()->route('profile.edit')->with('error', "Your account isn't linked to any franchisee yet.");
+    }
+    return redirect()->route('franchise.dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 // Routes accessibles seulement après authentication
@@ -67,6 +87,16 @@ Route::middleware('auth')->group(function () {
         Route::resource('sales', AdminSalesController::class)->only(['index', 'show']);
     // Exports
     Route::get('exports/sales.pdf', [\App\Http\Controllers\Admin\ExportController::class, 'salesPdf'])->name('exports.sales.pdf');
+
+    // Franchise applications review
+    Route::get('franchise-applications', [AdminFranchiseApplicationController::class,'index'])->name('franchise-applications.index');
+    Route::get('franchise-applications/{id}', [AdminFranchiseApplicationController::class,'show'])->name('franchise-applications.show');
+    Route::post('franchise-applications/{id}/approve', [AdminFranchiseApplicationController::class,'approve'])->name('franchise-applications.approve');
+    Route::post('franchise-applications/{id}/reject', [AdminFranchiseApplicationController::class,'reject'])->name('franchise-applications.reject');
+
+    // Create brand-new user inside a franchise
+    Route::get('franchises/{franchise}/users/create', [\App\Http\Controllers\Admin\FranchiseUserController::class, 'create'])->name('franchises.users.create');
+    Route::post('franchises/{franchise}/users', [\App\Http\Controllers\Admin\FranchiseUserController::class, 'store'])->name('franchises.users.store');
     });
     // Groupe de routes Franchise (prefix 'franchise/*', name prefix 'franchise.')
     Route::middleware(['franchise','franchise.attached'])->prefix('franchise')->as('franchise.')->scopeBindings()->group(function() {
