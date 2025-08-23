@@ -5,12 +5,12 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-use App\Models\{User, Franchise, Warehouse, Supply, LoyaltyRule, Truck, Dish, DishIngredient, StockOrder, StockOrderItem, CustomerOrder, OrderItem};
+use App\Models\{User, Franchise, Warehouse, Supply, Truck, Dish, DishIngredient, StockOrder, StockOrderItem, CustomerOrder, OrderItem};
 use App\Services\InventoryService;
 
 /**
  * Consolidated, idempotent seeder supporting profiles via SEED_PROFILE env:
- *  - minimal (default): core users, franchise, warehouses, supplies, loyalty rule
+ *  - minimal (default): core users, franchise, warehouses, supplies
  *  - demo: minimal + sample dish, truck, stock orders, received inventory, one customer order
  *  - bulk: demo + scaled dataset (extra supplies & trucks)
  *  - real: multi-franchise realistic dataset (multiple warehouses, trucks, dishes, orders, payments, stock orders, compliance scenario)
@@ -66,11 +66,7 @@ class BaselineSeeder extends Seeder
             Supply::firstOrCreate(['name' => $s['name']], $s);
         }
 
-        LoyaltyRule::firstOrCreate(['active' => true], [
-            'points_per_euro' => 1.0,
-            'redeem_rate' => 100.0,
-            'expires_after_months' => null,
-        ]);
+    // Mission 2 loyalty program removed in Mission 1 scope
     }
 
     protected function seedDemo(): void

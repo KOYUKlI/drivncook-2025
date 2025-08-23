@@ -36,8 +36,10 @@
                         <div class="font-medium">{{ $application->city ?? '—' }}</div>
                     </div>
                     <div>
-                        <div class="text-sm text-gray-500">Budget</div>
-                        <div class="font-medium">{{ $application->budget ? number_format($application->budget,0,',',' ') . ' €' : '—' }}</div>
+                        <div class="text-sm text-gray-500">Droit d’entrée</div>
+                        <div class="font-medium">{{ $application->entry_fee_due ? (number_format($application->entry_fee_due,0,',',' ') . ' €') : '50 000 €' }} —
+                            <span class="text-xs">Statut: {{ $application->entry_fee_status ?? 'pending' }}</span>
+                        </div>
                     </div>
                     <div>
                         <div class="text-sm text-gray-500">Expérience</div>
@@ -72,6 +74,18 @@
                     </form>
                 @else
                     <div class="mt-3 text-sm text-gray-600">Cette candidature est <strong>{{ ucfirst($application->status) }}</strong>.</div>
+                    @if($application->status === 'accepted')
+                        <div class="mt-2">
+                            @if(($application->entry_fee_status ?? 'pending') !== 'paid')
+                                <form method="POST" action="{{ route('admin.franchise-applications.checkout', $application->id) }}">
+                                    @csrf
+                                    <button class="btn btn-primary w-full">Créer session Stripe (50 000 €)</button>
+                                </form>
+                            @else
+                                <div class="badge badge-success">Droit d’entrée payé</div>
+                            @endif
+                        </div>
+                    @endif
                 @endif
             </div>
         </div>

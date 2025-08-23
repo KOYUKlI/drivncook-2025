@@ -14,7 +14,6 @@ class CustomerOrderFactory extends Factory
     {
         return [
             'truck_id' => Truck::factory(),
-            'loyalty_card_id' => null,
             'order_type' => 'on_site',
             'reference' => null,
             'total_price' => $this->faker->randomFloat(2, 5, 120),

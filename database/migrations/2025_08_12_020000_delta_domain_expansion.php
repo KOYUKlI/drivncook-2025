@@ -17,9 +17,7 @@ return new class extends Migration {
             if (!Schema::hasColumn('users','preferred_language')) {
                 $table->string('preferred_language',5)->nullable()->after('franchise_id');
             }
-            if (!Schema::hasColumn('users','newsletter_opt_in')) {
-                $table->boolean('newsletter_opt_in')->default(false)->after('preferred_language');
-            }
+            // Mission 2 removed: newsletter_opt_in skipped
         });
 
         Schema::table('trucks', function (Blueprint $table) {
@@ -40,30 +38,9 @@ return new class extends Migration {
             }
         });
 
-        if (Schema::hasTable('loyalty_cards') && !Schema::hasColumn('loyalty_cards','user_id')) {
-            Schema::table('loyalty_cards', function (Blueprint $table) {
-                $table->foreignId('user_id')->nullable()->after('id')->constrained('users')->nullOnDelete();
-            });
-        }
+    // Mission 2 removed: loyalty_cards adjustments skipped
 
-        if (!Schema::hasTable('newsletters')) {
-            Schema::create('newsletters', function (Blueprint $table) {
-                $table->id();
-                $table->string('subject');
-                $table->text('body');
-                $table->timestamp('scheduled_at')->nullable();
-                $table->timestamp('sent_at')->nullable();
-                $table->timestamps();
-            });
-        }
-        if (!Schema::hasTable('newsletter_sends')) {
-            Schema::create('newsletter_sends', function (Blueprint $table) {
-                $table->foreignId('newsletter_id')->constrained('newsletters')->cascadeOnDelete();
-                $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-                $table->timestamp('sent_at')->useCurrent();
-                $table->primary(['newsletter_id','user_id']);
-            });
-        }
+    // Mission 2 removed: newsletters tables creation skipped
 
         Schema::table('customer_orders', function (Blueprint $table) {
             if (!Schema::hasColumn('customer_orders','customer_id')) {
@@ -85,7 +62,6 @@ return new class extends Migration {
     }
 
     public function down(): void {
-        Schema::dropIfExists('newsletter_sends');
-        Schema::dropIfExists('newsletters');
+    // Mission 2 removed: nothing to drop here
     }
 };

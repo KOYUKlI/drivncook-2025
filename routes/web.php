@@ -15,10 +15,15 @@ use App\Http\Controllers\Admin\{ LocationController as AdminLocationController, 
 use App\Http\Controllers\Franchise\{ DashboardController as FranchiseDashboardController,
     TruckController as FranchiseTruckController,
     StockOrderController as FranchiseStockOrderController };
-use App\Http\Controllers\Admin\{ NewsletterController as AdminNewsletterController, LoyaltyRuleController as AdminLoyaltyRuleController, PaymentController as AdminPaymentController };
+use App\Http\Controllers\Franchise\TruckRequestController as FranchiseTruckRequestController;
+use App\Http\Controllers\Franchise\SalesController as FranchiseSalesController;
+use App\Http\Controllers\Admin\TruckRequestController as AdminTruckRequestController;
+use App\Http\Controllers\Admin\ExportController as AdminExportController;
+use App\Http\Controllers\Admin\{ PaymentController as AdminPaymentController };
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\FranchiseApplicationController;
 use App\Http\Controllers\Admin\FranchiseApplicationController as AdminFranchiseApplicationController;
+use App\Http\Controllers\StripeController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -29,6 +34,8 @@ Route::get('/franchise/apply', [FranchiseApplicationController::class, 'create']
 Route::post('/franchise/apply', [FranchiseApplicationController::class, 'store'])
     ->middleware('throttle:5,1')
     ->name('franchise.apply.post');
+Route::view('/franchise/apply/success', 'franchise.apply-success')->name('franchise.apply.success');
+Route::view('/franchise/apply/canceled', 'franchise.apply-canceled')->name('franchise.apply.canceled');
 
 Route::get('/dashboard', function () {
     $user = Auth::user();
@@ -65,15 +72,12 @@ Route::middleware('auth')->group(function () {
     Route::post('inventory/adjust', [\App\Http\Controllers\Admin\InventoryController::class, 'adjust'])->name('inventory.adjust');
     Route::post('inventory/move', [\App\Http\Controllers\Admin\InventoryController::class, 'move'])->name('inventory.move');
     Route::resource('inventory.lots', \App\Http\Controllers\Admin\InventoryLotController::class)->except(['index','show']);
-    // Dishes CRUD + Ingredients (BOM)
-    Route::resource('dishes', \App\Http\Controllers\Admin\DishController::class);
-    Route::post('dishes/{dish}/ingredients', [\App\Http\Controllers\Admin\DishIngredientController::class, 'store'])->name('dishes.ingredients.store');
-    Route::delete('dishes/{dish}/ingredients/{ingredient}', [\App\Http\Controllers\Admin\DishIngredientController::class, 'destroy'])->name('dishes.ingredients.destroy');
+    // Dishes (Mission 2) neutralized for Mission 1 scope
+    // Route::resource('dishes', \App\Http\Controllers\Admin\DishController::class);
+    // Route::post('dishes/{dish}/ingredients', [\App\Http\Controllers\Admin\DishIngredientController::class, 'store'])->name('dishes.ingredients.store');
+    // Route::delete('dishes/{dish}/ingredients/{ingredient}', [\App\Http\Controllers\Admin\DishIngredientController::class, 'destroy'])->name('dishes.ingredients.destroy');
     Route::resource('suppliers', AdminSupplierController::class);
     Route::resource('commissions', AdminCommissionController::class)->only(['index','show','update']);
-    Route::resource('loyalty-rules', AdminLoyaltyRuleController::class);
-    Route::resource('newsletters', AdminNewsletterController::class);
-    Route::post('newsletters/{newsletter}/send', [AdminNewsletterController::class,'send'])->name('newsletters.send');
     Route::get('payments', [AdminPaymentController::class,'index'])->name('payments.index');
     Route::post('sales/{order}/payments', [AdminPaymentController::class,'store'])->name('sales.payments.store');
     Route::get('payments/{payment}', [AdminPaymentController::class,'show'])->name('payments.show');
@@ -85,13 +89,16 @@ Route::middleware('auth')->group(function () {
     Route::put('compliance/{franchisee}', [AdminComplianceController::class, 'update'])->name('compliance.update');
         // Sales: only index and show (admin can view sales but not create)
         Route::resource('sales', AdminSalesController::class)->only(['index', 'show']);
+    // Truck Requests
+    Route::resource('truckrequests', AdminTruckRequestController::class)->only(['index','show','update']);
     // Exports
-    Route::get('exports/sales.pdf', [\App\Http\Controllers\Admin\ExportController::class, 'salesPdf'])->name('exports.sales.pdf');
+    Route::get('exports/sales.pdf', [AdminExportController::class, 'salesPdf'])->name('exports.sales.pdf');
 
     // Franchise applications review
     Route::get('franchise-applications', [AdminFranchiseApplicationController::class,'index'])->name('franchise-applications.index');
     Route::get('franchise-applications/{id}', [AdminFranchiseApplicationController::class,'show'])->name('franchise-applications.show');
     Route::post('franchise-applications/{id}/approve', [AdminFranchiseApplicationController::class,'approve'])->name('franchise-applications.approve');
+    Route::post('franchise-applications/{id}/checkout', [StripeController::class,'checkout'])->name('franchise-applications.checkout');
     Route::post('franchise-applications/{id}/reject', [AdminFranchiseApplicationController::class,'reject'])->name('franchise-applications.reject');
 
     // Create brand-new user inside a franchise
@@ -102,8 +109,10 @@ Route::middleware('auth')->group(function () {
     Route::middleware(['franchise','franchise.attached'])->prefix('franchise')->as('franchise.')->scopeBindings()->group(function() {
         // Dashboard (franchise home)
         Route::get('/dashboard', [FranchiseDashboardController::class, 'index'])->name('dashboard');
-        // CRUD resources for franchise
-        Route::resource('trucks', FranchiseTruckController::class);
+    // Trucks: read-only manage; creation is via request to admin (store exists but aborts 404)
+    Route::resource('trucks', FranchiseTruckController::class)->except(['create','destroy']);
+    // Request additional truck
+    Route::resource('truckrequests', FranchiseTruckRequestController::class)->only(['index','create','store']);
         Route::resource('stockorders', FranchiseStockOrderController::class);
         Route::post('stockorders/{stockorder}/complete', [FranchiseStockOrderController::class, 'complete'])
             ->name('stockorders.complete');
@@ -114,6 +123,9 @@ Route::middleware('auth')->group(function () {
             ->name('stockorders.items.destroy');
         // (Note: Warehouses are managed by admin; franchisee does not have direct warehouse routes)
     // Maintenance records
+    // Sales visualization for the franchisee
+    Route::get('sales', [FranchiseSalesController::class,'index'])->name('sales.index');
+    Route::get('sales/export.pdf', [AdminExportController::class,'salesPdf'])->name('sales.export.pdf');
     Route::resource('maintenance', \App\Http\Controllers\Franchise\MaintenanceRecordController::class)->except(['show']);
     });
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -122,3 +134,6 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+// Stripe webhook
+Route::post('/stripe/webhook', [StripeController::class, 'webhook']);

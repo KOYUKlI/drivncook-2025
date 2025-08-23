@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('app.name', "Driv'n Cook") }}</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @if (!app()->environment('testing'))
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @endif
     <script>
         document.documentElement.classList.add('js');
     </script>
@@ -48,10 +50,13 @@
                             <div class="sidebar-section-title">Admin</div>
                             <a href="{{ route('admin.dashboard') }}" class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'sidebar-link-active' : '' }}">Dashboard</a>
                             <a href="{{ route('admin.trucks.index') }}" class="sidebar-link {{ request()->is('admin/trucks*') ? 'sidebar-link-active' : '' }}">Trucks</a>
+                            @if(Route::has('admin.truckrequests.index'))
+                                <a href="{{ route('admin.truckrequests.index') }}" class="sidebar-link {{ request()->is('admin/truckrequests*') ? 'sidebar-link-active' : '' }}">Truck Requests</a>
+                            @endif
                             <a href="{{ route('admin.warehouses.index') }}" class="sidebar-link {{ request()->is('admin/warehouses*') ? 'sidebar-link-active' : '' }}">Warehouses</a>
                             <a href="{{ route('admin.supplies.index') }}" class="sidebar-link {{ request()->is('admin/supplies*') ? 'sidebar-link-active' : '' }}">Supplies</a>
                             <a href="{{ route('admin.inventory.index') }}" class="sidebar-link {{ request()->is('admin/inventory*') ? 'sidebar-link-active' : '' }}">Inventory</a>
-                            <a href="{{ route('admin.dishes.index') }}" class="sidebar-link {{ request()->is('admin/dishes*') ? 'sidebar-link-active' : '' }}">Dishes</a>
+                            {{-- Dishes (Mission 2) removed from menu --}}
                             @if(Route::has('admin.suppliers.index'))
                                 <a href="{{ route('admin.suppliers.index') }}" class="sidebar-link {{ request()->is('admin/suppliers*') ? 'sidebar-link-active' : '' }}">Suppliers</a>
                             @endif
@@ -76,7 +81,9 @@
                             <div class="sidebar-section-title">Franchise</div>
                             <a href="{{ route('franchise.dashboard') }}" class="sidebar-link {{ request()->routeIs('franchise.dashboard') ? 'sidebar-link-active' : '' }}">Dashboard</a>
                             <a href="{{ route('franchise.trucks.index') }}" class="sidebar-link {{ request()->is('franchise/trucks*') ? 'sidebar-link-active' : '' }}">My Trucks</a>
+                            <a href="{{ route('franchise.truckrequests.index') }}" class="sidebar-link {{ request()->is('franchise/truckrequests*') ? 'sidebar-link-active' : '' }}">Truck Requests</a>
                             <a href="{{ route('franchise.stockorders.index') }}" class="sidebar-link {{ request()->is('franchise/stockorders*') ? 'sidebar-link-active' : '' }}">Stock Orders</a>
+                            <a href="{{ route('franchise.sales.index') }}" class="sidebar-link {{ request()->is('franchise/sales*') ? 'sidebar-link-active' : '' }}">Sales</a>
                             <a href="{{ route('franchise.maintenance.index') }}" class="sidebar-link {{ request()->is('franchise/maintenance*') ? 'sidebar-link-active' : '' }}">Maintenance</a>
                         </div>
                     @endif

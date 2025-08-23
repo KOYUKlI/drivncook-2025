@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Mail\FranchiseApplicationApproved;
 use App\Mail\FranchiseApplicationReceived;
 use App\Mail\FranchiseApplicationRejected;
+use App\Mail\FranchiseAccountSetup;
 use App\Models\Franchise;
 use App\Models\FranchiseApplication;
 use App\Models\User;
@@ -30,6 +31,8 @@ class FranchiseApplicationFlowTest extends TestCase
             'budget' => 60000,
             'experience' => 'Restauration',
             'motivation' => 'Très motivée par le concept et le format.',
+            'accept_entry_fee' => '1',
+            'accept_royalty' => '1',
             'gdpr' => '1',
         ]);
 
@@ -45,9 +48,8 @@ class FranchiseApplicationFlowTest extends TestCase
         });
     }
 
-    public function test_admin_can_approve_creates_franchise_and_user_and_sends_reset(): void
+    public function test_admin_can_approve_creates_franchise_and_user_and_sends_setup_email(): void
     {
-        Notification::fake();
         Mail::fake();
 
         $admin = User::factory()->create(['role' => 'admin']);
@@ -70,7 +72,9 @@ class FranchiseApplicationFlowTest extends TestCase
         $this->assertNotNull($user);
         $this->assertSame('franchise', $user->role);
         $this->assertNotNull($user->franchise_id);
-        Notification::assertSentTo($user, ResetPassword::class);
+    Mail::assertSent(FranchiseAccountSetup::class, function ($m) use ($user) {
+            return method_exists($m, 'hasTo') ? $m->hasTo($user->email) : true;
+        });
         Mail::assertQueued(FranchiseApplicationApproved::class);
 
         $app->refresh();

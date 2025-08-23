@@ -13,15 +13,13 @@ class CustomerOrder extends Model
 {
     use HasFactory, HasUlidRouteKey;
 
-    protected $fillable = ['truck_id','loyalty_card_id','total_price','status','ordered_at','ulid'];
+    protected $fillable = ['truck_id','total_price','status','ordered_at','ulid'];
 
     public function truck(): BelongsTo {
         return $this->belongsTo(Truck::class);
     }
 
-    public function loyaltyCard(): BelongsTo {
-        return $this->belongsTo(LoyaltyCard::class);
-    }
+    // Loyalty feature removed in Mission 1 scope
     public function items(): HasMany {
         return $this->hasMany(OrderItem::class);
     }

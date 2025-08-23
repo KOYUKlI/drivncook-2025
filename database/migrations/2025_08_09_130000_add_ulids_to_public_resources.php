@@ -12,7 +12,7 @@ return new class extends Migration {
         $tables = [
             'trucks', 'warehouses', 'stock_orders', 'stock_order_items', 'maintenance_records', 'supplies', 'suppliers',
             'dishes', 'dish_ingredients', 'inventory', 'inventory_movements',
-            'franchises', 'customer_orders', 'order_items', 'event_registrations', 'locations', 'truck_deployments'
+            'franchises', 'customer_orders', 'order_items', /* Mission2 removed: 'event_registrations', */ 'locations', 'truck_deployments'
         ];
 
         foreach ($tables as $table) {
@@ -43,7 +43,7 @@ return new class extends Migration {
         $tables = [
             'trucks', 'warehouses', 'stock_orders', 'stock_order_items', 'maintenance_records', 'supplies', 'suppliers',
             'dishes', 'dish_ingredients', 'inventory', 'inventory_movements',
-            'franchises', 'customer_orders', 'order_items', 'event_registrations', 'locations', 'truck_deployments'
+            'franchises', 'customer_orders', 'order_items', /* Mission2 removed: 'event_registrations', */ 'locations', 'truck_deployments'
         ];
         foreach ($tables as $table) {
             if (Schema::hasTable($table) && Schema::hasColumn($table, 'ulid')) {

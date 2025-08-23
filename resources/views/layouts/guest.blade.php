@@ -12,7 +12,9 @@
         <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600&display=swap" rel="stylesheet" />
 
         <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @if (!app()->environment('testing'))
+            @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @endif
     </head>
     <body class="font-sans antialiased bg-gray-50 text-gray-900">
         <div class="min-h-screen flex flex-col">

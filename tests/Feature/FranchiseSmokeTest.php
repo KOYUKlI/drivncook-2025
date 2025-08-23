@@ -19,9 +19,11 @@ it('franchise pages répondent', function () {
     $this->actingAs($fr)->get('/franchise/dashboard')->assertOk();
     $this->actingAs($fr)->get('/franchise/trucks')->assertOk();
     $this->actingAs($fr)->get('/franchise/stockorders')->assertOk();
+    $this->actingAs($fr)->get('/franchise/truckrequests')->assertOk();
+    $this->actingAs($fr)->get('/franchise/sales')->assertOk();
 });
 
-it('franchise peut créer un truck', function () {
+it('franchise peut créer une demande de camion (mais pas créer le camion directement)', function () {
     $fr = User::where('role','franchise')->whereNotNull('franchise_id')->first();
     if(!$fr){
         $franchise = Franchise::create(['name' => 'Fr Smoke '.Str::random(4)]);
@@ -33,15 +35,13 @@ it('franchise peut créer un truck', function () {
             'franchise_id' => $franchise->id,
         ]);
     }
-    $plate = strtoupper(Str::random(2)).'-'.rand(100,999).'-'.strtoupper(Str::random(2));
-    // Seed session & token by visiting create form (if exists) or listing
-    $this->actingAs($fr)->get('/franchise/trucks')->assertOk();
+    // Cannot create truck directly (route disabled)
+    $this->actingAs($fr)->post('/franchise/trucks', [])->assertNotFound();
+
+    // Can create a truck request
+    $this->actingAs($fr)->get('/franchise/truckrequests/create')->assertOk();
     $token = session()->token();
     $this->actingAs($fr)
-        ->post('/franchise/trucks', [
-            '_token' => $token,
-            'name' => 'Truck '.Str::random(4),
-            'license_plate' => $plate,
-        ], ['X-CSRF-TOKEN' => $token])
-        ->assertRedirect('/franchise/trucks');
+        ->post('/franchise/truckrequests', [ '_token' => $token, 'reason' => 'Need capacity' ], ['X-CSRF-TOKEN' => $token])
+        ->assertRedirect('/franchise/truckrequests');
 });

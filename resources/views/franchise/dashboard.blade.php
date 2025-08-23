@@ -21,6 +21,14 @@
             <h2 class="text-sm text-gray-500">Pending Stock Orders</h2>
             <p class="text-2xl font-semibold">{{ $pendingOrders }}</p>
         </div></div>
+        <div class="card"><div class="card-body">
+            <h2 class="text-sm text-gray-500">Turnover (30d)</h2>
+            <p class="text-2xl font-semibold">€ {{ number_format($turnover30d ?? 0, 2) }}</p>
+        </div></div>
+        <div class="card"><div class="card-body">
+            <h2 class="text-sm text-gray-500">Sales (30d)</h2>
+            <p class="text-2xl font-semibold">{{ $salesCount30d }}</p>
+        </div></div>
     </div>
 
     <!-- (Optionnel) Graphique ou liste d'activité -->

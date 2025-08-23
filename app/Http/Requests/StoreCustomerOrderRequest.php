@@ -13,7 +13,6 @@ class StoreCustomerOrderRequest extends FormRequest
     {
         return [
             'truck_id' => 'required|exists:trucks,id',
-            'loyalty_card_id' => 'nullable|exists:loyalty_cards,id',
             'order_type' => 'required|in:online,on_site,reservation',
             'pickup_at' => 'nullable|date',
             'location_id' => 'nullable|exists:locations,id',

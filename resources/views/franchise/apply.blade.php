@@ -60,10 +60,9 @@
                     @error('city')<div class="mt-1 text-red-600 text-sm">{{ $message }}</div>@enderror
                 </div>
                 <div>
-                    <label class="block text-sm font-medium">Budget estimatif (EUR)</label>
-                    <input type="number" name="budget" value="{{ old('budget') }}" placeholder="Ex: 60000" class="input w-full focus:ring-2 focus:ring-amber-500 focus:border-amber-500" min="0">
-                    <p class="text-xs text-gray-500 mt-1">Recommandé : ≥ 50 000 €</p>
-                    @error('budget')<div class="mt-1 text-red-600 text-sm">{{ $message }}</div>@enderror
+                    <label class="block text-sm font-medium">Droit d’entrée</label>
+                    <input type="text" value="50 000 € (fixe)" class="input w-full bg-gray-50" disabled>
+                    <p class="text-xs text-gray-500 mt-1">À régler après validation de votre dossier (Stripe Checkout).</p>
                 </div>
             </div>
 
@@ -79,11 +78,25 @@
                 @error('motivation')<div class="mt-1 text-red-600 text-sm">{{ $message }}</div>@enderror
             </div>
 
-            <div class="flex items-start gap-3 text-sm">
-                <input type="checkbox" id="gdpr" name="gdpr" value="1" class="mt-1" required>
-                <label for="gdpr">J’accepte que mes données soient utilisées pour l’étude de ma candidature.</label>
+            <div class="space-y-3">
+                <div class="flex items-start gap-3 text-sm">
+                    <input type="checkbox" id="accept_entry_fee" name="accept_entry_fee" value="1" class="mt-1" @checked(old('accept_entry_fee')) required>
+                    <label for="accept_entry_fee">J’accepte les frais d’entrée de 50 000 €.</label>
+                </div>
+                @error('accept_entry_fee')<div class="-mt-2 text-red-600 text-sm">{{ $message }}</div>@enderror
+
+                <div class="flex items-start gap-3 text-sm">
+                    <input type="checkbox" id="accept_royalty" name="accept_royalty" value="1" class="mt-1" @checked(old('accept_royalty')) required>
+                    <label for="accept_royalty">J’accepte une redevance de 4 % sur le chiffre d’affaires.</label>
+                </div>
+                @error('accept_royalty')<div class="-mt-2 text-red-600 text-sm">{{ $message }}</div>@enderror
+
+                <div class="flex items-start gap-3 text-sm">
+                    <input type="checkbox" id="gdpr" name="gdpr" value="1" class="mt-1" @checked(old('gdpr')) required>
+                    <label for="gdpr">J’accepte que mes données soient utilisées pour l’étude de ma candidature.</label>
+                </div>
+                @error('gdpr')<div class="-mt-2 text-red-600 text-sm">{{ $message }}</div>@enderror
             </div>
-            @error('gdpr')<div class="-mt-2 text-red-600 text-sm">{{ $message }}</div>@enderror
 
             <div class="pt-2 flex flex-col sm:flex-row gap-3">
                 <button type="submit" class="btn btn-primary h-11 w-full sm:w-auto">Envoyer ma candidature</button>

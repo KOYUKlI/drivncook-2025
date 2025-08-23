@@ -11,10 +11,7 @@ return new class extends Migration {
 
         // Constraints only for MySQL to avoid sqlite test issues
         if ($driver === 'mysql') {
-            // Unique composite for event registrations (avoid double inscription)
-            if (! $this->indexExists('event_registrations', 'uk_event_truck')) {
-                DB::statement('ALTER TABLE event_registrations ADD CONSTRAINT uk_event_truck UNIQUE (event_id, truck_id)');
-            }
+            // Mission 2 events removed; skip event_registrations constraints
             // Unique SIRET suppliers if column exists
             if ($this->columnExists('suppliers','siret') && ! $this->indexExists('suppliers','uk_suppliers_siret')) {
                 DB::statement('ALTER TABLE suppliers ADD CONSTRAINT uk_suppliers_siret UNIQUE (siret)');
@@ -42,10 +39,7 @@ return new class extends Migration {
             if ($this->tableExists('stock_orders')) {
                 try { DB::statement("ALTER TABLE stock_orders ADD CONSTRAINT chk_so_source CHECK ( ((warehouse_id IS NOT NULL)+(supplier_id IS NOT NULL)) = 1 )"); } catch (Throwable $e) { /* ignore */ }
             }
-            // Loyalty transactions points > 0
-            if ($this->tableExists('loyalty_transactions')) {
-                try { DB::statement('ALTER TABLE loyalty_transactions ADD CONSTRAINT chk_loy_points_pos CHECK (points > 0)'); } catch (Throwable $e) { /* ignore */ }
-            }
+            // Mission 2 loyalty removed; skip loyalty_transactions checks
         }
 
         // 80/20 purchase mix view (works for both drivers with some SQL differences minimal)

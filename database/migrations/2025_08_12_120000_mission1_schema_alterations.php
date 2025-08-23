@@ -25,10 +25,7 @@ return new class extends Migration {
             try { DB::statement('ALTER TABLE stock_order_items ADD CONSTRAINT chk_stock_order_items_qty_pos CHECK (quantity >= 1)'); } catch (Throwable $e) {}
         }
 
-        // event_registrations unique(event_id, truck_id)
-        if ($driver === 'mysql' && Schema::hasTable('event_registrations')) {
-            try { DB::statement('ALTER TABLE event_registrations ADD CONSTRAINT uk_event_truck UNIQUE (event_id, truck_id)'); } catch (Throwable $e) {}
-        }
+    // Mission 2 events removed; skip event_registrations constraints
 
         // truck_deployments CHECK ensure present (one already earlier maybe)
         if ($driver === 'mysql' && Schema::hasTable('truck_deployments')) {

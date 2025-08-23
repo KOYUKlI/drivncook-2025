@@ -24,9 +24,11 @@ class FranchiseApplicationController extends Controller
             'email' => ['required','email','max:255'],
             'phone' => ['nullable','string','max:50'],
             'city' => ['nullable','string','max:120'],
-            'budget' => ['nullable','integer','min:50000'],
             'experience' => ['nullable','string'],
             'motivation' => ['required','string','min:20'],
+            // Explicit acceptance of entry fee (50k) and royalty (4%)
+            'accept_entry_fee' => ['accepted'],
+            'accept_royalty' => ['accepted'],
             'gdpr' => ['accepted'],
         ]);
 
@@ -38,6 +40,8 @@ class FranchiseApplicationController extends Controller
 
         $app = FranchiseApplication::create([
             ...$data,
+            'entry_fee_due' => 50000,
+            'entry_fee_status' => 'pending',
             'status' => 'pending',
         ]);
 

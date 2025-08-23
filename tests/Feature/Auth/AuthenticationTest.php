@@ -20,7 +20,8 @@ test('users can authenticate using the login screen', function () {
     // If validation failed (422) or 302 missing, fallback to manual login to keep smoke meaningful
     if ($response->status() === 302) {
         $this->assertAuthenticatedAs($user);
-        $response->assertRedirect(route('dashboard', absolute: false));
+        // Default user has no role/franchise -> redirected to profile per app logic
+        $response->assertRedirect(route('profile.edit', absolute: false));
     } else {
         // Try manual auth to see if credentials are valid
     $this->assertTrue(Auth::attempt(['email'=>$user->email,'password'=>'password']), 'Manual auth fallback failed');

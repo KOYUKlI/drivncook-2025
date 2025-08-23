@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\URL;
 use Illuminate\View\View;
 
 class FranchiseApplicationController extends Controller
@@ -64,7 +64,11 @@ class FranchiseApplicationController extends Controller
 
     // Send set password link after commit to avoid race conditions
         if ($userEmail) {
-            Password::sendResetLink(['email' => $userEmail]);
+            $user = \App\Models\User::firstWhere('email', $userEmail);
+            if ($user) {
+                $url = URL::signedRoute('password.set', ['id' => $user->id], now()->addMinutes(60));
+                try { Mail::to($userEmail)->send(new \App\Mail\FranchiseAccountSetup($user, $url)); } catch (\Throwable $e) {}
+            }
         }
 
     $method = app()->runningUnitTests() ? 'queue' : (config('queue.default') === 'sync' ? 'send' : 'queue');

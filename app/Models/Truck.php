@@ -26,8 +26,5 @@ class Truck extends Model {
     public function stockOrders(): HasMany {
         return $this->hasMany(StockOrder::class);
     }
-    public function events(): BelongsToMany {
-        // Many-to-many: a truck can register for many events
-        return $this->belongsToMany(Event::class, 'event_registrations');
-    }
+    // Events feature removed for Mission 1 scope
 }

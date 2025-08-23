@@ -19,7 +19,9 @@ class FranchiseApplicationFactory extends Factory
             'email' => $this->faker->unique()->safeEmail(),
             'phone' => $this->faker->phoneNumber(),
             'city' => $this->faker->city(),
-            'budget' => $this->faker->numberBetween(50000, 120000),
+            // budget no longer used in Mission 1; entry fee is fixed at 50k and accepted explicitly
+            'accept_entry_fee' => true,
+            'accept_royalty' => true,
             'experience' => $this->faker->sentence(8),
             'motivation' => $this->faker->paragraph(),
             'status' => 'pending',
