@@ -1,0 +1,71 @@
+<?php
+
+namespace App\Http\Controllers\BO;
+
+use App\Http\Controllers\Controller;
+
+class PurchaseOrderController extends Controller
+{
+    /**
+     * Display a listing of purchase orders.
+     */
+    public function index()
+    {
+        // Mock data
+        $orders = [
+            [
+                'id' => 1,
+                'reference' => 'PO-2024-001',
+                'franchisee' => 'Paris Nord',
+                'total' => 2500, // centimes
+                'ratio_80_20' => 85, // pourcentage
+                'status' => 'completed',
+                'date' => '2024-08-25',
+            ],
+            [
+                'id' => 2,
+                'reference' => 'PO-2024-002',
+                'franchisee' => 'Lyon Centre',
+                'total' => 1800,
+                'ratio_80_20' => 75, // En dessous de 80% = rouge
+                'status' => 'pending',
+                'date' => '2024-08-26',
+            ],
+            [
+                'id' => 3,
+                'reference' => 'PO-2024-003',
+                'franchisee' => 'Marseille Sud',
+                'total' => 3200,
+                'ratio_80_20' => 88,
+                'status' => 'completed',
+                'date' => '2024-08-27',
+            ],
+        ];
+
+        return view('bo.purchase_orders.index', compact('orders'));
+    }
+
+    /**
+     * Display the specified purchase order.
+     */
+    public function show(string $id)
+    {
+        // Mock data
+        $order = [
+            'id' => $id,
+            'reference' => 'PO-2024-001',
+            'franchisee' => 'Paris Nord',
+            'total' => 2500,
+            'ratio_80_20' => 85,
+            'status' => 'completed',
+            'date' => '2024-08-25',
+            'lines' => [
+                ['item' => 'Pain burger', 'category' => 'obligatoire', 'quantity' => 100, 'price' => 150, 'total' => 15000],
+                ['item' => 'Steaks surgelés', 'category' => 'obligatoire', 'quantity' => 50, 'price' => 200, 'total' => 10000],
+                ['item' => 'Sauce spéciale', 'category' => 'libre', 'quantity' => 10, 'price' => 80, 'total' => 800],
+            ],
+        ];
+
+        return view('bo.purchase_orders.show', compact('order'));
+    }
+}

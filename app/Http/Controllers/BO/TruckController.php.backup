@@ -1,0 +1,47 @@
+<?php
+
+namespace App\Http\Controllers\BO;
+
+use App\Http\Controllers\Controller;
+
+class TruckController extends Controller
+{
+    /**
+     * Display a listing of trucks.
+     */
+    public function index()
+    {
+        // Mock data
+        $trucks = [
+            ['id' => 1, 'code' => 'C001', 'status' => 'active', 'franchisee' => 'Paris Nord', 'last_maintenance' => '2024-08-15'],
+            ['id' => 2, 'code' => 'C002', 'status' => 'maintenance', 'franchisee' => 'Lyon Centre', 'last_maintenance' => '2024-08-20'],
+            ['id' => 3, 'code' => 'C003', 'status' => 'active', 'franchisee' => 'Marseille Sud', 'last_maintenance' => '2024-08-10'],
+        ];
+
+        return view('bo.trucks.index', compact('trucks'));
+    }
+
+    /**
+     * Display the specified truck with tabs (deployments, maintenance).
+     */
+    public function show(string $id)
+    {
+        // Mock data
+        $truck = [
+            'id' => $id,
+            'code' => 'C001',
+            'status' => 'active',
+            'franchisee' => 'Paris Nord',
+            'deployments' => [
+                ['date' => '2024-08-27', 'location' => 'Place de la République', 'revenue' => 850],
+                ['date' => '2024-08-26', 'location' => 'Gare du Nord', 'revenue' => 920],
+            ],
+            'maintenance' => [
+                ['date' => '2024-08-15', 'type' => 'Révision générale', 'cost' => 1200, 'status' => 'completed'],
+                ['date' => '2024-08-25', 'type' => 'Changement pneus', 'cost' => 450, 'status' => 'scheduled'],
+            ],
+        ];
+
+        return view('bo.trucks.show', compact('truck'));
+    }
+}

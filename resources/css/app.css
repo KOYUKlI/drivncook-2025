@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom sidebar styles */
+.sidebar-link {
+    @apply block px-3 py-2 rounded-md hover:bg-gray-100 text-gray-700 transition-colors duration-150;
+}
+
+.sidebar-link-active {
+    @apply bg-gray-100 font-semibold text-gray-900;
+}
+
+/* Custom form styles */
+.form-input {
+    @apply block w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500;
+}
+
+.form-select {
+    @apply block w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500;
+}
+
+/* Custom button styles */
+.btn-primary {
+    @apply inline-flex items-center px-4 py-2 bg-orange-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-orange-700 focus:bg-orange-700 active:bg-orange-900 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition ease-in-out duration-150;
+}
+
+.btn-secondary {
+    @apply inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50 focus:bg-gray-50 active:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150;
+}
+
+/* Status badges */
+.badge-green {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800;
+}
+
+.badge-orange {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800;
+}
+
+.badge-red {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800;
+}
+
+.badge-blue {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800;
+}
+
+.badge-gray {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800;
+}

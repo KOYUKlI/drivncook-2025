@@ -1,0 +1,173 @@
+<?php
+
+namespace App\Http\Controllers\BO;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+
+class PurchaseOrderController extends Controller
+{
+    /**
+     * Display a listing of purchase orders with 80/20 ratio analysis.
+     */
+    public function index()
+    {
+        // Mock data
+        $orders = [
+            [
+                'id' => 1,
+                'reference' => 'PO-2024-001',
+                'franchisee' => 'Paris Nord',
+                'total' => 2500, // centimes
+                'ratio_80_20' => 85, // pourcentage
+                'status' => 'completed',
+                'date' => '2024-08-25',
+                'compliance' => 'compliant' // >= 80%
+            ],
+            [
+                'id' => 2,
+                'reference' => 'PO-2024-002',
+                'franchisee' => 'Lyon Centre',
+                'total' => 1800,
+                'ratio_80_20' => 75, // En dessous de 80% = rouge
+                'status' => 'pending',
+                'date' => '2024-08-26',
+                'compliance' => 'non_compliant' // < 80%
+            ],
+            [
+                'id' => 3,
+                'reference' => 'PO-2024-003',
+                'franchisee' => 'Marseille Sud',
+                'total' => 3200,
+                'ratio_80_20' => 88,
+                'status' => 'completed',
+                'date' => '2024-08-27',
+                'compliance' => 'compliant'
+            ],
+        ];
+
+        return view('bo.purchase_orders.index', compact('orders'));
+    }
+
+    /**
+     * Display the specified purchase order with detailed 80/20 analysis.
+     */
+    public function show(string $id)
+    {
+        // Mock data
+        $order = [
+            'id' => $id,
+            'reference' => 'PO-2024-001',
+            'franchisee' => 'Paris Nord',
+            'franchisee_email' => 'franchise.parisnord@drivncook.fr',
+            'total' => 2500,
+            'ratio_80_20' => 85,
+            'status' => 'completed',
+            'date' => '2024-08-25',
+            'lines' => [
+                ['item' => 'Pain burger', 'category' => 'obligatoire', 'quantity' => 100, 'price' => 150, 'total' => 15000],
+                ['item' => 'Steaks surgelés', 'category' => 'obligatoire', 'quantity' => 50, 'price' => 200, 'total' => 10000],
+                ['item' => 'Sauce spéciale', 'category' => 'libre', 'quantity' => 10, 'price' => 80, 'total' => 800],
+            ],
+        ];
+
+        // Calculate detailed ratios
+        $obligatoireTotal = 0;
+        $libreTotal = 0;
+        
+        foreach ($order['lines'] as $line) {
+            if ($line['category'] === 'obligatoire') {
+                $obligatoireTotal += $line['total'];
+            } else {
+                $libreTotal += $line['total'];
+            }
+        }
+
+        $order['obligatoire_total'] = $obligatoireTotal;
+        $order['libre_total'] = $libreTotal;
+        $order['calculated_ratio'] = $obligatoireTotal > 0 ? 
+            round(($obligatoireTotal / ($obligatoireTotal + $libreTotal)) * 100) : 0;
+        $order['compliance_status'] = $order['calculated_ratio'] >= 80 ? 'compliant' : 'non_compliant';
+
+        return view('bo.purchase_orders.show', compact('order'));
+    }
+
+    /**
+     * Validate purchase order 80/20 ratio compliance.
+     */
+    public function validateCompliance(Request $request, string $id)
+    {
+        $request->validate([
+            'action' => 'required|in:approve,flag,reject',
+            'message' => 'nullable|string|max:500'
+        ]);
+
+        // Mock data fetch
+        $order = [
+            'id' => $id,
+            'reference' => 'PO-2024-002',
+            'franchisee' => 'Lyon Centre',
+            'franchisee_email' => 'franchise.lyon@drivncook.fr',
+            'ratio_80_20' => 75, // Non-compliant
+            'status' => 'pending'
+        ];
+
+        $action = $request->input('action');
+        $message = $request->input('message', '');
+
+        switch ($action) {
+            case 'approve':
+                // Force approve despite non-compliance
+                // In real app: Update status, log override reason
+                return redirect()
+                    ->route('bo.purchase_orders.show', $id)
+                    ->with('success', 'Bon de commande approuvé malgré la non-conformité 80/20.');
+
+            case 'flag':
+                // Flag for review but allow processing
+                // In real app: Create alert, notify management
+                return redirect()
+                    ->route('bo.purchase_orders.show', $id)
+                    ->with('warning', 'Bon de commande signalé pour non-conformité 80/20.');
+
+            case 'reject':
+                // Reject and require modification
+                // In real app: Update status, send notification to franchisee
+                return redirect()
+                    ->route('bo.purchase_orders.index')
+                    ->with('success', 'Bon de commande rejeté. Le franchisé a été notifié des modifications requises.');
+        }
+
+        return redirect()->back();
+    }
+
+    /**
+     * Generate compliance report for all purchase orders.
+     */
+    public function complianceReport(Request $request)
+    {
+        $period = $request->input('period', 'current_month');
+        
+        // Mock compliance data
+        $complianceData = [
+            'total_orders' => 45,
+            'compliant_orders' => 38,
+            'non_compliant_orders' => 7,
+            'compliance_rate' => 84.4,
+            'average_ratio' => 82.1,
+            'by_franchisee' => [
+                ['name' => 'Paris Nord', 'orders' => 8, 'compliance_rate' => 87.5, 'avg_ratio' => 85.2],
+                ['name' => 'Lyon Centre', 'orders' => 6, 'compliance_rate' => 66.7, 'avg_ratio' => 76.8],
+                ['name' => 'Marseille Sud', 'orders' => 7, 'compliance_rate' => 100, 'avg_ratio' => 89.1],
+                ['name' => 'Toulouse Nord', 'orders' => 5, 'compliance_rate' => 80, 'avg_ratio' => 81.4],
+            ],
+            'trend' => [
+                ['month' => 'Juin', 'compliance_rate' => 78.2],
+                ['month' => 'Juillet', 'compliance_rate' => 81.5],
+                ['month' => 'Août', 'compliance_rate' => 84.4],
+            ]
+        ];
+
+        return view('bo.purchase_orders.compliance_report', compact('complianceData', 'period'));
+    }
+}
