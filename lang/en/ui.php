@@ -443,4 +443,332 @@ return [
     'side_navigation' => 'Side Navigation',
     'close_sidebar' => 'Close Sidebar',
     'share' => 'Share',
+
+    // BO Purchase Orders
+    'bo' => [
+        'purchase_orders' => [
+            'title' => 'Purchase Orders',
+            'subtitle' => 'Supply order management',
+            'create' => 'New Order',
+            'edit' => 'Edit Order',
+            'show' => 'Order Details',
+            'list' => 'Order List',
+            'delete_confirm' => 'Are you sure you want to delete this order?',
+            
+            'form' => [
+                'warehouse' => 'Warehouse',
+                'warehouse_placeholder' => 'Select a warehouse',
+                'franchisee' => 'Franchisee',
+                'franchisee_placeholder' => 'Select a franchisee (optional)',
+                'lines_title' => 'Order Lines',
+                'add_line' => 'Add line',
+                'stock_item' => 'Item',
+                'stock_item_placeholder' => 'Select an item',
+                'quantity' => 'Quantity',
+                'unit_price' => 'Unit Price',
+                'subtotal' => 'Subtotal',
+                'total' => 'Total',
+                'remove_line' => 'Remove this line',
+                'no_stock_items' => 'No items available',
+                'currency_helper' => 'Price in cents (ex: 1250 = €12.50)',
+            ],
+            
+            'workflow' => [
+                'approve' => 'Approve',
+                'prepare' => 'Prepare',
+                'ship' => 'Ship',
+                'receive' => 'Receive',
+                'cancel' => 'Cancel',
+                'approved' => 'Approved',
+                'prepared' => 'Prepared',
+                'shipped' => 'Shipped',
+                'received' => 'Received',
+                'cancelled' => 'Cancelled',
+                'draft' => 'Draft',
+            ],
+            
+            'compliance' => [
+                'ratio_label' => '80/20 Ratio',
+                'ratio_compliant' => 'Compliant',
+                'ratio_non_compliant' => 'Non-compliant',
+                'ratio_warning' => 'Warning: 80/20 ratio not respected',
+                'override_needed' => 'Override authorization required',
+            ],
+            
+            'compliance_report' => [
+                'title' => 'Compliance Report',
+                'subtitle' => 'Purchase order compliance analysis',
+                'current_month' => 'Current Month',
+                'last_month' => 'Last Month',
+                'current_quarter' => 'Current Quarter',
+                'update' => 'Update',
+                'back_to_orders' => 'Back to Orders',
+                'print' => 'Print',
+                
+                'stats' => [
+                    'total_orders' => 'Total Orders',
+                    'compliant_orders' => 'Compliant Orders',
+                    'non_compliant_orders' => 'Non-Compliant Orders',
+                    'compliance_rate' => 'Compliance Rate',
+                ],
+                
+                'overall' => [
+                    'title' => 'Overall Compliance',
+                    'average_ratio' => 'Average Ratio',
+                    'target' => 'Target',
+                ],
+                
+                'by_franchisee' => [
+                    'title' => 'By Franchisee',
+                    'franchisee' => 'Franchisee',
+                    'orders' => 'Orders',
+                    'compliance_rate' => 'Compliance Rate',
+                    'avg_ratio' => 'Avg Ratio',
+                    'status' => 'Status',
+                ],
+                
+                'status' => [
+                    'compliant' => 'Compliant',
+                    'non_compliant' => 'Non-Compliant',
+                ],
+                
+                'empty' => [
+                    'title' => 'No data',
+                    'description' => 'No orders found for the selected period.',
+                ],
+            ],
+        ],
+        
+        'reports' => [
+            'monthly_sales' => [
+                'title' => 'Monthly Reports',
+                'subtitle' => 'Monthly sales reports management by franchisee',
+                
+                'filters' => [
+                    'title' => 'Filters and Search',
+                    'year' => 'Year',
+                    'month' => 'Month',
+                    'franchisee' => 'Franchisee',
+                    'all_months' => 'All months',
+                    'all_franchisees' => 'All franchisees',
+                    'apply' => 'Apply',
+                    'reset' => 'Reset',
+                ],
+                
+                'generate' => [
+                    'title' => 'Generate New Report',
+                    'year' => 'Year',
+                    'month' => 'Month',
+                    'franchisee' => 'Franchisee',
+                    'all_franchisees' => 'All franchisees',
+                    'button' => 'Generate Report',
+                ],
+                
+                'table' => [
+                    'title' => 'Generated Reports',
+                    'franchisee' => 'Franchisee',
+                    'period' => 'Period',
+                    'generated_at' => 'Generated on',
+                    'actions' => 'Actions',
+                    'download' => 'Download',
+                    'all_franchisees' => 'All franchisees',
+                ],
+                
+                'empty' => [
+                    'title' => 'No reports',
+                    'description' => 'No monthly reports found for the selected criteria.',
+                    'generate_first' => 'Generate first report',
+                ],
+                
+                'messages' => [
+                    'generated_success' => 'Report generated successfully for :franchisee - :month :year',
+                    'already_exists' => 'A report already exists for this period and franchisee.',
+                    'file_not_found' => 'PDF file was not found on the server.',
+                ],
+            ],
+        ],
+    ],
+
+    // Months
+    'months' => [
+        1 => 'January',
+        2 => 'February', 
+        3 => 'March',
+        4 => 'April',
+        5 => 'May',
+        6 => 'June',
+        7 => 'July',
+        8 => 'August',
+        9 => 'September',
+        10 => 'October',
+        11 => 'November',
+        12 => 'December',
+    ],
+
+    // FO Sales
+    'fo' => [
+        'dashboard' => 'Dashboard',
+        
+        'sales' => [
+            'title' => 'My Sales',
+            'subtitle' => 'Manage your daily sales and view your performance',
+            
+            'index' => [
+                'title' => 'Sales History',
+                'subtitle' => 'View all your sales transactions',
+                'new_sale' => 'New Sale',
+            ],
+            
+            'create' => [
+                'title' => 'New Sale',
+                'subtitle' => 'Record a new sales transaction',
+                
+                'location_time' => 'Location and Time',
+                'location' => 'Location',
+                'location_placeholder' => 'e.g. Republic Square, Downtown',
+                'coordinates' => 'GPS Coordinates',
+                'sale_date' => 'Sale Date and Time',
+                
+                'items' => 'Items Sold',
+                'add_item' => 'Add Item',
+                'product' => 'Product',
+                'select_product' => 'Select a product',
+                'quantity' => 'Quantity',
+                'line_total' => 'Line Total',
+                'item_selected' => 'item selected',
+                'items_selected' => 'items selected',
+                'subtotal' => 'Subtotal',
+                'items_count' => 'Items count',
+                'avg_price' => 'Average price',
+                
+                'payment_method' => 'Payment Method',
+                'payment' => [
+                    'card' => 'Credit Card',
+                    'cash' => 'Cash',
+                    'mobile' => 'Mobile Payment',
+                ],
+                
+                'summary' => 'Summary',
+                'tax' => 'VAT',
+                'total' => 'Total',
+                
+                'confirm_sale' => 'Confirm Sale',
+                'cancel' => 'Cancel',
+            ],
+            
+            'filters' => [
+                'title' => 'Filters and Search',
+                'period' => 'Period',
+                'from_date' => 'From',
+                'to_date' => 'To',
+                'all_periods' => 'All periods',
+                'today' => 'Today',
+                'yesterday' => 'Yesterday',
+                'this_week' => 'This week',
+                'last_week' => 'Last week',
+                'this_month' => 'This month',
+                'last_month' => 'Last month',
+                'this_quarter' => 'This quarter',
+                'this_year' => 'This year',
+                'location' => 'Location',
+                'all_locations' => 'All locations',
+                'payment_method' => 'Payment method',
+                'all_payments' => 'All methods',
+                'apply' => 'Apply',
+                'reset' => 'Reset',
+            ],
+            
+            'stats' => [
+                'title' => 'Period Summary',
+                'total_sales' => 'Total Sales',
+                'transactions_count' => 'Transactions',
+                'avg_transaction' => 'Average Basket',
+                'items_sold' => 'Items Sold',
+                'best_day' => 'Best Day',
+                'most_sold_item' => 'Top Item',
+                'growth' => 'Growth',
+                'vs_previous' => 'vs previous period',
+            ],
+            
+            'table' => [
+                'date' => 'Date and Time',
+                'location' => 'Location',
+                'payment_method' => 'Payment',
+                'items' => 'Items',
+                'amount' => 'Amount',
+                'actions' => 'Actions',
+                'view_details' => 'View Details',
+                'export_receipt' => 'Export Receipt',
+                'coordinates' => 'Coordinates',
+            ],
+            
+            'payment_methods' => [
+                'card' => 'Card',
+                'cash' => 'Cash',
+                'mobile' => 'Mobile',
+            ],
+            
+            'empty' => [
+                'title' => 'No sales found',
+                'description' => 'You haven\'t made any sales for this period yet.',
+                'create_first' => 'Create my first sale',
+            ],
+            
+            'pagination' => [
+                'showing' => 'Showing',
+                'to' => 'to',
+                'of' => 'of',
+                'results' => 'results',
+                'previous' => 'Previous',
+                'next' => 'Next',
+            ],
+            
+            'messages' => [
+                'created' => 'Sale recorded successfully!',
+                'updated' => 'Sale updated successfully!',
+                'deleted' => 'Sale deleted successfully!',
+                'export_success' => 'Export generated successfully!',
+            ],
+        ],
+        
+        'reports' => [
+            'title' => 'My Reports',
+            'subtitle' => 'View and download your monthly reports',
+            
+            'filters' => [
+                'title' => 'Filters and Search',
+                'year' => 'Year',
+                'month' => 'Month',
+                'all_months' => 'All months',
+                'apply' => 'Apply',
+                'reset' => 'Reset',
+            ],
+            
+            'table' => [
+                'title' => 'Available Reports',
+                'reports_count' => 'report|reports',
+                'period' => 'Period',
+                'type' => 'Type',
+                'generated_at' => 'Generated on',
+                'file_size' => 'Size',
+                'actions' => 'Actions',
+                'download' => 'Download',
+            ],
+            
+            'types' => [
+                'monthly_sales' => 'Monthly Sales',
+            ],
+            
+            'empty' => [
+                'title' => 'No reports available',
+                'description' => 'No monthly reports have been generated for your franchise yet.',
+                'help' => 'Monthly reports are automatically generated by the administration.',
+            ],
+            
+            'messages' => [
+                'access_denied' => 'You don\'t have access to this report.',
+                'file_not_found' => 'The report file could not be found.',
+            ],
+        ],
+    ],
 ];

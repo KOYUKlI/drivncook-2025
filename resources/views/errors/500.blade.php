@@ -1,9 +1,77 @@
-@extends('layouts.guest')
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ __('ui.errors.500.title') }} - {{ config('app.name', 'DrivnCook') }}</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    
+    <!-- Scripts -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
+<body class="font-sans text-gray-900 antialiased bg-gradient-to-br from-red-50 to-orange-50 min-h-screen">
+    <div class="min-h-screen flex flex-col justify-center items-center">
+        <!-- Logo -->
+        <div class="flex flex-col items-center mb-8">
+            <div class="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center mb-4 shadow-lg">
+                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-800">DrivnCook</h1>
+        </div>
 
-@section('content')
-<div class="text-center py-20">
-  <h1 class="text-4xl font-bold mb-2">500</h1>
-  <p class="text-gray-600">{{ __('Server Error') }}</p>
-  <p class="text-gray-500 mt-2">{{ __('Please try again later.') }}</p>
-</div>
-@endsection
+        <!-- Error Content -->
+        <div class="w-full max-w-md px-6 py-8 bg-white shadow-xl rounded-2xl border border-gray-100 text-center">
+            <div class="mb-6">
+                <div class="text-6xl font-bold text-red-600 mb-2">500</div>
+                <h2 class="text-2xl font-semibold text-gray-800 mb-2">{{ __('ui.errors.500.heading') }}</h2>
+                <p class="text-gray-600">{{ __('ui.errors.500.message') }}</p>
+            </div>
+
+            <!-- Info Box -->
+            <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p class="text-red-700 text-sm">
+                    {{ __('ui.errors.500.help') }}
+                </p>
+            </div>
+
+            <!-- Navigation Links -->
+            <div class="space-y-3">
+                @auth
+                    @if(auth()->user()->hasRole('franchisee'))
+                        <a href="{{ route('fo.dashboard') }}" class="w-full inline-flex justify-center items-center px-4 py-2 bg-gradient-to-r from-orange-500 to-red-600 text-white font-semibold rounded-lg hover:from-orange-600 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-all duration-200">
+                            {{ __('ui.errors.500.back_fo') }}
+                        </a>
+                    @else
+                        <a href="{{ route('bo.dashboard') }}" class="w-full inline-flex justify-center items-center px-4 py-2 bg-gradient-to-r from-orange-500 to-red-600 text-white font-semibold rounded-lg hover:from-orange-600 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-all duration-200">
+                            {{ __('ui.errors.500.back_bo') }}
+                        </a>
+                    @endif
+                @else
+                    <a href="{{ route('home') }}" class="w-full inline-flex justify-center items-center px-4 py-2 bg-gradient-to-r from-orange-500 to-red-600 text-white font-semibold rounded-lg hover:from-orange-600 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-all duration-200">
+                        {{ __('ui.errors.500.back_home') }}
+                    </a>
+                @endauth
+                
+                <button onclick="window.location.reload()" class="w-full inline-flex justify-center items-center px-4 py-2 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    {{ __('ui.errors.500.reload') }}
+                </button>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-8 text-center">
+            <p class="text-sm text-gray-500">
+                {{ __('ui.auth.footer') }}
+            </p>
+        </div>
+    </div>
+</body>
+</html>

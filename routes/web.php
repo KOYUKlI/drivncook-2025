@@ -75,12 +75,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Franchisees management (admin only)
         Route::middleware('role:admin')->group(function () {
             Route::resource('franchisees', FranchiseeController::class);
-            Route::resource('applications', ApplicationController::class)->only(['index', 'show']);
-            Route::post('applications/{id}/prequalify', [ApplicationController::class, 'prequalify'])->name('applications.prequalify');
-            Route::post('applications/{id}/interview', [ApplicationController::class, 'interview'])->name('applications.interview');
-            Route::post('applications/{id}/approve', [FranchiseApplicationReviewController::class, 'approve'])->name('applications.approve');
-            Route::post('applications/{id}/reject', [ApplicationController::class, 'reject'])->name('applications.reject');
-            Route::get('applications/documents/{document}/download', [ApplicationController::class, 'downloadDocument'])->name('applications.download-document');
+            Route::get('applications', [App\Http\Controllers\Admin\ApplicationController::class, 'index'])->name('applications.index');
+            Route::get('applications/{application}', [App\Http\Controllers\Admin\ApplicationController::class, 'show'])->name('applications.show');
+            Route::post('applications/{application}/status', [App\Http\Controllers\Admin\ApplicationController::class, 'updateStatus'])->name('applications.update-status');
+            Route::get('applications/files/{document}/download', [App\Http\Controllers\Admin\ApplicationController::class, 'downloadDocument'])->name('applications.files.download');
         });
 
         // Trucks management (admin, fleet)
@@ -104,6 +102,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::middleware('role:admin|warehouse')->group(function () {
             Route::get('reports/monthly', [BOReportController::class, 'monthly'])->name('reports.monthly');
             Route::post('reports/monthly/generate', [BOReportController::class, 'generate'])->name('reports.monthly.generate');
+            Route::get('reports/{id}/download', [BOReportController::class, 'download'])->name('reports.download');
 
             Route::resource('warehouses', WarehouseController::class)->except(['show']);
             Route::resource('stock-items', StockItemController::class)->except(['show']);
@@ -148,3 +147,11 @@ Route::get('/test-franchisee', function () {
 
     return redirect()->route('fo.dashboard');
 })->name('test.franchisee');
+
+// Mail preview routes (local only)
+if (app()->environment('local')) {
+    Route::prefix('dev/mail')->name('dev.mail.')->group(function () {
+        Route::get('preview', [App\Http\Controllers\Dev\MailPreviewController::class, 'index'])->name('index');
+        Route::get('preview/{mailable}', [App\Http\Controllers\Dev\MailPreviewController::class, 'preview'])->name('preview');
+    });
+}

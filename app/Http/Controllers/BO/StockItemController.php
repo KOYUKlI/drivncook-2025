@@ -36,7 +36,7 @@ class StockItemController extends Controller
         $item->is_central = (bool) ($data['is_central'] ?? false);
         $item->save();
 
-        return redirect()->route('bo.stock-items.index')->with('success', __('Article créé.'));
+        return redirect()->route('bo.stock-items.index')->with('success', __('ui.bo.stock_items.messages.created'));
     }
 
     public function edit(StockItem $stock_item)
@@ -57,13 +57,13 @@ class StockItemController extends Controller
         $data['is_central'] = (bool) ($data['is_central'] ?? false);
         $stock_item->update($data);
 
-        return redirect()->route('bo.stock-items.index')->with('success', __('Article mis à jour.'));
+        return redirect()->route('bo.stock-items.index')->with('success', __('ui.bo.stock_items.messages.updated'));
     }
 
     public function destroy(StockItem $stock_item)
     {
         $stock_item->delete();
 
-        return redirect()->route('bo.stock-items.index')->with('success', __('Article supprimé.'));
+        return redirect()->route('bo.stock-items.index')->with('success', __('ui.bo.stock_items.messages.deleted'));
     }
 }

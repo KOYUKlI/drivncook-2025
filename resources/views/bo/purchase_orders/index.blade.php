@@ -7,21 +7,21 @@
 @section('content')
     <x-ui.breadcrumbs :items="[
         ['title' => __('ui.dashboard'), 'url' => route('bo.dashboard')],
-        ['title' => __('ui.purchase_orders')]
+        ['title' => __('ui.bo.purchase_orders.title')]
     ]" />
 
     <div class="mb-8">
         <div class="flex items-center justify-between">
             <div>
-                <h1 class="text-2xl font-bold text-gray-900">{{ __('ui.purchase_orders') }}</h1>
-                <p class="text-gray-600">{{ __('ui.manage_purchase_orders') }}</p>
+                <h1 class="text-2xl font-bold text-gray-900">{{ __('ui.bo.purchase_orders.title') }}</h1>
+                <p class="text-gray-600">{{ __('ui.bo.purchase_orders.subtitle') }}</p>
             </div>
             <div class="flex gap-3">
                 <a href="{{ route('bo.purchase-orders.create') }}" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium">
-                    {{ __('ui.create_purchase_order') }}
+                    {{ __('ui.bo.purchase_orders.create') }}
                 </a>
                 <a href="{{ route('bo.purchase-orders.compliance-report') }}" class="border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-md text-sm font-medium">
-                    {{ __('ui.compliance_report') }}
+                    {{ __('ui.bo.purchase_orders.compliance_report.title') }}
                 </a>
             </div>
         </div>

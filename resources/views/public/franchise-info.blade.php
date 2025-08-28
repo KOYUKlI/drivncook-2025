@@ -1,21 +1,115 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
+<x-app-layout>
+    <x-slot name="title">{{ __('ui.public.franchise_info.title') }}</x-slot>
 
-        <title>{{ __('ui.franchise_information') }} - {{ config('app.name', 'Laravel') }}</title>
-        <meta name="description" content="{{ __('ui.franchise_info_meta_description') }}">
+    <!-- Hero Section -->
+    <div class="bg-gradient-to-br from-indigo-50 to-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+            <div class="text-center">
+                <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
+                    {{ __('ui.public.franchise_info.hero_title') }}
+                </h1>
+                <p class="mt-6 max-w-3xl mx-auto text-xl text-gray-600">
+                    {{ __('ui.public.franchise_info.hero_subtitle') }}
+                </p>
+            </div>
+        </div>
+    </div>
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700" rel="stylesheet" />
+    <!-- Economic Model Section -->
+    <div class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-3xl mx-auto">
+                <h2 class="text-3xl font-bold text-gray-900 text-center">{{ __('ui.public.franchise_info.model_title') }}</h2>
+                <div class="mt-12 space-y-8">
+                    <div class="bg-gray-50 rounded-lg p-6">
+                        <h3 class="text-xl font-semibold text-gray-900">{{ __('ui.public.franchise_info.investment') }}</h3>
+                        <p class="mt-2 text-gray-600">{{ __('ui.public.franchise_info.investment_desc') }}</p>
+                        <div class="mt-4 bg-yellow-100 border border-yellow-200 rounded-md p-4">
+                            <p class="text-sm text-yellow-800">
+                                <strong>{{ __('ui.public.franchise_info.investment_requirement') }}</strong>
+                                {{ __('ui.public.franchise_info.investment_amount') }}
+                            </p>
+                        </div>
+                    </div>
 
-        <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body class="min-h-screen bg-white text-gray-900">
+                    <div class="bg-gray-50 rounded-lg p-6">
+                        <h3 class="text-xl font-semibold text-gray-900">{{ __('ui.public.franchise_info.fees') }}</h3>
+                        <p class="mt-2 text-gray-600">{{ __('ui.public.franchise_info.fees_desc') }}</p>
+                        <div class="mt-4 bg-blue-100 border border-blue-200 rounded-md p-4">
+                            <p class="text-sm text-blue-800">
+                                <strong>{{ __('ui.public.franchise_info.fees_percentage') }}</strong>
+                                {{ __('ui.public.franchise_info.fees_amount') }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 rounded-lg p-6">
+                        <h3 class="text-xl font-semibold text-gray-900">{{ __('ui.public.franchise_info.ratio_title') }}</h3>
+                        <p class="mt-2 text-gray-600">{{ __('ui.public.franchise_info.ratio_desc') }}</p>
+                        <div class="mt-4 bg-green-100 border border-green-200 rounded-md p-4">
+                            <p class="text-sm text-green-800">
+                                <strong>{{ __('ui.public.franchise_info.ratio_requirement') }}</strong>
+                                {{ __('ui.public.franchise_info.ratio_explanation') }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-3xl mx-auto">
+                <h2 class="text-3xl font-bold text-gray-900 text-center">{{ __('ui.public.franchise_info.faq_title') }}</h2>
+                <div class="mt-12 space-y-6">
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-gray-900">{{ __('ui.public.franchise_info.faq_q1') }}</h3>
+                        <p class="mt-2 text-gray-600">{{ __('ui.public.franchise_info.faq_a1') }}</p>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-gray-900">{{ __('ui.public.franchise_info.faq_q2') }}</h3>
+                        <p class="mt-2 text-gray-600">{{ __('ui.public.franchise_info.faq_a2') }}</p>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-gray-900">{{ __('ui.public.franchise_info.faq_q3') }}</h3>
+                        <p class="mt-2 text-gray-600">{{ __('ui.public.franchise_info.faq_a3') }}</p>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-gray-900">{{ __('ui.public.franchise_info.faq_q4') }}</h3>
+                        <p class="mt-2 text-gray-600">{{ __('ui.public.franchise_info.faq_a4') }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="bg-indigo-600">
+        <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold text-white">
+                    {{ __('ui.public.franchise_info.cta_title') }}
+                </h2>
+                <p class="mt-4 text-xl text-indigo-100">
+                    {{ __('ui.public.franchise_info.cta_subtitle') }}
+                </p>
+                <div class="mt-8">
+                    <a href="{{ route('public.applications.create') }}" class="inline-flex items-center px-8 py-3 border border-transparent text-lg font-medium rounded-md text-indigo-600 bg-white hover:bg-gray-50 transition-colors duration-200">
+                        {{ __('ui.public.franchise_info.cta_button') }}
+                        <svg class="ml-2 -mr-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</x-app-layout>
         
         <!-- Header -->
         <header class="bg-white border-b border-gray-200">

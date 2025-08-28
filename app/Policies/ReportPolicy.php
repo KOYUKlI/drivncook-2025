@@ -72,4 +72,22 @@ class ReportPolicy
     {
         return $user->hasRole(['admin', 'warehouse', 'fleet']);
     }
+
+    /**
+     * Determine whether the user can download a specific report.
+     */
+    public function downloadReport(User $user, $report): bool
+    {
+        // Admin and warehouse can download any report
+        if ($user->hasRole(['admin', 'warehouse'])) {
+            return true;
+        }
+
+        // Franchisees can only download their own reports
+        if ($user->hasRole('franchisee') && $user->franchisee_id) {
+            return $report->franchisee_id === $user->franchisee_id;
+        }
+
+        return false;
+    }
 }

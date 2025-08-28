@@ -15,31 +15,25 @@ class ReportController extends Controller
     /**
      * Display a listing of reports.
      */
-    public function index()
+    public function index(Request $request)
     {
         $franchiseeId = data_get(Auth::user(), 'franchisee_id');
-        $reports = ReportPdf::query()
-            ->when($franchiseeId, fn ($q) => $q->where('franchisee_id', $franchiseeId))
-            ->latest('generated_at')
-            ->get();
-
-        // Calculate real summary data for FO dashboard
-        $franchiseeId = data_get(Auth::user(), 'franchisee_id');
         
-        $monthSales = \App\Models\Sale::whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])
-            ->when($franchiseeId, fn($q) => $q->where('franchisee_id', $franchiseeId))
-            ->get();
+        $query = ReportPdf::query()
+            ->when($franchiseeId, fn ($q) => $q->where('franchisee_id', $franchiseeId));
 
-        $summary = [
-            'total_sales_month' => $monthSales->sum('total_cents'),
-            'transactions_month' => $monthSales->count(),
-            'avg_transaction' => $monthSales->count() > 0 ? $monthSales->avg('total_cents') : 0,
-            'compliance_rate' => 92.1, // TODO: Calculate from purchase orders
-            'best_location' => 'Centre-ville', // TODO: Calculate from deployments
-            'reports_generated' => $reports->count(),
-        ];
+        // Apply filters
+        if ($request->filled('year')) {
+            $query->where('year', $request->get('year'));
+        }
 
-        return view('fo.reports.index', compact('reports', 'summary'));
+        if ($request->filled('month')) {
+            $query->where('month', $request->get('month'));
+        }
+
+        $reports = $query->latest('generated_at')->get();
+
+        return view('fo.reports.index', compact('reports'));
     }
 
     /**
@@ -76,13 +70,25 @@ class ReportController extends Controller
     {
         $report = ReportPdf::findOrFail($id);
         $user = Auth::user();
-        $isBackoffice = in_array(data_get($user, 'role'), ['admin', 'warehouse'], true); // fallback if roles not loaded
+        
+        // Security check: ensure franchisee can only download their own reports
+        $isBackoffice = in_array(data_get($user, 'role'), ['admin', 'warehouse', 'fleet', 'tech']);
         $ownsReport = $user && $user->franchisee_id && $user->franchisee_id === $report->franchisee_id;
-        if (! ($isBackoffice || $ownsReport)) {
-            abort(403);
+        
+        if (!($isBackoffice || $ownsReport)) {
+            abort(403, __('ui.fo.reports.messages.access_denied'));
         }
 
-        return response()->download(Storage::disk('public')->path($report->storage_path));
+        // Check if file exists
+        if (!Storage::disk('public')->exists($report->storage_path)) {
+            return redirect()->route('fo.reports.index')
+                ->with('error', __('ui.fo.reports.messages.file_not_found'));
+        }
+
+        return response()->download(
+            Storage::disk('public')->path($report->storage_path),
+            $report->filename ?: "rapport_{$report->month}_{$report->year}.pdf"
+        );
     }
 
     /**

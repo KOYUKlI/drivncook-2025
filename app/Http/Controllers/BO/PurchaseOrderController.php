@@ -24,7 +24,11 @@ class PurchaseOrderController extends Controller
     {
         $this->authorize('create', PurchaseOrder::class);
 
-        return view('bo.purchase_orders.create');
+        $warehouses = \App\Models\Warehouse::orderBy('name')->get();
+        $franchisees = \App\Models\User::role('franchisee')->orderBy('name')->get();
+        $stockItems = \App\Models\StockItem::orderBy('name')->get();
+
+        return view('bo.purchase_orders.create', compact('warehouses', 'franchisees', 'stockItems'));
     }
 
     /**
@@ -399,10 +403,28 @@ class PurchaseOrderController extends Controller
     {
         $period = $request->input('period', 'current_month');
 
-        $orders = PurchaseOrder::with(['warehouse', 'creator'])
-            ->whereMonth('created_at', now()->month)
-            ->whereYear('created_at', now()->year)
-            ->get();
+        // Build query based on period
+        $query = PurchaseOrder::with(['warehouse', 'creator', 'franchisee']);
+        
+        switch ($period) {
+            case 'last_month':
+                $query->whereMonth('created_at', now()->subMonth()->month)
+                      ->whereYear('created_at', now()->subMonth()->year);
+                break;
+            case 'current_quarter':
+                $query->whereBetween('created_at', [
+                    now()->startOfQuarter(),
+                    now()->endOfQuarter()
+                ]);
+                break;
+            case 'current_month':
+            default:
+                $query->whereMonth('created_at', now()->month)
+                      ->whereYear('created_at', now()->year);
+                break;
+        }
+
+        $orders = $query->get();
 
         $complianceData = [
             'total_orders' => $orders->count(),
@@ -411,22 +433,19 @@ class PurchaseOrderController extends Controller
             'compliance_rate' => $orders->count() > 0 ? 
                 ($orders->where('corp_ratio_cached', '>=', 80)->count() / $orders->count()) * 100 : 0,
             'average_ratio' => $orders->avg('corp_ratio_cached') ?? 0,
-            'by_franchisee' => $orders->groupBy('warehouse.name')->map(function ($warehouseOrders, $warehouseName) {
-                $compliantCount = $warehouseOrders->where('corp_ratio_cached', '>=', 80)->count();
-                $totalCount = $warehouseOrders->count();
+            'by_franchisee' => $orders->groupBy(function ($order) {
+                return $order->franchisee?->name ?? $order->warehouse?->name ?? 'Inconnu';
+            })->map(function ($franchiseeOrders, $franchiseeName) {
+                $compliantCount = $franchiseeOrders->where('corp_ratio_cached', '>=', 80)->count();
+                $totalCount = $franchiseeOrders->count();
                 
                 return [
-                    'name' => $warehouseName ?? 'Inconnu',
+                    'name' => $franchiseeName,
                     'orders' => $totalCount,
                     'compliance_rate' => $totalCount > 0 ? ($compliantCount / $totalCount) * 100 : 0,
-                    'avg_ratio' => $warehouseOrders->avg('corp_ratio_cached') ?? 0,
+                    'avg_ratio' => $franchiseeOrders->avg('corp_ratio_cached') ?? 0,
                 ];
-            })->values()->toArray(),
-            'trend' => [
-                // TODO: Calculate historical compliance trend
-                ['month' => 'Mois actuel', 'compliance_rate' => $orders->count() > 0 ? 
-                    ($orders->where('corp_ratio_cached', '>=', 80)->count() / $orders->count()) * 100 : 0],
-            ],
+            })->sortByDesc('compliance_rate')->values()->toArray(),
         ];
 
         return view('bo.purchase_orders.compliance_report', compact('complianceData', 'period'));

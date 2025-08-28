@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ __('Se connecter') }} - {{ config('app.name', 'DrivnCook') }}</title>
+    <title>{{ __('ui.auth.login.title') }} - {{ config('app.name', 'DrivnCook') }}</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -24,13 +24,13 @@
                 </svg>
             </div>
             <h1 class="text-3xl font-bold text-gray-800">DrivnCook</h1>
-            <p class="text-gray-600 text-center mt-2">{{ __('Plateforme de gestion des franchises') }}</p>
+            <p class="text-gray-600 text-center mt-2">{{ __('ui.auth.tagline') }}</p>
         </div>
 
         <div class="w-full sm:max-w-md mt-6 px-6 py-8 bg-white shadow-xl rounded-2xl border border-gray-100">
             <div class="mb-6 text-center">
-                <h2 class="text-2xl font-semibold text-gray-800 mb-2">{{ __('Connexion') }}</h2>
-                <p class="text-gray-600">{{ __('Accédez à votre espace de gestion') }}</p>
+                <h2 class="text-2xl font-semibold text-gray-800 mb-2">{{ __('ui.auth.login.heading') }}</h2>
+                <p class="text-gray-600">{{ __('ui.auth.login.subtitle') }}</p>
             </div>
 
             <!-- Session Status -->
@@ -46,7 +46,7 @@
                 <!-- Email Address -->
                 <div>
                     <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-                        {{ __('Adresse email') }}
+                        {{ __('ui.auth.login.email') }}
                     </label>
                     <input 
                         id="email" 
@@ -57,7 +57,7 @@
                         required 
                         autofocus 
                         autocomplete="username"
-                        placeholder="{{ __('votre@email.com') }}"
+                        placeholder="{{ __('ui.auth.login.email_placeholder') }}"
                     />
                     @error('email')
                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -67,7 +67,7 @@
                 <!-- Password -->
                 <div>
                     <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-                        {{ __('Mot de passe') }}
+                        {{ __('ui.auth.login.password') }}
                     </label>
                     <input 
                         id="password" 
@@ -76,7 +76,7 @@
                         name="password"
                         required 
                         autocomplete="current-password"
-                        placeholder="{{ __('••••••••') }}"
+                        placeholder="{{ __('ui.auth.login.password_placeholder') }}"
                     />
                     @error('password')
                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -92,12 +92,12 @@
                             class="rounded border-gray-300 text-orange-600 shadow-sm focus:ring-orange-500" 
                             name="remember"
                         >
-                        <span class="ml-2 text-sm text-gray-600">{{ __('Se souvenir de moi') }}</span>
+                        <span class="ml-2 text-sm text-gray-600">{{ __('ui.auth.login.remember') }}</span>
                     </label>
 
                     @if (Route::has('password.request'))
                         <a class="text-sm text-orange-600 hover:text-orange-800 hover:underline" href="{{ route('password.request') }}">
-                            {{ __('Mot de passe oublié ?') }}
+                            {{ __('ui.auth.login.forgot_password') }}
                         </a>
                     @endif
                 </div>
@@ -106,16 +106,16 @@
                     type="submit" 
                     class="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white font-semibold py-3 px-4 rounded-lg hover:from-orange-600 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transform transition hover:scale-[1.02] shadow-lg"
                 >
-                    {{ __('Se connecter') }}
+                    {{ __('ui.auth.login.submit') }}
                 </button>
             </form>
 
             <!-- Footer -->
             <div class="mt-8 pt-6 border-t border-gray-200">
                 <p class="text-center text-sm text-gray-600">
-                    {{ __('Pas encore de compte ?') }}
+                    {{ __('ui.auth.login.no_account') }}
                     <a href="{{ route('public.applications.create') }}" class="text-orange-600 hover:text-orange-800 font-medium hover:underline">
-                        {{ __('Candidater maintenant') }}
+                        {{ __('ui.auth.login.apply_now') }}
                     </a>
                 </p>
             </div>
@@ -124,7 +124,7 @@
         <!-- Additional Info -->
         <div class="mt-8 text-center">
             <p class="text-sm text-gray-500">
-                {{ __('© 2025 DrivnCook. Tous droits réservés.') }}
+                {{ __('ui.auth.footer') }}
             </p>
         </div>
     </div>

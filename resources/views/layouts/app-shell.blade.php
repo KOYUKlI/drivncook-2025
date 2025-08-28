@@ -20,6 +20,12 @@
 
         <main class="flex-1">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+                <!-- Flash Messages -->
+                <x-ui.flash type="success" />
+                <x-ui.flash type="error" />
+                <x-ui.flash type="warning" />
+                <x-ui.flash type="info" />
+                
                 @hasSection('sidebar')
                     <div class="lg:flex lg:gap-6">
                         <aside class="lg:w-64 lg:flex-shrink-0 mb-6 lg:mb-0">

@@ -316,4 +316,332 @@ return [
     'login' => 'Connexion',
     'register' => 'S\'inscrire',
     'suspended' => 'Suspendu',
+
+    // BO Purchase Orders
+    'bo' => [
+        'purchase_orders' => [
+            'title' => 'Commandes d\'Achat',
+            'subtitle' => 'Gestion des commandes d\'approvisionnement',
+            'create' => 'Nouvelle Commande',
+            'edit' => 'Modifier Commande',
+            'show' => 'Détails Commande',
+            'list' => 'Liste Commandes',
+            'delete_confirm' => 'Êtes-vous sûr de vouloir supprimer cette commande ?',
+            
+            'form' => [
+                'warehouse' => 'Entrepôt',
+                'warehouse_placeholder' => 'Sélectionner un entrepôt',
+                'franchisee' => 'Franchisé',
+                'franchisee_placeholder' => 'Sélectionner un franchisé (optionnel)',
+                'lines_title' => 'Lignes de Commande',
+                'add_line' => 'Ajouter une ligne',
+                'stock_item' => 'Article',
+                'stock_item_placeholder' => 'Sélectionner un article',
+                'quantity' => 'Quantité',
+                'unit_price' => 'Prix Unitaire',
+                'subtotal' => 'Sous-total',
+                'total' => 'Total',
+                'remove_line' => 'Supprimer cette ligne',
+                'no_stock_items' => 'Aucun article disponible',
+                'currency_helper' => 'Prix en centimes (ex: 1250 = 12,50€)',
+            ],
+            
+            'workflow' => [
+                'approve' => 'Approuver',
+                'prepare' => 'Préparer',
+                'ship' => 'Expédier',
+                'receive' => 'Recevoir',
+                'cancel' => 'Annuler',
+                'approved' => 'Approuvé',
+                'prepared' => 'Préparé',
+                'shipped' => 'Expédié',
+                'received' => 'Reçu',
+                'cancelled' => 'Annulé',
+                'draft' => 'Brouillon',
+            ],
+            
+            'compliance' => [
+                'ratio_label' => 'Ratio 80/20',
+                'ratio_compliant' => 'Conforme',
+                'ratio_non_compliant' => 'Non conforme',
+                'ratio_warning' => 'Attention : ratio 80/20 non respecté',
+                'override_needed' => 'Autorisation de dérogation requise',
+            ],
+            
+            'compliance_report' => [
+                'title' => 'Rapport de Conformité',
+                'subtitle' => 'Analyse de conformité des commandes d\'achat',
+                'current_month' => 'Mois Actuel',
+                'last_month' => 'Mois Précédent',
+                'current_quarter' => 'Trimestre Actuel',
+                'update' => 'Actualiser',
+                'back_to_orders' => 'Retour aux Commandes',
+                'print' => 'Imprimer',
+                
+                'stats' => [
+                    'total_orders' => 'Total Commandes',
+                    'compliant_orders' => 'Commandes Conformes',
+                    'non_compliant_orders' => 'Commandes Non Conformes',
+                    'compliance_rate' => 'Taux de Conformité',
+                ],
+                
+                'overall' => [
+                    'title' => 'Conformité Globale',
+                    'average_ratio' => 'Ratio Moyen',
+                    'target' => 'Objectif',
+                ],
+                
+                'by_franchisee' => [
+                    'title' => 'Par Franchisé',
+                    'franchisee' => 'Franchisé',
+                    'orders' => 'Commandes',
+                    'compliance_rate' => 'Taux Conformité',
+                    'avg_ratio' => 'Ratio Moyen',
+                    'status' => 'Statut',
+                ],
+                
+                'status' => [
+                    'compliant' => 'Conforme',
+                    'non_compliant' => 'Non Conforme',
+                ],
+                
+                'empty' => [
+                    'title' => 'Aucune donnée',
+                    'description' => 'Aucune commande trouvée pour la période sélectionnée.',
+                ],
+            ],
+        ],
+        
+        'reports' => [
+            'monthly_sales' => [
+                'title' => 'Rapports Mensuels',
+                'subtitle' => 'Gestion des rapports de ventes mensuels par franchisé',
+                
+                'filters' => [
+                    'title' => 'Filtres et Recherche',
+                    'year' => 'Année',
+                    'month' => 'Mois',
+                    'franchisee' => 'Franchisé',
+                    'all_months' => 'Tous les mois',
+                    'all_franchisees' => 'Tous les franchisés',
+                    'apply' => 'Appliquer',
+                    'reset' => 'Réinitialiser',
+                ],
+                
+                'generate' => [
+                    'title' => 'Générer un Nouveau Rapport',
+                    'year' => 'Année',
+                    'month' => 'Mois',
+                    'franchisee' => 'Franchisé',
+                    'all_franchisees' => 'Tous les franchisés',
+                    'button' => 'Générer Rapport',
+                ],
+                
+                'table' => [
+                    'title' => 'Rapports Générés',
+                    'franchisee' => 'Franchisé',
+                    'period' => 'Période',
+                    'generated_at' => 'Généré le',
+                    'actions' => 'Actions',
+                    'download' => 'Télécharger',
+                    'all_franchisees' => 'Tous les franchisés',
+                ],
+                
+                'empty' => [
+                    'title' => 'Aucun rapport',
+                    'description' => 'Aucun rapport mensuel trouvé pour les critères sélectionnés.',
+                    'generate_first' => 'Générer le premier rapport',
+                ],
+                
+                'messages' => [
+                    'generated_success' => 'Rapport généré avec succès pour :franchisee - :month :year',
+                    'already_exists' => 'Un rapport existe déjà pour cette période et ce franchisé.',
+                    'file_not_found' => 'Le fichier PDF n\'a pas été trouvé sur le serveur.',
+                ],
+            ],
+        ],
+    ],
+
+    // Months
+    'months' => [
+        1 => 'Janvier',
+        2 => 'Février', 
+        3 => 'Mars',
+        4 => 'Avril',
+        5 => 'Mai',
+        6 => 'Juin',
+        7 => 'Juillet',
+        8 => 'Août',
+        9 => 'Septembre',
+        10 => 'Octobre',
+        11 => 'Novembre',
+        12 => 'Décembre',
+    ],
+
+    // FO Sales
+    'fo' => [
+        'dashboard' => 'Tableau de Bord',
+        
+        'sales' => [
+            'title' => 'Mes Ventes',
+            'subtitle' => 'Gérez vos ventes quotidiennes et consultez vos performances',
+            
+            'index' => [
+                'title' => 'Historique des Ventes',
+                'subtitle' => 'Consultez toutes vos transactions de vente',
+                'new_sale' => 'Nouvelle Vente',
+            ],
+            
+            'create' => [
+                'title' => 'Nouvelle Vente',
+                'subtitle' => 'Enregistrer une nouvelle transaction de vente',
+                
+                'location_time' => 'Localisation et Heure',
+                'location' => 'Emplacement',
+                'location_placeholder' => 'Ex: Place de la République, Centre-ville',
+                'coordinates' => 'Coordonnées GPS',
+                'sale_date' => 'Date et Heure de la Vente',
+                
+                'items' => 'Articles Vendus',
+                'add_item' => 'Ajouter un Article',
+                'product' => 'Produit',
+                'select_product' => 'Sélectionner un produit',
+                'quantity' => 'Quantité',
+                'line_total' => 'Total Ligne',
+                'item_selected' => 'article sélectionné',
+                'items_selected' => 'articles sélectionnés',
+                'subtotal' => 'Sous-total',
+                'items_count' => 'Nombre d\'articles',
+                'avg_price' => 'Prix moyen',
+                
+                'payment_method' => 'Mode de Paiement',
+                'payment' => [
+                    'card' => 'Carte Bancaire',
+                    'cash' => 'Espèces',
+                    'mobile' => 'Paiement Mobile',
+                ],
+                
+                'summary' => 'Récapitulatif',
+                'tax' => 'TVA',
+                'total' => 'Total',
+                
+                'confirm_sale' => 'Confirmer la Vente',
+                'cancel' => 'Annuler',
+            ],
+            
+            'filters' => [
+                'title' => 'Filtres et Recherche',
+                'period' => 'Période',
+                'from_date' => 'Du',
+                'to_date' => 'Au',
+                'all_periods' => 'Toutes les périodes',
+                'today' => 'Aujourd\'hui',
+                'yesterday' => 'Hier',
+                'this_week' => 'Cette semaine',
+                'last_week' => 'Semaine dernière',
+                'this_month' => 'Ce mois',
+                'last_month' => 'Mois dernier',
+                'this_quarter' => 'Ce trimestre',
+                'this_year' => 'Cette année',
+                'location' => 'Emplacement',
+                'all_locations' => 'Tous les emplacements',
+                'payment_method' => 'Mode de paiement',
+                'all_payments' => 'Tous les modes',
+                'apply' => 'Appliquer',
+                'reset' => 'Réinitialiser',
+            ],
+            
+            'stats' => [
+                'title' => 'Résumé de la Période',
+                'total_sales' => 'Ventes Totales',
+                'transactions_count' => 'Transactions',
+                'avg_transaction' => 'Panier Moyen',
+                'items_sold' => 'Articles Vendus',
+                'best_day' => 'Meilleur Jour',
+                'most_sold_item' => 'Article Star',
+                'growth' => 'Croissance',
+                'vs_previous' => 'vs période précédente',
+            ],
+            
+            'table' => [
+                'date' => 'Date et Heure',
+                'location' => 'Emplacement',
+                'payment_method' => 'Paiement',
+                'items' => 'Articles',
+                'amount' => 'Montant',
+                'actions' => 'Actions',
+                'view_details' => 'Voir Détails',
+                'export_receipt' => 'Exporter Reçu',
+                'coordinates' => 'Coordonnées',
+            ],
+            
+            'payment_methods' => [
+                'card' => 'Carte',
+                'cash' => 'Espèces',
+                'mobile' => 'Mobile',
+            ],
+            
+            'empty' => [
+                'title' => 'Aucune vente trouvée',
+                'description' => 'Vous n\'avez pas encore effectué de vente pour cette période.',
+                'create_first' => 'Créer ma première vente',
+            ],
+            
+            'pagination' => [
+                'showing' => 'Affichage de',
+                'to' => 'à',
+                'of' => 'sur',
+                'results' => 'résultats',
+                'previous' => 'Précédent',
+                'next' => 'Suivant',
+            ],
+            
+            'messages' => [
+                'created' => 'Vente enregistrée avec succès !',
+                'updated' => 'Vente mise à jour avec succès !',
+                'deleted' => 'Vente supprimée avec succès !',
+                'export_success' => 'Export généré avec succès !',
+            ],
+        ],
+        
+        'reports' => [
+            'title' => 'Mes Rapports',
+            'subtitle' => 'Consultez et téléchargez vos rapports mensuels',
+            
+            'filters' => [
+                'title' => 'Filtres et Recherche',
+                'year' => 'Année',
+                'month' => 'Mois',
+                'all_months' => 'Tous les mois',
+                'apply' => 'Appliquer',
+                'reset' => 'Réinitialiser',
+            ],
+            
+            'table' => [
+                'title' => 'Rapports Disponibles',
+                'reports_count' => 'rapport|rapports',
+                'period' => 'Période',
+                'type' => 'Type',
+                'generated_at' => 'Généré le',
+                'file_size' => 'Taille',
+                'actions' => 'Actions',
+                'download' => 'Télécharger',
+            ],
+            
+            'types' => [
+                'monthly_sales' => 'Ventes Mensuelles',
+            ],
+            
+            'empty' => [
+                'title' => 'Aucun rapport disponible',
+                'description' => 'Aucun rapport mensuel n\'a encore été généré pour votre franchise.',
+                'help' => 'Les rapports mensuels sont générés automatiquement par l\'administration.',
+            ],
+            
+            'messages' => [
+                'access_denied' => 'Vous n\'avez pas accès à ce rapport.',
+                'file_not_found' => 'Le fichier du rapport est introuvable.',
+            ],
+        ],
+    ],
 ];

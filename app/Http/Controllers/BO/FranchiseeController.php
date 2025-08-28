@@ -46,11 +46,13 @@ class FranchiseeController extends Controller
             'email' => 'required|email|max:255|unique:franchisees,email',
             'phone' => 'nullable|string|max:30',
             'billing_address' => 'nullable|string|max:1000',
+            'status' => 'nullable|string|in:active,inactive',
         ], [
-            'name.required' => 'Le nom est obligatoire.',
-            'email.required' => 'L\'email est obligatoire.',
-            'email.unique' => 'Cet email est déjà utilisé.',
-            'email.email' => 'L\'email doit être valide.',
+            'name.required' => __('ui.bo.franchisees.validation.name_required'),
+            'email.required' => __('ui.bo.franchisees.validation.email_required'),
+            'email.unique' => __('ui.bo.franchisees.validation.email_unique'),
+            'email.email' => __('ui.bo.franchisees.validation.email_format'),
+            'status.in' => __('ui.bo.franchisees.validation.status_invalid'),
         ]);
 
         $franchisee = new Franchisee();
@@ -59,10 +61,11 @@ class FranchiseeController extends Controller
         $franchisee->email = $data['email'];
         $franchisee->phone = $data['phone'] ?? null;
         $franchisee->billing_address = $data['billing_address'] ?? null;
+        $franchisee->status = $data['status'] ?? 'active';
         $franchisee->save();
 
         return redirect()->route('bo.franchisees.show', $franchisee->id)
-            ->with('success', 'Franchisé créé avec succès.');
+            ->with('success', __('ui.bo.franchisees.created_success'));
     }
 
     /**
@@ -88,8 +91,11 @@ class FranchiseeController extends Controller
             'trucks_assigned' => (int) $franchisee->trucks->count(),
         ];
 
-        // For now, reports are not linked to franchisees directly
-        $reports = collect([]);
+        // Reports for download (specific to this franchisee)
+        $reports = ReportPdf::where('franchisee_id', $franchisee->id)
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get();
 
         return view('bo.franchisees.show', compact('franchisee', 'stats', 'reports'));
     }
@@ -117,16 +123,18 @@ class FranchiseeController extends Controller
             'email' => 'required|email|max:255|unique:franchisees,email,'.$id,
             'phone' => 'nullable|string|max:30',
             'billing_address' => 'nullable|string|max:1000',
+            'status' => 'nullable|string|in:active,inactive',
         ], [
-            'name.required' => 'Le nom est obligatoire.',
-            'email.required' => 'L\'email est obligatoire.',
-            'email.unique' => 'Cet email est déjà utilisé par un autre franchisé.',
-            'email.email' => 'L\'email doit être valide.',
+            'name.required' => __('ui.bo.franchisees.validation.name_required'),
+            'email.required' => __('ui.bo.franchisees.validation.email_required'),
+            'email.unique' => __('ui.bo.franchisees.validation.email_unique_update'),
+            'email.email' => __('ui.bo.franchisees.validation.email_format'),
+            'status.in' => __('ui.bo.franchisees.validation.status_invalid'),
         ]);
         $franchisee->fill($data)->save();
 
         return redirect()->route('bo.franchisees.show', $franchisee->id)
-            ->with('success', 'Franchisé modifié avec succès.');
+            ->with('success', __('ui.bo.franchisees.updated_success'));
     }
 
     /**
@@ -138,6 +146,6 @@ class FranchiseeController extends Controller
         $this->authorize('delete', $franchisee);
         $franchisee->delete();
 
-        return redirect()->route('bo.franchisees.index')->with('success', __('Franchisé supprimé avec succès'));
+        return redirect()->route('bo.franchisees.index')->with('success', __('ui.bo.franchisees.deleted_success'));
     }
 }

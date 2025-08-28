@@ -9,12 +9,12 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class ApplicationStatusChanged extends Mailable
+class FranchiseApplicationStatusChanged extends Mailable
 {
     use Queueable, SerializesModels;
 
     public function __construct(
-        public FranchiseApplication|array $application,
+        public FranchiseApplication $application,
         public string $oldStatus,
         public string $newStatus,
         public ?string $adminMessage = ''
@@ -23,11 +23,11 @@ class ApplicationStatusChanged extends Mailable
     public function envelope(): Envelope
     {
         $subject = match ($this->newStatus) {
-            'prequalified' => 'Votre candidature est présélectionnée',
-            'interview' => 'Entretien programmé',
-            'approved' => 'Candidature approuvée',
-            'rejected' => 'Candidature rejetée',
-            default => 'Mise à jour de votre candidature',
+            'prequalified' => __('emails.application_status_prequalified'),
+            'interview' => __('emails.application_status_interview'),
+            'approved' => __('emails.application_status_approved'),
+            'rejected' => __('emails.application_status_rejected'),
+            default => __('emails.application_status_rejected'),
         };
 
         return new Envelope(
@@ -38,12 +38,12 @@ class ApplicationStatusChanged extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.application_status_changed',
+            markdown: 'emails.applications.status-changed',
             with: [
-                'newStatus' => $this->newStatus,
-                'oldStatus' => $this->oldStatus,
-                'statusMessage' => $this->adminMessage ?? '',
                 'application' => $this->application,
+                'oldStatus' => $this->oldStatus,
+                'newStatus' => $this->newStatus,
+                'adminMessage' => $this->adminMessage,
             ],
         );
     }

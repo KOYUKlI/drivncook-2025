@@ -14,62 +14,111 @@ class ReportController extends Controller
 {
     public function monthly(Request $request)
     {
-        // Calculate real monthly sales data
-        $monthStart = now()->startOfMonth();
-        $monthEnd = now()->endOfMonth();
-        
-        $sales = \App\Models\Sale::whereBetween('created_at', [$monthStart, $monthEnd])->get();
-        
-        $totalSales = $sales->sum('total_cents');
-        $transactionCount = $sales->count();
-        $avgTransaction = $transactionCount > 0 ? $totalSales / $transactionCount : 0;
+        // Get filter parameters
+        $year = $request->get('year', now()->year);
+        $month = $request->get('month');
+        $franchiseeId = $request->get('franchisee_id');
 
-        // Calculate daily sales data
-        $dailySales = $sales->groupBy(function ($sale) {
-            return $sale->created_at->format('Y-m-d');
-        })->map(function ($daySales, $date) {
-            $dayTotal = $daySales->sum('total_cents');
-            $dayCount = $daySales->count();
-            
-            return [
-                'date' => $date,
-                'transactions' => $dayCount,
-                'total' => $dayTotal,
-                'avg' => $dayCount > 0 ? $dayTotal / $dayCount : 0,
-            ];
-        })->values()->toArray();
+        // Build query for existing PDFs
+        $reportsQuery = ReportPdf::where('type', 'monthly_sales')
+            ->with('franchisee')
+            ->when($year, fn($q) => $q->where('year', $year))
+            ->when($month, fn($q) => $q->where('month', $month))
+            ->when($franchiseeId, fn($q) => $q->where('franchisee_id', $franchiseeId))
+            ->latest('generated_at');
 
-        return view('reports.monthly_sales', compact(
-            'totalSales',
-            'transactionCount',
-            'avgTransaction',
-            'dailySales'
-        ));
+        $reports = $reportsQuery->get();
+
+        // Get franchisees for filter dropdown
+        $franchisees = \App\Models\Franchisee::orderBy('name')->get();
+
+        // Get available years from reports
+        $availableYears = ReportPdf::where('type', 'monthly_sales')
+            ->distinct()
+            ->pluck('year')
+            ->sort()
+            ->values();
+
+        return view('bo.reports.monthly_sales', compact('reports', 'franchisees', 'availableYears', 'year', 'month', 'franchiseeId'));
     }
 
     public function generate(Request $request, PdfService $pdf)
     {
-        $year = now()->year;
-        $month = now()->month;
+        $request->validate([
+            'year' => 'required|integer|min:2020|max:2030',
+            'month' => 'required|integer|min:1|max:12',
+            'franchisee_id' => 'nullable|exists:franchisees,id',
+        ]);
+
+        $year = $request->get('year');
+        $month = $request->get('month');
+        $franchiseeId = $request->get('franchisee_id');
+
+        // Check if report already exists
+        $existingReport = ReportPdf::where('type', 'monthly_sales')
+            ->where('year', $year)
+            ->where('month', $month)
+            ->where('franchisee_id', $franchiseeId)
+            ->first();
+
+        if ($existingReport) {
+            return redirect()->route('bo.reports.monthly')
+                ->with('warning', __('ui.bo.reports.monthly_sales.already_exists'));
+        }
+
+        // Get franchisee or use default
+        $franchisee = $franchiseeId ? \App\Models\Franchisee::find($franchiseeId) : null;
+        $franchiseeName = $franchisee?->name ?? __('ui.bo.reports.monthly_sales.all_franchisees');
+
+        // Generate report data
         $data = [
-            'franchisee' => ['name' => 'Franchise Démo'],
+            'franchisee' => ['name' => $franchiseeName],
             'month' => $month,
             'year' => $year,
-            'total' => 12345,
-            'lines' => [],
+            'total' => 0, // TODO: Calculate real sales data
+            'lines' => [], // TODO: Get actual sales lines
         ];
-        $path = 'reports/demo/monthly-'.now()->format('Ym').'.pdf';
+
+        $filename = sprintf('monthly-%s-%s-%s.pdf', 
+            $year, 
+            str_pad((string) $month, 2, '0', STR_PAD_LEFT),
+            $franchiseeId ?: 'all'
+        );
+        $path = "reports/monthly/{$filename}";
+        
         $pdf->monthlySales($data, $path);
 
         $report = ReportPdf::create([
             'id' => (string) Str::ulid(),
-            'franchisee_id' => request('franchisee_id') ?? (Auth::user()->franchisee_id ?? null),
+            'franchisee_id' => $franchiseeId,
             'type' => 'monthly_sales',
             'year' => $year,
             'month' => $month,
             'storage_path' => $path,
             'generated_at' => now(),
         ]);
+
+        return redirect()->route('bo.reports.monthly')
+            ->with('success', __('ui.bo.reports.monthly_sales.generated_success', [
+                'month' => __('ui.months.' . $month),
+                'year' => $year,
+                'franchisee' => $franchiseeName
+            ]));
+    }
+
+    /**
+     * Download an existing monthly report
+     */
+    public function download(string $id)
+    {
+        $report = ReportPdf::findOrFail($id);
+        
+        $this->authorize('downloadReport', $report);
+
+        if (!Storage::disk('public')->exists($report->storage_path)) {
+            return redirect()->back()
+                ->with('error', __('ui.bo.reports.monthly_sales.file_not_found'));
+        }
 
         return response()->download(Storage::disk('public')->path($report->storage_path));
     }

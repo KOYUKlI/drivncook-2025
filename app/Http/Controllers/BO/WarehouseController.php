@@ -32,7 +32,7 @@ class WarehouseController extends Controller
         $warehouse->id = (string) Str::ulid();
         $warehouse->save();
 
-        return redirect()->route('bo.warehouses.index')->with('success', __('Entrepôt créé.'));
+        return redirect()->route('bo.warehouses.index')->with('success', __('ui.bo.warehouses.messages.created'));
     }
 
     public function edit(Warehouse $warehouse)
@@ -49,13 +49,13 @@ class WarehouseController extends Controller
 
         $warehouse->update($data);
 
-        return redirect()->route('bo.warehouses.index')->with('success', __('Entrepôt mis à jour.'));
+        return redirect()->route('bo.warehouses.index')->with('success', __('ui.bo.warehouses.messages.updated'));
     }
 
     public function destroy(Warehouse $warehouse)
     {
         $warehouse->delete();
 
-        return redirect()->route('bo.warehouses.index')->with('success', __('Entrepôt supprimé.'));
+        return redirect()->route('bo.warehouses.index')->with('success', __('ui.bo.warehouses.messages.deleted'));
     }
 }

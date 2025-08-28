@@ -1,54 +1,38 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+<x-app-layout>
+    <x-slot name="title">{{ __('ui.public.application.title') }}</x-slot>
 
-    <title>{{ __('Candidature Franchise') }} - {{ config('app.name', 'DrivnCook') }}</title>
-
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
-    <!-- Scripts -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="font-sans antialiased bg-gradient-to-br from-orange-50 via-white to-red-50 min-h-screen">
-    <!-- Navigation publique -->
-    <nav class="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 flex items-center">
-                        <div class="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center mr-3">
-                            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
-                            </svg>
-                        </div>
-                        <span class="text-xl font-bold text-gray-800">DrivnCook</span>
-                    </div>
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Progress Indicator -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between">
+                <h1 class="text-3xl font-bold text-gray-900">{{ __('ui.public.application.wizard_title') }}</h1>
+                <div class="text-sm text-gray-500">
+                    {{ __('ui.public.application.step') }} <span x-text="currentStep"></span> {{ __('ui.public.application.of') }} 4
                 </div>
-                <div class="flex items-center space-x-4">
-                    <a href="{{ route('login') }}" class="text-gray-600 hover:text-orange-600 font-medium">
-                        {{ __('Se connecter') }}
-                    </a>
+            </div>
+            
+            <div class="mt-4">
+                <div class="flex items-center">
+                    <template x-for="step in 4" :key="step">
+                        <div class="flex items-center" :class="step < 4 ? 'flex-1' : ''">
+                            <div 
+                                class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium"
+                                :class="step <= currentStep ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-600'"
+                                x-text="step"
+                            ></div>
+                            <div 
+                                class="h-1 flex-1 mx-2"
+                                :class="step < 4 ? (step < currentStep ? 'bg-indigo-600' : 'bg-gray-200') : ''"
+                                x-show="step < 4"
+                            ></div>
+                        </div>
+                    </template>
                 </div>
             </div>
         </div>
-    </nav>
 
-    <!-- Header Hero -->
-    <div class="bg-gradient-to-r from-orange-500 to-red-600 text-white py-16">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center">
-                <h1 class="text-4xl md:text-5xl font-bold mb-4">
-                    {{ __('Rejoignez l\'aventure DrivnCook') }}
-                </h1>
-                <p class="text-xl md:text-2xl text-orange-100 mb-8">
-                    {{ __('Devenez franchisé et lancez votre food truck') }}
-                </p>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+        <form id="applicationForm" x-data="applicationWizard()" @submit.prevent="submitForm">
+            @csrf
                     <div class="text-center">
                         <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
                             <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

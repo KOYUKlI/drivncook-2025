@@ -4,7 +4,7 @@ namespace App\Http\Controllers\BO;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ApplicationTransitionRequest;
-use App\Mail\ApplicationStatusChanged;
+use App\Mail\FranchiseApplicationStatusChanged;
 use App\Models\FranchiseApplication;
 use App\Models\FranchiseApplicationDocument;
 use Illuminate\Support\Facades\Gate;
@@ -63,7 +63,7 @@ class ApplicationController extends Controller
 
         // Send notification email
         Mail::to($application->email)->send(
-            new ApplicationStatusChanged($application, $fromStatus, $toStatus, $message)
+            new FranchiseApplicationStatusChanged($application, $fromStatus, $toStatus, $message)
         );
 
         return redirect()
@@ -95,7 +95,7 @@ class ApplicationController extends Controller
 
         // Send notification email
         Mail::to($application->email)->send(
-            new ApplicationStatusChanged($application, $fromStatus, $toStatus, $message)
+            new FranchiseApplicationStatusChanged($application, $fromStatus, $toStatus, $message)
         );
 
         return redirect()
@@ -127,7 +127,7 @@ class ApplicationController extends Controller
 
         // Send notification email
         Mail::to($application->email)->send(
-            new ApplicationStatusChanged($application, $fromStatus, $toStatus, $adminMessage)
+            new FranchiseApplicationStatusChanged($application, $fromStatus, $toStatus, $adminMessage)
         );
 
         return redirect()
@@ -159,7 +159,7 @@ class ApplicationController extends Controller
 
         // Send notification email
         Mail::to($application->email)->send(
-            new ApplicationStatusChanged($application, $fromStatus, $toStatus, $reason)
+            new FranchiseApplicationStatusChanged($application, $fromStatus, $toStatus, $reason)
         );
 
         return redirect()

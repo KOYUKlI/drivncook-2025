@@ -27,17 +27,31 @@
                 @endrole
 
                 @role('admin|warehouse')
-                    <x-nav.link :href="route('bo.purchase-orders.index')" :active="request()->routeIs('bo.purchase-orders.*')">
-                        {{ __('ui.purchase_orders') }}
-                    </x-nav.link>
-                    <x-nav.link :href="route('bo.purchase-orders.create')" :active="request()->routeIs('bo.purchase-orders.create')">
-                        {{ __('ui.create_purchase_order') }}
-                    </x-nav.link>
+                    <div class="mt-3 mb-2">
+                        <h4 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                            {{ __('ui.bo.referentials.title') }}
+                        </h4>
+                    </div>
                     <x-nav.link :href="route('bo.warehouses.index')" :active="request()->routeIs('bo.warehouses.*')">
-                        {{ __('ui.warehouses') }}
+                        {{ __('ui.bo.warehouses.title') }}
                     </x-nav.link>
                     <x-nav.link :href="route('bo.stock-items.index')" :active="request()->routeIs('bo.stock-items.*')">
-                        {{ __('ui.stock_items') }}
+                        {{ __('ui.bo.stock_items.title') }}
+                    </x-nav.link>
+                    
+                    <div class="mt-3 mb-2">
+                        <h4 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                            {{ __('ui.bo.operations.title') }}
+                        </h4>
+                    </div>
+                    <x-nav.link :href="route('bo.purchase-orders.index')" :active="request()->routeIs('bo.purchase-orders.*')">
+                        {{ __('ui.bo.purchase_orders.title') }}
+                    </x-nav.link>
+                    <x-nav.link :href="route('bo.purchase-orders.create')" :active="request()->routeIs('bo.purchase-orders.create')">
+                        {{ __('ui.bo.purchase_orders.create') }}
+                    </x-nav.link>
+                    <x-nav.link :href="route('bo.purchase-orders.compliance-report')" :active="request()->routeIs('bo.purchase-orders.compliance-report')">
+                        {{ __('ui.bo.purchase_orders.compliance_report.title') }}
                     </x-nav.link>
                     <x-nav.link :href="route('bo.reports.monthly')" :active="request()->routeIs('bo.reports.monthly*')">
                         {{ __('ui.monthly_sales_reports') }}
@@ -62,7 +76,7 @@
                     {{ __('ui.new_sale') }}
                 </x-nav.link>
                 <x-nav.link :href="route('fo.reports.index')" :active="request()->routeIs('fo.reports.*')">
-                    {{ __('ui.my_reports') }}
+                    {{ __('ui.fo.reports.title') }}
                 </x-nav.link>
             </div>
         @endrole
@@ -136,10 +150,13 @@
 
                         @role('admin|warehouse')
                             <x-nav.link :href="route('bo.purchase-orders.index')" :active="request()->routeIs('bo.purchase-orders.*')" mobile>
-                                {{ __('ui.purchase_orders') }}
+                                {{ __('ui.bo.purchase_orders.title') }}
                             </x-nav.link>
                             <x-nav.link :href="route('bo.purchase-orders.create')" :active="request()->routeIs('bo.purchase-orders.create')" mobile>
-                                {{ __('ui.create_purchase_order') }}
+                                {{ __('ui.bo.purchase_orders.create') }}
+                            </x-nav.link>
+                            <x-nav.link :href="route('bo.purchase-orders.compliance-report')" :active="request()->routeIs('bo.purchase-orders.compliance-report')" mobile>
+                                {{ __('ui.bo.purchase_orders.compliance_report.title') }}
                             </x-nav.link>
                             <x-nav.link :href="route('bo.warehouses.index')" :active="request()->routeIs('bo.warehouses.*')" mobile>
                                 {{ __('ui.warehouses') }}
@@ -164,7 +181,7 @@
                             {{ __('ui.sales') }}
                         </x-nav.link>
                         <x-nav.link :href="route('fo.reports.index')" :active="request()->routeIs('fo.reports.*')" mobile>
-                            {{ __('ui.reports') }}
+                            {{ __('ui.fo.reports.title') }}
                         </x-nav.link>
                     </div>
                 @endrole

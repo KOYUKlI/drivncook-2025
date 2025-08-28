@@ -20,6 +20,8 @@ class TruckController extends Controller
     public function index(Request $request)
     {
         $status = $request->input('status', 'all');
+        $franchiseeId = $request->input('franchisee', 'all');
+        $search = $request->input('search');
 
         $query = Truck::query()->with('franchisee');
 
@@ -36,6 +38,16 @@ class TruckController extends Controller
             }
         }
 
+        // Filter by franchisee
+        if ($franchiseeId !== 'all') {
+            $query->where('franchisee_id', $franchiseeId);
+        }
+
+        // Search by truck code/plate
+        if ($search) {
+            $query->where('plate', 'like', "%{$search}%");
+        }
+
         $trucks = $query->get()->map(function ($truck) {
             // Map status enum values to frontend expected values
             $statusMap = [
@@ -49,14 +61,17 @@ class TruckController extends Controller
                 'id' => $truck->id,
                 'code' => $truck->plate, // use plate as code
                 'status' => $statusMap[$truck->status] ?? 'inactive',
-                'franchisee' => $truck->franchisee->name ?? 'Non assigné',
-                'last_maintenance' => $truck->maintenanceLogs()->latest('started_at')->first()?->started_at?->format('Y-m-d'),
+                'franchisee' => $truck->franchisee->name ?? __('ui.bo.trucks.unassigned'),
+                'last_maintenance' => $truck->maintenanceLogs()->latest('started_at')->first()?->started_at?->format('Y-m-d') ?? null,
                 'next_maintenance' => $truck->maintenanceLogs()
                     ->where('started_at', '>', now())
                     ->orderBy('started_at')
-                    ->first()?->started_at?->format('Y-m-d'),
+                    ->first()?->started_at?->format('Y-m-d') ?? null,
             ];
         })->toArray();
+
+        // Get franchisees for filter
+        $franchisees = \App\Models\Franchisee::select('id', 'name')->get();
 
         // Calculate statistics
         $allTrucks = Truck::all();
@@ -67,7 +82,7 @@ class TruckController extends Controller
             'inactive' => $allTrucks->where('status', 'Retired')->count(),
         ];
 
-        return view('bo.trucks.index', compact('trucks', 'stats', 'status'));
+        return view('bo.trucks.index', compact('trucks', 'stats', 'status', 'franchisees', 'franchiseeId', 'search'));
     }
 
     /**
@@ -89,8 +104,8 @@ class TruckController extends Controller
             'id' => $truck->id,
             'code' => $truck->plate,
             'status' => $statusMap[$truck->status] ?? 'inactive',
-            'franchisee' => $truck->franchisee->name ?? 'Non assigné',
-            'franchisee_email' => $truck->franchisee->email ?? 'Non renseigné',
+            'franchisee' => $truck->franchisee->name ?? __('ui.bo.trucks.unassigned'),
+            'franchisee_email' => $truck->franchisee->email ?? __('ui.bo.trucks.not_provided'),
             'model' => 'N/A', // TODO: Add model field
             'license_plate' => $truck->plate,
             'purchase_date' => $truck->service_start?->format('Y-m-d'),
@@ -116,12 +131,12 @@ class TruckController extends Controller
             })->toArray(),
         ];
 
-        // Calculate status counts for trucks
+        // Calculate status counts for trucks (secure with ?? 0)
         $statusCounts = [
-            'active' => Truck::where('status', 'Active')->count(),
-            'in_maintenance' => Truck::where('status', 'InMaintenance')->count(),
-            'retired' => Truck::where('status', 'Retired')->count(),
-            'pending' => Truck::where('status', 'Draft')->count(),
+            'active' => Truck::where('status', 'Active')->count() ?? 0,
+            'in_maintenance' => Truck::where('status', 'InMaintenance')->count() ?? 0,
+            'retired' => Truck::where('status', 'Retired')->count() ?? 0,
+            'pending' => Truck::where('status', 'Draft')->count() ?? 0,
         ];
 
         return view('bo.trucks.show', ['truck' => $truckData, 'statusCounts' => $statusCounts]);

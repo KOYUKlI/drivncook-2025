@@ -30,6 +30,64 @@ This app defines the task scheduler in `routes/console.php` (no Console Kernel).
 
 Ensure `storage:link` is run once for public files (PDFs, uploads): `php artisan storage:link`.
 
+## Emails
+
+### Configuration
+
+The application uses **Markdown mailables** with custom branded templates. Email configuration:
+
+- **From address/name**: Set in `config/mail.php` (`MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME`)
+- **Templates**: Located in `resources/views/vendor/mail/` for global branding
+- **Email views**: Located in `resources/views/emails/` organized by feature
+- **Translations**: `resources/lang/{fr,en}/emails.php` for all subjects and content
+
+### Mailpit Development
+
+For local development, emails are sent to **Mailpit**:
+- **Web interface**: http://localhost:8025
+- **SMTP**: localhost:1025 (already configured in Sail)
+- No real emails are sent in development
+
+### Email Preview (Local Only)
+
+Preview all emails with mock data during development:
+- **Index page**: http://localhost/dev/mail/preview
+- **Individual preview**: http://localhost/dev/mail/preview/{mailable-name}
+- Available only in local environment with authentication
+
+### Queue Configuration
+
+Emails use the configured queue system:
+- **Sync mode** (`QUEUE_CONNECTION=sync`): Emails sent immediately
+- **Queue mode** (database, redis, etc.): Emails queued for background processing
+- The application automatically detects the queue driver and uses `->queue()` or `->send()` accordingly
+
+### Available Mailables
+
+**Franchise Applications:**
+- `FranchiseApplicationSubmitted` - Confirmation to applicant
+- `FranchiseApplicationStatusChanged` - Status updates (prequalified/interview/approved/rejected)
+- `FranchiseeOnboardingWelcome` - Welcome email with credentials after approval
+- `FranchiseApplicationNewAdminAlert` - Admin notification for new applications
+
+**Purchase Orders:**
+- `PurchaseOrderCreated` - Order confirmation to franchisee and warehouse
+- `PurchaseOrderStatusUpdated` - Status change notifications
+
+**Truck Maintenance:**
+- `TruckMaintenanceOpened` - Maintenance start notification
+- `TruckMaintenanceClosed` - Maintenance completion notification
+
+**Reports:**
+- `MonthlySalesReportReady` - Secure PDF download notification
+
+### Customizing Email Templates
+
+1. **Global branding**: Edit files in `resources/views/vendor/mail/html/`
+2. **Individual emails**: Edit files in `resources/views/emails/{feature}/`
+3. **Translations**: Update `resources/lang/{fr,en}/emails.php`
+4. **Colors/styling**: Modify the vendor mail templates (header, footer, button components)
+
 ## Learning Laravel
 
 Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
