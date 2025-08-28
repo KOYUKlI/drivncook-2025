@@ -11,10 +11,12 @@ class SaleLine extends Model
     use HasFactory;
 
     protected $table = 'sale_lines';
+
     protected $keyType = 'string';
+
     public $incrementing = false;
 
-    protected $fillable = [ 'id', 'sale_id', 'stock_item_id', 'qty', 'unit_price_cents' ];
+    protected $fillable = ['id', 'sale_id', 'stock_item_id', 'qty', 'unit_price_cents'];
 
     protected $casts = [
         'qty' => 'integer',
@@ -23,5 +25,8 @@ class SaleLine extends Model
         'updated_at' => 'datetime',
     ];
 
-    public function sale(): BelongsTo { return $this->belongsTo(Sale::class); }
+    public function sale(): BelongsTo
+    {
+        return $this->belongsTo(Sale::class);
+    }
 }

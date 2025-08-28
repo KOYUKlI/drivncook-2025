@@ -15,12 +15,14 @@
             <h1 class="text-2xl font-bold text-gray-900">{{ __('ui.sales') }}</h1>
             <p class="text-gray-600">{{ __('ui.sales_subtitle') }}</p>
         </div>
-        <a href="{{ route('fo.sales.create') }}" class="inline-flex items-center px-4 py-2 bg-orange-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-orange-700 focus:bg-orange-700 active:bg-orange-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+    @can('create', \App\Models\Sale::class)
+    <a href="{{ route('fo.sales.create') }}" class="inline-flex items-center px-4 py-2 bg-orange-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-orange-700 focus:bg-orange-700 active:bg-orange-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
             </svg>
             {{ __('ui.new_sale') }}
         </a>
+    @endcan
     </div>
 
     <!-- Sales Stats -->
@@ -133,7 +135,7 @@
         <div class="px-6 py-4 border-t border-gray-200">
             <div class="flex items-center justify-between">
                 <div class="text-sm text-gray-700">
-                    {{ __('ui.showing') }} <span class="font-medium">1</span> {{ __('ui.to') }} <span class="font-medium">{{ count($sales) }}</span> {{ __('ui.of') }} <span class="font-medium">{{ $total_sales }}</span> {{ __('ui.results') }}
+                    {{ __('ui.showing') }} <span class="font-medium">1</span> {{ __('ui.to') }} <span class="font-medium">{{ count($sales) }}</span> {{ __('ui.of') }} <span class="font-medium">{{ count($sales) }}</span> {{ __('ui.results') }}
                 </div>
                 <div class="flex space-x-2">
                     <button class="px-3 py-1 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50" disabled>

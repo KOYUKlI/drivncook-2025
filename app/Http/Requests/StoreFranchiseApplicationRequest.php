@@ -30,11 +30,11 @@ class StoreFranchiseApplicationRequest extends FormRequest
             'capital' => 'nullable|integer|min:0',
             'motivation' => 'nullable|string|max:2000',
 
-            // Document uploads
-            'cv' => 'required|file|mimes:pdf,doc,docx|max:10240', // 10MB
-            'identity' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120', // 5MB
-            'financial_statement' => 'nullable|file|mimes:pdf,xls,xlsx|max:10240',
-            'motivation_letter' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
+            // Document uploads (restricted types and sizes)
+            'cv' => 'required|file|mimes:pdf|max:10240', // 10MB, PDF only
+            'identity' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240', // 10MB
+            'financial_statement' => 'nullable|file|mimes:pdf|max:10240',
+            'motivation_letter' => 'nullable|file|mimes:pdf|max:10240',
         ];
     }
 
@@ -54,18 +54,18 @@ class StoreFranchiseApplicationRequest extends FormRequest
             'capital.min' => 'Le capital ne peut pas être négatif.',
 
             'cv.required' => 'Le CV est obligatoire.',
-            'cv.mimes' => 'Le CV doit être au format PDF, DOC ou DOCX.',
+            'cv.mimes' => 'Le CV doit être au format PDF.',
             'cv.max' => 'Le CV ne doit pas dépasser 10 MB.',
 
             'identity.required' => 'La pièce d\'identité est obligatoire.',
             'identity.mimes' => 'La pièce d\'identité doit être au format PDF, JPG, JPEG ou PNG.',
-            'identity.max' => 'La pièce d\'identité ne doit pas dépasser 5 MB.',
+            'identity.max' => 'La pièce d\'identité ne doit pas dépasser 10 MB.',
 
-            'financial_statement.mimes' => 'Le bilan financier doit être au format PDF, XLS ou XLSX.',
+            'financial_statement.mimes' => 'Le bilan financier doit être au format PDF.',
             'financial_statement.max' => 'Le bilan financier ne doit pas dépasser 10 MB.',
 
-            'motivation_letter.mimes' => 'La lettre de motivation doit être au format PDF, DOC ou DOCX.',
-            'motivation_letter.max' => 'La lettre de motivation ne doit pas dépasser 5 MB.',
+            'motivation_letter.mimes' => 'La lettre de motivation doit être au format PDF.',
+            'motivation_letter.max' => 'La lettre de motivation ne doit pas dépasser 10 MB.',
         ];
     }
 }

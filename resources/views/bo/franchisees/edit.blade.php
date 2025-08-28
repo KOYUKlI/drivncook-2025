@@ -39,16 +39,17 @@
 
                 <div>
                     <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-                        {{ __('ui.email') }}
+                        {{ __('ui.email') }} *
                     </label>
                     <input 
                         type="email" 
                         id="email" 
                         name="email" 
-                        value="{{ $franchisee['email'] }}"
+                        value="{{ old('email', $franchisee['email']) }}"
                         required
                         class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                     >
+                    <x-input-error :messages="$errors->get('email')" />
                 </div>
 
                 <div>
@@ -84,6 +85,20 @@
                         <option value="toulouse-nord">Toulouse Nord</option>
                     </select>
                 </div>
+            </div>
+
+            <div>
+                <label for="billing_address" class="block text-sm font-medium text-gray-700 mb-2">
+                    {{ __('ui.billing_address') }}
+                </label>
+                <textarea 
+                    id="billing_address" 
+                    name="billing_address" 
+                    rows="3"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+                    placeholder="{{ __('ui.billing_address_placeholder') }}"
+                >{{ old('billing_address', $franchisee['billing_address'] ?? '') }}</textarea>
+                <x-input-error :messages="$errors->get('billing_address')" />
             </div>
 
             <div class="flex items-center justify-between pt-6 border-t">

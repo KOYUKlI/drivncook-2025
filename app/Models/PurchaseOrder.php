@@ -18,28 +18,23 @@ class PurchaseOrder extends Model
     protected $fillable = [
         'id',
         'warehouse_id',
-        'creator_id',
+        'franchisee_id',
         'status',
-        'total_cents',
         'corp_ratio_cached',
-        'status_updated_at',
-        'status_updated_by',
     ];
 
     protected $casts = [
-        'total_cents' => 'integer',
         'corp_ratio_cached' => 'decimal:2',
-        'status_updated_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
 
     /**
-     * The user who created this purchase order.
+     * The franchisee for this purchase order.
      */
-    public function creator(): BelongsTo
+    public function franchisee(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'creator_id');
+        return $this->belongsTo(Franchisee::class);
     }
 
     /**

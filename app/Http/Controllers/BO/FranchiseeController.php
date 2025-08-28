@@ -16,6 +16,7 @@ class FranchiseeController extends Controller
      */
     public function index()
     {
+        $this->authorize('viewAny', Franchisee::class);
         $franchisees = Franchisee::query()
             ->latest()
             ->get();
@@ -28,6 +29,8 @@ class FranchiseeController extends Controller
      */
     public function create()
     {
+        $this->authorize('create', Franchisee::class);
+
         return view('bo.franchisees.create');
     }
 
@@ -36,20 +39,30 @@ class FranchiseeController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('create', Franchisee::class);
+        
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
+            'email' => 'required|email|max:255|unique:franchisees,email',
             'phone' => 'nullable|string|max:30',
             'billing_address' => 'nullable|string|max:1000',
+        ], [
+            'name.required' => 'Le nom est obligatoire.',
+            'email.required' => 'L\'email est obligatoire.',
+            'email.unique' => 'Cet email est déjà utilisé.',
+            'email.email' => 'L\'email doit être valide.',
         ]);
 
         $franchisee = new Franchisee();
         $franchisee->id = (string) Str::ulid();
-        $franchisee->fill($data);
+        $franchisee->name = $data['name'];
+        $franchisee->email = $data['email'];
+        $franchisee->phone = $data['phone'] ?? null;
+        $franchisee->billing_address = $data['billing_address'] ?? null;
         $franchisee->save();
 
         return redirect()->route('bo.franchisees.show', $franchisee->id)
-            ->with('success', __('Franchisé créé avec succès'));
+            ->with('success', 'Franchisé créé avec succès.');
     }
 
     /**
@@ -58,6 +71,7 @@ class FranchiseeController extends Controller
     public function show(string $id)
     {
         $franchisee = Franchisee::with(['trucks', 'sales.lines'])->findOrFail($id);
+        $this->authorize('view', $franchisee);
 
         $from30 = now()->subDays(30);
         $from60 = now()->subDays(60);
@@ -74,7 +88,8 @@ class FranchiseeController extends Controller
             'trucks_assigned' => (int) $franchisee->trucks->count(),
         ];
 
-        $reports = ReportPdf::where('franchisee_id', $franchisee->id)->latest('generated_at')->get();
+        // For now, reports are not linked to franchisees directly
+        $reports = collect([]);
 
         return view('bo.franchisees.show', compact('franchisee', 'stats', 'reports'));
     }
@@ -84,9 +99,10 @@ class FranchiseeController extends Controller
      */
     public function edit(string $id)
     {
-    $franchisee = Franchisee::findOrFail($id);
+        $franchisee = Franchisee::findOrFail($id);
+        $this->authorize('update', $franchisee);
 
-    return view('bo.franchisees.edit', compact('franchisee'));
+        return view('bo.franchisees.edit', compact('franchisee'));
     }
 
     /**
@@ -95,16 +111,22 @@ class FranchiseeController extends Controller
     public function update(Request $request, string $id)
     {
         $franchisee = Franchisee::findOrFail($id);
+        $this->authorize('update', $franchisee);
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
+            'email' => 'required|email|max:255|unique:franchisees,email,'.$id,
             'phone' => 'nullable|string|max:30',
             'billing_address' => 'nullable|string|max:1000',
+        ], [
+            'name.required' => 'Le nom est obligatoire.',
+            'email.required' => 'L\'email est obligatoire.',
+            'email.unique' => 'Cet email est déjà utilisé par un autre franchisé.',
+            'email.email' => 'L\'email doit être valide.',
         ]);
         $franchisee->fill($data)->save();
 
         return redirect()->route('bo.franchisees.show', $franchisee->id)
-            ->with('success', __('Franchisé modifié avec succès'));
+            ->with('success', 'Franchisé modifié avec succès.');
     }
 
     /**
@@ -112,8 +134,10 @@ class FranchiseeController extends Controller
      */
     public function destroy(string $id)
     {
-    $franchisee = Franchisee::findOrFail($id);
-    $franchisee->delete();
-    return redirect()->route('bo.franchisees.index')->with('success', __('Franchisé supprimé avec succès'));
+        $franchisee = Franchisee::findOrFail($id);
+        $this->authorize('delete', $franchisee);
+        $franchisee->delete();
+
+        return redirect()->route('bo.franchisees.index')->with('success', __('Franchisé supprimé avec succès'));
     }
 }

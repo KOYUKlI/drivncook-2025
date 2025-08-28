@@ -8,7 +8,6 @@ use App\Models\FranchiseApplication;
 use App\Models\FranchiseApplicationDocument;
 use App\Models\FranchiseApplicationEvent;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class FranchiseApplicationController extends Controller
@@ -34,7 +33,7 @@ class FranchiseApplicationController extends Controller
             'territory' => 'nullable|string|max:255',
         ]);
 
-        $app = new FranchiseApplication();
+        $app = new FranchiseApplication;
         $app->id = (string) Str::ulid();
         $app->full_name = trim(($data['first_name'] ?? '').' '.($data['last_name'] ?? '')) ?: null;
         $app->email = $data['email'] ?? '';
@@ -61,7 +60,7 @@ class FranchiseApplicationController extends Controller
     public function store(StoreFranchiseApplicationRequest $request)
     {
         $validated = $request->validated();
-        $app = new FranchiseApplication();
+        $app = new FranchiseApplication;
         $app->id = (string) Str::ulid();
         $app->full_name = trim(($validated['first_name'] ?? '').' '.($validated['last_name'] ?? ''));
         $app->email = $validated['email'];
@@ -70,10 +69,10 @@ class FranchiseApplicationController extends Controller
         $app->status = 'submitted';
         $app->save();
 
-        // Uploads to public disk
+        // Uploads to local/private disk
         foreach (['cv' => 'cv', 'identity' => 'identity'] as $field => $kind) {
             if ($request->hasFile($field)) {
-                $path = $request->file($field)->store("applications/{$app->id}", 'public');
+                $path = $request->file($field)->store("applications/{$app->id}", 'local');
                 FranchiseApplicationDocument::create([
                     'id' => (string) Str::ulid(),
                     'franchise_application_id' => $app->id,
@@ -100,7 +99,8 @@ class FranchiseApplicationController extends Controller
      */
     public function show(string $id)
     {
-    $application = FranchiseApplication::with(['documents', 'events'])->findOrFail($id);
+        $application = FranchiseApplication::with(['documents', 'events'])->findOrFail($id);
+
         return view('public.applications.show', compact('application'));
     }
 }

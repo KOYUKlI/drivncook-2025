@@ -32,12 +32,14 @@
                         required
                         class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                         placeholder="{{ __('ui.franchise_name_placeholder') }}"
+                        value="{{ old('name') }}"
                     >
+                    <x-input-error :messages="$errors->get('name')" />
                 </div>
 
                 <div>
                     <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-                        {{ __('ui.email') }}
+                        {{ __('ui.email') }} *
                     </label>
                     <input 
                         type="email" 
@@ -46,10 +48,12 @@
                         required
                         class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                         placeholder="{{ __('ui.email_placeholder') }}"
+                        value="{{ old('email') }}"
                     >
+                    <x-input-error :messages="$errors->get('email')" />
                 </div>
 
-                <div>
+                <div class="md:col-span-2">
                     <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">
                         {{ __('ui.phone') }}
                     </label>
@@ -59,40 +63,24 @@
                         name="phone"
                         class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                         placeholder="{{ __('ui.phone_placeholder') }}"
+                        value="{{ old('phone') }}"
                     >
-                </div>
-
-                <div>
-                    <label for="territory" class="block text-sm font-medium text-gray-700 mb-2">
-                        {{ __('ui.territory') }}
-                    </label>
-                    <select 
-                        id="territory" 
-                        name="territory" 
-                        required
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
-                    >
-                        <option value="">{{ __('ui.select_territory') }}</option>
-                        <option value="paris-nord">Paris Nord</option>
-                        <option value="paris-sud">Paris Sud</option>
-                        <option value="lyon-centre">Lyon Centre</option>
-                        <option value="marseille-sud">Marseille Sud</option>
-                        <option value="toulouse-nord">Toulouse Nord</option>
-                    </select>
+                    <x-input-error :messages="$errors->get('phone')" />
                 </div>
             </div>
 
             <div>
-                <label for="address" class="block text-sm font-medium text-gray-700 mb-2">
-                    {{ __('ui.address') }}
+                <label for="billing_address" class="block text-sm font-medium text-gray-700 mb-2">
+                    {{ __('ui.billing_address') }}
                 </label>
                 <textarea 
-                    id="address" 
-                    name="address" 
+                    id="billing_address" 
+                    name="billing_address" 
                     rows="3"
                     class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                     placeholder="{{ __('ui.address_placeholder') }}"
-                ></textarea>
+                >{{ old('billing_address') }}</textarea>
+                <x-input-error :messages="$errors->get('billing_address')" />
             </div>
 
             <div class="flex items-center justify-end space-x-4 pt-6 border-t">

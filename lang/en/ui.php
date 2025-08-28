@@ -72,6 +72,10 @@ return [
     'optional' => 'Optional',
 
     // FO Navigation
+    'my_franchise' => 'My Franchise',
+    'my_sales' => 'My Sales',
+    'new_sale' => 'New Sale',
+    'my_reports' => 'My Reports',
     'sales' => 'Sales',
     'reports' => 'Reports',
 
@@ -189,6 +193,15 @@ return [
     'register' => 'Register',
 
     // Additional UI keys
+    'billing_address' => 'Billing Address',
+    'billing_address_placeholder' => '123 Billing Street, 75001 Paris',
+    'compliance_report' => 'Compliance Report',
+    'create_purchase_order' => 'Create Purchase Order',
+    'add_line' => 'Add Line',
+    'remove_line' => 'Remove Line',
+    'all_franchisees' => 'All Franchisees',
+    'all_statuses' => 'All Statuses',
+    'deploy' => 'Deploy',
     'my_franchise' => 'My franchise',
     'side_navigation' => 'Side navigation',
     'close_sidebar' => 'Close sidebar',
@@ -409,5 +422,25 @@ return [
     'sales_by_product' => 'Sales by Product',
     'quantity_sold' => 'Quantity Sold',
     'total_revenue' => 'Total Revenue',
+    // Additional missing keys
+    'all' => 'All',
+    'order_lines' => 'Order Lines',
+    'unit_price_cents' => 'Unit Price (cents)',
+    'remove' => 'Remove',
+    'all_periods' => 'All Periods',
+    'all_locations' => 'All Locations',
+    'items_count' => 'Items Count',
+    'total_sales' => 'Total Sales',
+    'create_warehouse' => 'Create Warehouse',
+    'edit_warehouse' => 'Edit Warehouse',
+    'create_stock_item' => 'Create Stock Item',
+    'edit_stock_item' => 'Edit Stock Item',
+    'prequalify' => 'Prequalify',
+    'schedule_interview' => 'Schedule Interview',
+    'warehouses' => 'Warehouses',
+    'stock_items' => 'Stock Items',
+    'monthly_sales_reports' => 'Monthly Sales Reports',
+    'side_navigation' => 'Side Navigation',
+    'close_sidebar' => 'Close Sidebar',
     'share' => 'Share',
 ];

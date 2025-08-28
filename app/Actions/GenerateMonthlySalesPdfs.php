@@ -6,19 +6,16 @@ use App\Models\Franchisee;
 use App\Models\ReportPdf;
 use App\Services\PdfService;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
 
 class GenerateMonthlySalesPdfs
 {
-    public function __construct(private PdfService $pdf)
-    {
-    }
+    public function __construct(private PdfService $pdf) {}
 
     public function handle(): void
     {
         $period = now()->subMonth();
-    $year = (int) $period->format('Y');
-    $month = (int) $period->format('m');
+        $year = (int) $period->format('Y');
+        $month = (int) $period->format('m');
 
         Franchisee::query()->each(function (Franchisee $f) use ($year, $month) {
             $data = [

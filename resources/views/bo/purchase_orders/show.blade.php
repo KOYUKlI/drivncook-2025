@@ -33,6 +33,9 @@
                 <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full {{ $ratioColor }}">
                     {{ __('ui.ratio') }}: {{ $order['ratio_80_20'] }}%
                 </span>
+                <a href="{{ route('bo.purchase-orders.compliance-report') }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                    {{ __('ui.view_compliance_report') }}
+                </a>
             </div>
         </div>
     </div>

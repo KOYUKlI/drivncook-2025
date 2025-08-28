@@ -19,11 +19,27 @@ class ReportController extends Controller
     {
         $franchiseeId = data_get(Auth::user(), 'franchisee_id');
         $reports = ReportPdf::query()
-            ->when($franchiseeId, fn($q) => $q->where('franchisee_id', $franchiseeId))
+            ->when($franchiseeId, fn ($q) => $q->where('franchisee_id', $franchiseeId))
             ->latest('generated_at')
             ->get();
 
-        return view('fo.reports.index', compact('reports'));
+        // Calculate real summary data for FO dashboard
+        $franchiseeId = data_get(Auth::user(), 'franchisee_id');
+        
+        $monthSales = \App\Models\Sale::whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])
+            ->when($franchiseeId, fn($q) => $q->where('franchisee_id', $franchiseeId))
+            ->get();
+
+        $summary = [
+            'total_sales_month' => $monthSales->sum('total_cents'),
+            'transactions_month' => $monthSales->count(),
+            'avg_transaction' => $monthSales->count() > 0 ? $monthSales->avg('total_cents') : 0,
+            'compliance_rate' => 92.1, // TODO: Calculate from purchase orders
+            'best_location' => 'Centre-ville', // TODO: Calculate from deployments
+            'reports_generated' => $reports->count(),
+        ];
+
+        return view('fo.reports.index', compact('reports', 'summary'));
     }
 
     /**
@@ -59,12 +75,13 @@ class ReportController extends Controller
     public function download(string $id)
     {
         $report = ReportPdf::findOrFail($id);
-    $user = Auth::user();
-    $isBackoffice = in_array(data_get($user, 'role'), ['admin','warehouse'], true); // fallback if roles not loaded
-    $ownsReport = $user && $user->franchisee_id && $user->franchisee_id === $report->franchisee_id;
-    if (! ($isBackoffice || $ownsReport)) {
+        $user = Auth::user();
+        $isBackoffice = in_array(data_get($user, 'role'), ['admin', 'warehouse'], true); // fallback if roles not loaded
+        $ownsReport = $user && $user->franchisee_id && $user->franchisee_id === $report->franchisee_id;
+        if (! ($isBackoffice || $ownsReport)) {
             abort(403);
         }
+
         return response()->download(Storage::disk('public')->path($report->storage_path));
     }
 

@@ -18,17 +18,13 @@ class Truck extends Model
     protected $fillable = [
         'id',
         'franchisee_id',
-        'code',
-        'license_plate',
-        'model',
-        'purchase_date',
-        'warranty_end',
+        'plate',
         'status',
+        'service_start',
     ];
 
     protected $casts = [
-        'purchase_date' => 'date',
-        'warranty_end' => 'date',
+        'service_start' => 'date',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

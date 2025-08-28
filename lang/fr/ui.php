@@ -79,6 +79,10 @@ return [
     'optional' => 'Optionnel',
 
     // FO Navigation
+    'my_franchise' => 'Ma Franchise',
+    'my_sales' => 'Mes Ventes',
+    'new_sale' => 'Saisir une Vente',
+    'my_reports' => 'Mes Rapports',
     'sales' => 'Ventes',
     'reports' => 'Rapports',
 
@@ -168,6 +172,13 @@ return [
     'transactions' => 'Transactions',
 
     // 80/20 & Purchase orders
+    'compliance_report' => 'Rapport de Conformité',
+    'create_purchase_order' => 'Créer une Commande',
+    'add_line' => 'Ajouter une Ligne',
+    'remove_line' => 'Supprimer la Ligne',
+    'all_franchisees' => 'Tous les Franchisés',
+    'all_statuses' => 'Tous les Statuts',
+    'deploy' => 'Déployer',
     'ratio' => 'Ratio',
     'total_amount' => 'Montant total',
     'compliance_ratio' => 'Ratio de conformité',
@@ -180,6 +191,9 @@ return [
     'compliance_warning' => 'Attention : ratio 80/20 non respecté',
 
     // Applications
+    // Applications
+    'documents' => 'Documents',
+    'download' => 'Télécharger',
     'application' => 'Candidature',
     'submitted_on' => 'Soumise le',
     'applicant_information' => 'Informations du candidat',
@@ -192,6 +206,8 @@ return [
     'application_draft_saved_flash' => 'Votre brouillon a été enregistré.',
 
     // Additional franchisee form labels
+    'billing_address' => 'Adresse de Facturation',
+    'billing_address_placeholder' => '123 Rue de Facturation, 75001 Paris',
     'franchise_name' => 'Nom de la franchise',
     'franchise_name_placeholder' => 'Ex: Franchise Paris Nord',
     'email_placeholder' => 'adresse@email.com',
@@ -263,5 +279,41 @@ return [
     'assigned_trucks' => 'Camions assignés',
     'recent_sales' => 'Ventes récentes',
     'performance_stats' => 'Statistiques de performance',
+    // Additional missing keys
+    'all' => 'Tous',
+    'order_lines' => 'Lignes de Commande',
+    'unit_price_cents' => 'Prix Unitaire (centimes)',
+    'remove' => 'Supprimer',
+    'all_periods' => 'Toutes les Périodes',
+    'all_locations' => 'Tous les Emplacements',
+    'amount' => 'Montant',
+    'items_count' => 'Nombre d\'Articles',
+    'total_sales' => 'Ventes Totales',
+    'create_warehouse' => 'Créer un Entrepôt',
+    'edit_warehouse' => 'Modifier l\'Entrepôt',
+    'create_stock_item' => 'Créer un Article',
+    'edit_stock_item' => 'Modifier l\'Article',
+    'prequalify' => 'Pré-qualifier',
+    'schedule_interview' => 'Planifier un Entretien',
+    'warehouses' => 'Entrepôts',
+    'stock_items' => 'Articles en Stock',
+    'monthly_sales_reports' => 'Rapports Mensuels de Ventes',
+    'side_navigation' => 'Navigation Latérale',
+    'close_sidebar' => 'Fermer la Barre Latérale',
+    'franchise_fee' => 'Droit d\'Entrée',
+    'truck_equipment' => 'Équipement Camion',
+    'initial_stock' => 'Stock Initial',
+    'total_investment' => 'Investissement Total',
+    'ongoing_costs' => 'Coûts Permanents',
+    'royalty_fee' => 'Redevance',
+    'of_revenue' => 'du chiffre d\'affaires',
+    'marketing_fee' => 'Contribution Marketing',
+    'application_process' => 'Processus de Candidature',
+    'franchise_information' => 'Informations Franchise',
+    'franchise_info_subtitle' => 'Découvrez toutes les opportunités avec Driv\'n Cook',
+    'franchise_info_meta_description' => 'Informations complètes sur les opportunités de franchise Driv\'n Cook. Investissement, formation, accompagnement.',
+    'initial_investment' => 'Investissement Initial',
+    'login' => 'Connexion',
+    'register' => 'S\'inscrire',
     'suspended' => 'Suspendu',
 ];

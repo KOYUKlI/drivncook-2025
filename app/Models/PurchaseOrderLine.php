@@ -11,7 +11,9 @@ class PurchaseOrderLine extends Model
     use HasFactory;
 
     protected $table = 'purchase_lines';
+
     protected $keyType = 'string';
+
     public $incrementing = false;
 
     protected $fillable = [
@@ -25,6 +27,13 @@ class PurchaseOrderLine extends Model
         'updated_at' => 'datetime',
     ];
 
-    public function order(): BelongsTo { return $this->belongsTo(PurchaseOrder::class, 'purchase_order_id'); }
-    public function stockItem(): BelongsTo { return $this->belongsTo(StockItem::class); }
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(PurchaseOrder::class, 'purchase_order_id');
+    }
+
+    public function stockItem(): BelongsTo
+    {
+        return $this->belongsTo(StockItem::class);
+    }
 }

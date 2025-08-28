@@ -11,9 +11,10 @@ class MaintenanceLog extends Model
     use HasFactory;
 
     protected $keyType = 'string';
+
     public $incrementing = false;
 
-    protected $fillable = [ 'id', 'truck_id', 'kind', 'description', 'started_at', 'closed_at' ];
+    protected $fillable = ['id', 'truck_id', 'kind', 'description', 'started_at', 'closed_at'];
 
     protected $casts = [
         'started_at' => 'datetime',
@@ -22,5 +23,8 @@ class MaintenanceLog extends Model
         'updated_at' => 'datetime',
     ];
 
-    public function truck(): BelongsTo { return $this->belongsTo(Truck::class); }
+    public function truck(): BelongsTo
+    {
+        return $this->belongsTo(Truck::class);
+    }
 }

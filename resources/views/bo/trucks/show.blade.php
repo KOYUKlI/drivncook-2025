@@ -86,6 +86,21 @@
                         </tbody>
                     </table>
                 </div>
+                
+                <!-- Actions pour déploiements -->
+                <div class="px-6 py-4 border-t border-gray-200">
+                    @can('update', App\Models\Truck::class)
+                    <form method="POST" action="{{ route('bo.trucks.schedule-deployment', $truck['id']) }}" class="inline mr-4">
+                        @csrf
+                        <input type="hidden" name="deployment_date" value="{{ now()->addDay()->toDateString() }}">
+                        <input type="hidden" name="territory" value="{{ $truck['franchisee'] }}">
+                        <input type="hidden" name="franchisee_id" value="1">
+                        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm">
+                            {{ __('ui.schedule_deployment') }}
+                        </button>
+                    </form>
+                    @endcan
+                </div>
             </div>
         </div>
 
@@ -142,6 +157,36 @@
                             @endforeach
                         </tbody>
                     </table>
+                </div>
+                
+                <!-- Actions pour maintenance -->
+                <div class="px-6 py-4 border-t border-gray-200">
+                    @can('update', App\Models\Truck::class)
+                    <form method="POST" action="{{ route('bo.trucks.schedule-maintenance', $truck['id']) }}" class="inline mr-4">
+                        @csrf
+                        <input type="hidden" name="date" value="{{ now()->addWeek()->toDateString() }}">
+                        <input type="hidden" name="type" value="Révision générale">
+                        <input type="hidden" name="technician" value="Garage Central">
+                        <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded text-sm">
+                            {{ __('ui.schedule_maintenance') }}
+                        </button>
+                    </form>
+                    <form method="POST" action="{{ route('bo.trucks.open-maintenance', [$truck['id'], 1]) }}" class="inline mr-4">
+                        @csrf
+                        <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded text-sm">
+                            {{ __('ui.start_maintenance') }}
+                        </button>
+                    </form>
+                    <form method="POST" action="{{ route('bo.trucks.close-maintenance', [$truck['id'], 1]) }}" class="inline">
+                        @csrf
+                        <input type="hidden" name="actual_cost" value="50000">
+                        <input type="hidden" name="work_performed" value="Révision complète">
+                        <input type="hidden" name="truck_operational" value="1">
+                        <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded text-sm">
+                            {{ __('ui.complete_maintenance') }}
+                        </button>
+                    </form>
+                    @endcan
                 </div>
             </div>
         </div>

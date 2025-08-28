@@ -44,53 +44,53 @@
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                    @foreach($applications as $application)
+                    @forelse($applications as $application)
                     <tr>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm font-medium text-gray-900">{{ $application['name'] }}</div>
+                            <div class="text-sm font-medium text-gray-900">{{ $application->full_name }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {{ $application['email'] }}
+                            {{ $application->email }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {{ $application['territory'] }}
+                            {{ $application->desired_area ?? 'Non spécifié' }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             @php
                             $statusColors = [
-                                'in_review' => 'bg-yellow-100 text-yellow-800',
+                                'draft' => 'bg-gray-100 text-gray-800',
+                                'submitted' => 'bg-blue-100 text-blue-800',
+                                'prequalified' => 'bg-yellow-100 text-yellow-800',
+                                'interview' => 'bg-purple-100 text-purple-800',
                                 'approved' => 'bg-green-100 text-green-800',
                                 'rejected' => 'bg-red-100 text-red-800',
-                                'pending' => 'bg-gray-100 text-gray-800'
                             ];
                             @endphp
-                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $statusColors[$application['status']] }}">
-                                {{ __('ui.' . $application['status']) }}
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $statusColors[$application->status] ?? 'bg-gray-100 text-gray-800' }}">
+                                {{ ucfirst($application->status) }}
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            @php
-                            $stepColors = [
-                                'application' => 'bg-blue-100 text-blue-800',
-                                'documents' => 'bg-orange-100 text-orange-800',
-                                'interview' => 'bg-purple-100 text-purple-800',
-                                'contract' => 'bg-green-100 text-green-800'
-                            ];
-                            @endphp
-                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $stepColors[$application['step']] }}">
-                                {{ __('ui.' . $application['step']) }}
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                                {{ $application->documents->count() }} documents
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {{ \Carbon\Carbon::parse($application['submitted_at'])->format('d/m/Y') }}
+                            {{ $application->created_at->format('d/m/Y') }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <a href="{{ route('bo.applications.show', $application['id']) }}" class="text-indigo-600 hover:text-indigo-900">
+                            <a href="{{ route('bo.applications.show', $application->id) }}" class="text-indigo-600 hover:text-indigo-900">
                                 {{ __('ui.review') }}
                             </a>
                         </td>
                     </tr>
-                    @endforeach
+                    @empty
+                    <tr>
+                        <td colspan="7" class="px-6 py-12 text-center text-gray-500">
+                            {{ __('Aucune candidature trouvée') }}
+                        </td>
+                    </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>

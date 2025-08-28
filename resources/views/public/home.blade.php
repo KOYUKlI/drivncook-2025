@@ -30,14 +30,12 @@
 
                     <div class="flex items-center gap-4">
                         @guest
+                            <a href="{{ route('public.applications.create') }}" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                {{ __('ui.apply_now') }}
+                            </a>
                             <a href="{{ route('login') }}" class="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium">
                                 {{ __('ui.login') }}
                             </a>
-                            @if (Route::has('register'))
-                                <a href="{{ route('register') }}" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium">
-                                    {{ __('ui.register') }}
-                                </a>
-                            @endif
                         @else
                             <a href="{{ route('dashboard') }}" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium">
                                 {{ __('ui.dashboard') }}
@@ -59,7 +57,7 @@
                         {{ __('ui.hero_subtitle') }}
                     </p>
                     <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                        <a href="{{ route('public.franchise') }}" 
+                        <a href="{{ route('public.applications.create') }}" 
                            class="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors">
                             {{ __('ui.become_franchisee') }}
                         </a>
@@ -145,7 +143,7 @@
                 <p class="text-xl text-orange-100 mb-8">
                     {{ __('ui.start_application_text') }}
                 </p>
-                <a href="{{ route('public.franchise') }}" 
+                <a href="{{ route('public.applications.create') }}" 
                    class="bg-white hover:bg-gray-100 text-orange-500 px-8 py-4 rounded-lg text-lg font-semibold transition-colors inline-block">
                     {{ __('ui.start_application') }}
                 </a>

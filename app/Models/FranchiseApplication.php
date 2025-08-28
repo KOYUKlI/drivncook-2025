@@ -31,9 +31,9 @@ class FranchiseApplication extends Model
     ];
 
     protected $casts = [
-    'entry_fee_ack' => 'boolean',
-    'royalty_ack' => 'boolean',
-    'central80_ack' => 'boolean',
+        'entry_fee_ack' => 'boolean',
+        'royalty_ack' => 'boolean',
+        'central80_ack' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

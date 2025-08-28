@@ -11,9 +11,10 @@ class Deployment extends Model
     use HasFactory;
 
     protected $keyType = 'string';
+
     public $incrementing = false;
 
-    protected $fillable = [ 'id', 'truck_id', 'location', 'start_date', 'end_date' ];
+    protected $fillable = ['id', 'truck_id', 'location', 'start_date', 'end_date'];
 
     protected $casts = [
         'start_date' => 'date',
@@ -22,5 +23,8 @@ class Deployment extends Model
         'updated_at' => 'datetime',
     ];
 
-    public function truck(): BelongsTo { return $this->belongsTo(Truck::class); }
+    public function truck(): BelongsTo
+    {
+        return $this->belongsTo(Truck::class);
+    }
 }

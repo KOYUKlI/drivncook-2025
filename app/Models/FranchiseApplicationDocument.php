@@ -11,9 +11,13 @@ class FranchiseApplicationDocument extends Model
     use HasFactory;
 
     protected $keyType = 'string';
+
     public $incrementing = false;
 
-    protected $fillable = [ 'id', 'franchise_application_id', 'kind', 'path' ];
+    protected $fillable = ['id', 'franchise_application_id', 'kind', 'path'];
 
-    public function application(): BelongsTo { return $this->belongsTo(FranchiseApplication::class, 'franchise_application_id'); }
+    public function application(): BelongsTo
+    {
+        return $this->belongsTo(FranchiseApplication::class, 'franchise_application_id');
+    }
 }

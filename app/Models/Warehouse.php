@@ -10,7 +10,8 @@ class Warehouse extends Model
     use HasFactory;
 
     protected $keyType = 'string';
+
     public $incrementing = false;
 
-    protected $fillable = [ 'id', 'name', 'city' ];
+    protected $fillable = ['id', 'name', 'city'];
 }

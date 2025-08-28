@@ -12,50 +12,44 @@ use App\Models\PurchaseOrderLine;
 use App\Services\PurchaseComplianceService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class PurchaseOrderController extends Controller
 {
     /**
+     * Show the form for creating a new purchase order.
+     */
+    public function create()
+    {
+        $this->authorize('create', PurchaseOrder::class);
+
+        return view('bo.purchase_orders.create');
+    }
+
+    /**
      * Display a listing of purchase orders with 80/20 ratio analysis.
      */
     public function index()
     {
-        // Mock data
-        $orders = [
-            [
-                'id' => 1,
-                'reference' => 'PO-2024-001',
-                'franchisee' => 'Paris Nord',
-                'total' => 2500, // centimes
-                'ratio_80_20' => 85, // pourcentage
-                'status' => 'completed',
-                'date' => '2024-08-25',
-                'compliance' => 'compliant', // >= 80%
-            ],
-            [
-                'id' => 2,
-                'reference' => 'PO-2024-002',
-                'franchisee' => 'Lyon Centre',
-                'total' => 1800,
-                'ratio_80_20' => 75, // En dessous de 80% = rouge
-                'status' => 'pending',
-                'date' => '2024-08-26',
-                'compliance' => 'non_compliant', // < 80%
-            ],
-            [
-                'id' => 3,
-                'reference' => 'PO-2024-003',
-                'franchisee' => 'Marseille Sud',
-                'total' => 3200,
-                'ratio_80_20' => 88,
-                'status' => 'completed',
-                'date' => '2024-08-27',
-                'compliance' => 'compliant',
-            ],
-        ];
+        $orders = PurchaseOrder::with(['warehouse', 'franchisee', 'lines.stockItem'])
+            ->latest()
+            ->get()
+            ->map(function ($order) {
+                $ratio = $order->corp_ratio_cached ?? 0;
+                
+                return [
+                    'id' => $order->id,
+                    'reference' => "PO-{$order->created_at->format('Y')}-" . str_pad($order->id, 3, '0', STR_PAD_LEFT),
+                    'franchisee' => $order->warehouse->name ?? 'Entrepôt inconnu',
+                    'total' => $order->lines->sum(fn($line) => $line->qty * $line->unit_price_cents),
+                    'ratio_80_20' => $ratio,
+                    'status' => $order->status,
+                    'date' => $order->created_at->format('Y-m-d'),
+                    'compliance' => $ratio >= 80 ? 'compliant' : 'non_compliant',
+                ];
+            })
+            ->toArray();
 
         return view('bo.purchase_orders.index', compact('orders'));
     }
@@ -65,21 +59,26 @@ class PurchaseOrderController extends Controller
      */
     public function show(string $id)
     {
-        // Mock data
+        $purchaseOrder = PurchaseOrder::with(['warehouse', 'franchisee', 'lines.stockItem'])->findOrFail($id);
+        
         $order = [
-            'id' => $id,
-            'reference' => 'PO-2024-001',
-            'franchisee' => 'Paris Nord',
-            'franchisee_email' => 'franchise.parisnord@drivncook.fr',
-            'total' => 2500,
-            'ratio_80_20' => 85,
-            'status' => 'completed',
-            'date' => '2024-08-25',
-            'lines' => [
-                ['item' => 'Pain burger', 'category' => 'obligatoire', 'quantity' => 100, 'price' => 150, 'total' => 15000],
-                ['item' => 'Steaks surgelés', 'category' => 'obligatoire', 'quantity' => 50, 'price' => 200, 'total' => 10000],
-                ['item' => 'Sauce spéciale', 'category' => 'libre', 'quantity' => 10, 'price' => 80, 'total' => 800],
-            ],
+            'id' => $purchaseOrder->id,
+            'reference' => "PO-{$purchaseOrder->created_at->format('Y')}-" . str_pad($purchaseOrder->id, 3, '0', STR_PAD_LEFT),
+            'franchisee' => $purchaseOrder->warehouse->name ?? 'Entrepôt inconnu',
+            'franchisee_email' => $purchaseOrder->franchisee->email ?? 'Non renseigné',
+            'total' => $purchaseOrder->lines->sum(fn($line) => $line->qty * $line->unit_price_cents),
+            'ratio_80_20' => $purchaseOrder->corp_ratio_cached ?? 0,
+            'status' => $purchaseOrder->status,
+            'date' => $purchaseOrder->created_at->format('Y-m-d'),
+            'lines' => $purchaseOrder->lines->map(function ($line) {
+                return [
+                    'item' => $line->stockItem->name ?? 'Article inconnu',
+                    'category' => 'obligatoire', // TODO: Add category field to stock items
+                    'quantity' => $line->qty,
+                    'price' => $line->unit_price_cents,
+                    'total' => $line->qty * $line->unit_price_cents,
+                ];
+            })->toArray(),
         ];
 
         // Calculate detailed ratios
@@ -113,7 +112,7 @@ class PurchaseOrderController extends Controller
         $data = $request->validated();
         $lines = $data['lines'];
 
-        $po = new PurchaseOrder();
+        $po = new PurchaseOrder;
         $po->id = (string) Str::ulid();
         $po->warehouse_id = $data['warehouse_id'];
         $po->franchisee_id = $request->input('franchisee_id');
@@ -123,7 +122,7 @@ class PurchaseOrderController extends Controller
 
         $total = 0;
         foreach ($lines as $line) {
-            $pol = new PurchaseOrderLine();
+            $pol = new PurchaseOrderLine;
             $pol->id = (string) Str::ulid();
             $pol->purchase_order_id = $po->id;
             $pol->stock_item_id = $line['stock_item_id'];
@@ -282,14 +281,15 @@ class PurchaseOrderController extends Controller
      */
     private function fetchOrderWithRatio(string $id): array
     {
-        // Mock data with central ratio computation
+        $purchaseOrder = PurchaseOrder::with(['warehouse', 'franchisee', 'lines.stockItem'])->findOrFail($id);
+        
         $order = [
-            'id' => $id,
-            'reference' => 'PO-2024-002',
-            'franchisee' => 'Lyon Centre',
-            'franchisee_email' => 'franchise.lyon@drivncook.fr',
-            'ratio_80_20' => 75, // Original ratio
-            'status' => 'pending',
+            'id' => $purchaseOrder->id,
+            'reference' => "PO-{$purchaseOrder->created_at->format('Y')}-" . str_pad($purchaseOrder->id, 3, '0', STR_PAD_LEFT),
+            'franchisee' => $purchaseOrder->warehouse->name ?? 'Entrepôt inconnu',
+            'franchisee_email' => $purchaseOrder->franchisee->email ?? 'Non renseigné',
+            'ratio_80_20' => $purchaseOrder->corp_ratio_cached ?? 0,
+            'status' => $purchaseOrder->status,
         ];
 
         // Compute central ratio (80% from central warehouse, 20% local)
@@ -304,9 +304,18 @@ class PurchaseOrderController extends Controller
      */
     private function computeCentralRatio(string $id, bool $forceRecalculation = false): float
     {
-        // Mock computation - in real app, this would query actual inventory
-        $centralStock = 850; // Items available in central warehouse
-        $totalRequired = 1000; // Total items needed
+        $purchaseOrder = PurchaseOrder::with('lines.stockItem')->findOrFail($id);
+        
+        $totalRequired = $purchaseOrder->lines->sum('qty');
+        $centralStock = $purchaseOrder->lines->sum(function ($line) {
+            // TODO: Query actual central warehouse stock for this item
+            // For now, assume 80% availability as baseline
+            return $line->qty * 0.8;
+        });
+
+        if ($totalRequired <= 0) {
+            return 0;
+        }
 
         $centralRatio = ($centralStock / $totalRequired) * 100;
 
@@ -319,7 +328,11 @@ class PurchaseOrderController extends Controller
      */
     private function logComplianceOverride(string $id, string $reason, float $ratio): void
     {
-        // Mock logging - in real app, this would save to database
+        $purchaseOrder = PurchaseOrder::findOrFail($id);
+        $purchaseOrder->update([
+            'status' => 'approved_override',
+        ]);
+
         Log::info("Purchase Order {$id} compliance override", [
             'ratio' => $ratio,
             'reason' => $reason,
@@ -333,7 +346,11 @@ class PurchaseOrderController extends Controller
      */
     private function flagForReview(string $id, string $message, float $ratio): void
     {
-        // Mock flagging - in real app, this would create alerts
+        $purchaseOrder = PurchaseOrder::findOrFail($id);
+        $purchaseOrder->update([
+            'status' => 'needs_review',
+        ]);
+
         Log::warning("Purchase Order {$id} flagged for review", [
             'ratio' => $ratio,
             'message' => $message,
@@ -346,7 +363,11 @@ class PurchaseOrderController extends Controller
      */
     private function rejectOrder(string $id, string $message, float $ratio): void
     {
-        // Mock rejection - in real app, this would update status and notify
+        $purchaseOrder = PurchaseOrder::findOrFail($id);
+        $purchaseOrder->update([
+            'status' => 'rejected',
+        ]);
+
         Log::info("Purchase Order {$id} rejected", [
             'ratio' => $ratio,
             'message' => $message,
@@ -359,7 +380,11 @@ class PurchaseOrderController extends Controller
      */
     private function updateCentralRatio(string $id, float $ratio, string $reason): void
     {
-        // Mock update - in real app, this would update database
+        $purchaseOrder = PurchaseOrder::findOrFail($id);
+        $purchaseOrder->update([
+            'corp_ratio_cached' => $ratio,
+        ]);
+
         Log::info("Purchase Order {$id} central ratio updated", [
             'new_ratio' => $ratio,
             'reason' => $reason,
@@ -374,23 +399,33 @@ class PurchaseOrderController extends Controller
     {
         $period = $request->input('period', 'current_month');
 
-        // Mock compliance data
+        $orders = PurchaseOrder::with(['warehouse', 'creator'])
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->get();
+
         $complianceData = [
-            'total_orders' => 45,
-            'compliant_orders' => 38,
-            'non_compliant_orders' => 7,
-            'compliance_rate' => 84.4,
-            'average_ratio' => 82.1,
-            'by_franchisee' => [
-                ['name' => 'Paris Nord', 'orders' => 8, 'compliance_rate' => 87.5, 'avg_ratio' => 85.2],
-                ['name' => 'Lyon Centre', 'orders' => 6, 'compliance_rate' => 66.7, 'avg_ratio' => 76.8],
-                ['name' => 'Marseille Sud', 'orders' => 7, 'compliance_rate' => 100, 'avg_ratio' => 89.1],
-                ['name' => 'Toulouse Nord', 'orders' => 5, 'compliance_rate' => 80, 'avg_ratio' => 81.4],
-            ],
+            'total_orders' => $orders->count(),
+            'compliant_orders' => $orders->where('corp_ratio_cached', '>=', 80)->count(),
+            'non_compliant_orders' => $orders->where('corp_ratio_cached', '<', 80)->count(),
+            'compliance_rate' => $orders->count() > 0 ? 
+                ($orders->where('corp_ratio_cached', '>=', 80)->count() / $orders->count()) * 100 : 0,
+            'average_ratio' => $orders->avg('corp_ratio_cached') ?? 0,
+            'by_franchisee' => $orders->groupBy('warehouse.name')->map(function ($warehouseOrders, $warehouseName) {
+                $compliantCount = $warehouseOrders->where('corp_ratio_cached', '>=', 80)->count();
+                $totalCount = $warehouseOrders->count();
+                
+                return [
+                    'name' => $warehouseName ?? 'Inconnu',
+                    'orders' => $totalCount,
+                    'compliance_rate' => $totalCount > 0 ? ($compliantCount / $totalCount) * 100 : 0,
+                    'avg_ratio' => $warehouseOrders->avg('corp_ratio_cached') ?? 0,
+                ];
+            })->values()->toArray(),
             'trend' => [
-                ['month' => 'Juin', 'compliance_rate' => 78.2],
-                ['month' => 'Juillet', 'compliance_rate' => 81.5],
-                ['month' => 'Août', 'compliance_rate' => 84.4],
+                // TODO: Calculate historical compliance trend
+                ['month' => 'Mois actuel', 'compliance_rate' => $orders->count() > 0 ? 
+                    ($orders->where('corp_ratio_cached', '>=', 80)->count() / $orders->count()) * 100 : 0],
             ],
         ];
 

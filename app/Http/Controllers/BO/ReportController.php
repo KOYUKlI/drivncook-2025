@@ -14,7 +14,37 @@ class ReportController extends Controller
 {
     public function monthly(Request $request)
     {
-        return view('bo.reports.monthly');
+        // Calculate real monthly sales data
+        $monthStart = now()->startOfMonth();
+        $monthEnd = now()->endOfMonth();
+        
+        $sales = \App\Models\Sale::whereBetween('created_at', [$monthStart, $monthEnd])->get();
+        
+        $totalSales = $sales->sum('total_cents');
+        $transactionCount = $sales->count();
+        $avgTransaction = $transactionCount > 0 ? $totalSales / $transactionCount : 0;
+
+        // Calculate daily sales data
+        $dailySales = $sales->groupBy(function ($sale) {
+            return $sale->created_at->format('Y-m-d');
+        })->map(function ($daySales, $date) {
+            $dayTotal = $daySales->sum('total_cents');
+            $dayCount = $daySales->count();
+            
+            return [
+                'date' => $date,
+                'transactions' => $dayCount,
+                'total' => $dayTotal,
+                'avg' => $dayCount > 0 ? $dayTotal / $dayCount : 0,
+            ];
+        })->values()->toArray();
+
+        return view('reports.monthly_sales', compact(
+            'totalSales',
+            'transactionCount',
+            'avgTransaction',
+            'dailySales'
+        ));
     }
 
     public function generate(Request $request, PdfService $pdf)

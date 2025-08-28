@@ -8,32 +8,33 @@ use Spatie\Permission\Models\Role;
 uses(RefreshDatabase::class);
 
 describe('Complete Workflow Integration Tests', function () {
-beforeEach(function () {
-    // Clear all caches to avoid conflicts between tests
-    Artisan::call('view:clear');
-    
-    // Clear all roles and permissions to start fresh
-    app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
-    
-    // Create roles if they don't exist
-    $adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
-    $franchiseeRole = Role::firstOrCreate(['name' => 'franchisee', 'guard_name' => 'web']);
-    $warehouseRole = Role::firstOrCreate(['name' => 'warehouse', 'guard_name' => 'web']);
-    $fleetRole = Role::firstOrCreate(['name' => 'fleet', 'guard_name' => 'web']);
+    beforeEach(function () {
+        // Clear all caches to avoid conflicts between tests
+        Artisan::call('view:clear');
 
-    // Create users with roles
-    $this->adminUser = User::factory()->create();
-    $this->adminUser->assignRole($adminRole);
+        // Clear all roles and permissions to start fresh
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-    $this->franchiseeUser = User::factory()->create();
-    $this->franchiseeUser->assignRole($franchiseeRole);
+        // Create roles if they don't exist
+        $adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+        $franchiseeRole = Role::firstOrCreate(['name' => 'franchisee', 'guard_name' => 'web']);
+        $warehouseRole = Role::firstOrCreate(['name' => 'warehouse', 'guard_name' => 'web']);
+        $fleetRole = Role::firstOrCreate(['name' => 'fleet', 'guard_name' => 'web']);
 
-    $this->warehouseUser = User::factory()->create();
-    $this->warehouseUser->assignRole($warehouseRole);
+        // Create users with roles
+        $this->adminUser = User::factory()->create();
+        $this->adminUser->assignRole($adminRole);
 
-    $this->fleetUser = User::factory()->create();
-    $this->fleetUser->assignRole($fleetRole);
-});    it('allows complete franchise application workflow', function () {
+        $this->franchiseeUser = User::factory()->create();
+        $this->franchiseeUser->assignRole($franchiseeRole);
+
+        $this->warehouseUser = User::factory()->create();
+        $this->warehouseUser->assignRole($warehouseRole);
+
+        $this->fleetUser = User::factory()->create();
+        $this->fleetUser->assignRole($fleetRole);
+    });
+    it('allows complete franchise application workflow', function () {
         // 1. Public application submission
         $applicationData = [
             'first_name' => 'Jean',

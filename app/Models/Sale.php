@@ -18,13 +18,12 @@ class Sale extends Model
     protected $fillable = [
         'id',
         'franchisee_id',
-        'truck_id',
+        'sale_date',
         'total_cents',
-        'payment_method',
-        'notes',
     ];
 
     protected $casts = [
+        'sale_date' => 'date',
         'total_cents' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
@@ -36,14 +35,6 @@ class Sale extends Model
     public function franchisee(): BelongsTo
     {
         return $this->belongsTo(Franchisee::class);
-    }
-
-    /**
-     * The truck used for this sale.
-     */
-    public function truck(): BelongsTo
-    {
-        return $this->belongsTo(Truck::class);
     }
 
     /**

@@ -13,18 +13,61 @@ class DashboardController extends Controller
     public function index()
     {
         $user = Auth::user();
+        $franchiseeId = data_get($user, 'franchisee_id');
 
-        // Mock data for franchisee dashboard
+        // Calculate real franchisee dashboard data
+        $currentMonth = now();
+        $lastMonth = now()->subMonth();
+        
+        $currentMonthSales = \App\Models\Sale::whereBetween('created_at', [
+            $currentMonth->startOfMonth(), 
+            $currentMonth->endOfMonth()
+        ])
+        ->when($franchiseeId, fn($q) => $q->where('franchisee_id', $franchiseeId))
+        ->sum('total_cents');
+
+        $lastMonthSales = \App\Models\Sale::whereBetween('created_at', [
+            $lastMonth->startOfMonth(), 
+            $lastMonth->endOfMonth()
+        ])
+        ->when($franchiseeId, fn($q) => $q->where('franchisee_id', $franchiseeId))
+        ->sum('total_cents');
+
+        $salesGrowth = $lastMonthSales > 0 ? 
+            (($currentMonthSales - $lastMonthSales) / $lastMonthSales) * 100 : 0;
+
+        $pendingOrders = \App\Models\PurchaseOrder::where('status', 'pending')
+            ->when($franchiseeId, function($q) use ($franchiseeId) {
+                return $q->whereHas('warehouse', function($subQ) use ($franchiseeId) {
+                    // TODO: Add franchisee_id to warehouses or use proper relation
+                    return $subQ;
+                });
+            })
+            ->count();
+
+        $userTruck = \App\Models\Truck::where('franchisee_id', $franchiseeId)->first();
+        $truckStatus = $userTruck ? $userTruck->status : 'none';
+
+        $recentSales = \App\Models\Sale::query()
+            ->when($franchiseeId, fn($q) => $q->where('franchisee_id', $franchiseeId))
+            ->latest()
+            ->limit(3)
+            ->get()
+            ->map(function($sale) {
+                return [
+                    'date' => $sale->sale_date->format('Y-m-d'),
+                    'amount' => $sale->total_cents,
+                    'location' => 'Location non renseignée', // sale_date used instead
+                ];
+            })
+            ->toArray();
+
         $data = [
-            'monthly_sales' => 15000, // centimes
-            'sales_growth' => 8.5, // pourcentage
-            'pending_orders' => 2,
-            'truck_status' => 'active',
-            'recent_sales' => [
-                ['date' => '2024-08-27', 'amount' => 850, 'location' => 'Place de la République'],
-                ['date' => '2024-08-26', 'amount' => 920, 'location' => 'Gare du Nord'],
-                ['date' => '2024-08-25', 'amount' => 750, 'location' => 'Châtelet'],
-            ],
+            'monthly_sales' => $currentMonthSales,
+            'sales_growth' => round($salesGrowth, 1),
+            'pending_orders' => $pendingOrders,
+            'truck_status' => $truckStatus,
+            'recent_sales' => $recentSales,
             'quick_links' => [
                 ['title' => 'Rapport mensuel PDF', 'route' => '#', 'icon' => 'document'],
                 ['title' => 'Nouvelle commande', 'route' => 'fo.sales.create', 'icon' => 'plus'],

@@ -16,6 +16,35 @@
     </div>
 
     <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm text-gray-700">{{ __('ui.status') }}</label>
+                    <select name="status" class="mt-1 block w-full border-gray-300 rounded-md">
+                        @php $current = request('status', 'all'); @endphp
+                        <option value="all" {{ $current==='all' ? 'selected' : '' }}>{{ __('ui.all_statuses') }}</option>
+                        <option value="active" {{ $current==='active' ? 'selected' : '' }}>{{ __('ui.active') }}</option>
+                        <option value="maintenance" {{ $current==='maintenance' ? 'selected' : '' }}>{{ __('ui.maintenance') }}</option>
+                        <option value="inactive" {{ $current==='inactive' ? 'selected' : '' }}>{{ __('ui.inactive') }}</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-700">{{ __('ui.franchisee') }}</label>
+                    <select name="franchisee" class="mt-1 block w-full border-gray-300 rounded-md">
+                        @php $currentFranchisee = request('franchisee', 'all'); @endphp
+                        <option value="all" {{ $currentFranchisee==='all' ? 'selected' : '' }}>{{ __('ui.all_franchisees') }}</option>
+                        <option value="paris-nord" {{ $currentFranchisee==='paris-nord' ? 'selected' : '' }}>Paris Nord</option>
+                        <option value="lyon-centre" {{ $currentFranchisee==='lyon-centre' ? 'selected' : '' }}>Lyon Centre</option>
+                        <option value="marseille-sud" {{ $currentFranchisee==='marseille-sud' ? 'selected' : '' }}>Marseille Sud</option>
+                        <option value="toulouse-nord" {{ $currentFranchisee==='toulouse-nord' ? 'selected' : '' }}>Toulouse Nord</option>
+                        <option value="bordeaux-est" {{ $currentFranchisee==='bordeaux-est' ? 'selected' : '' }}>Bordeaux Est</option>
+                    </select>
+                </div>
+                <div class="flex items-end">
+                    <x-primary-button>{{ __('ui.filter') }}</x-primary-button>
+                </div>
+            </form>
+        </div>
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">

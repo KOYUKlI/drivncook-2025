@@ -2,15 +2,18 @@
 
 use App\Http\Controllers\BO\ApplicationController;
 use App\Http\Controllers\BO\DashboardController as BODashboardController;
+use App\Http\Controllers\BO\FranchiseApplicationReviewController;
 use App\Http\Controllers\BO\FranchiseeController;
 use App\Http\Controllers\BO\PurchaseOrderController;
+use App\Http\Controllers\BO\ReportController as BOReportController;
+use App\Http\Controllers\BO\StockItemController;
 use App\Http\Controllers\BO\TruckController;
+use App\Http\Controllers\BO\WarehouseController;
 use App\Http\Controllers\FO\DashboardController as FODashboardController;
 use App\Http\Controllers\FO\ReportController;
 use App\Http\Controllers\FO\SaleController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Public\FranchiseApplicationController;
-use App\Http\Controllers\BO\FranchiseApplicationReviewController;
 use App\Http\Controllers\Public\FranchisePageController;
 use App\Http\Controllers\Public\HomeController;
 use App\Services\PdfService;
@@ -77,6 +80,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('applications/{id}/interview', [ApplicationController::class, 'interview'])->name('applications.interview');
             Route::post('applications/{id}/approve', [FranchiseApplicationReviewController::class, 'approve'])->name('applications.approve');
             Route::post('applications/{id}/reject', [ApplicationController::class, 'reject'])->name('applications.reject');
+            Route::get('applications/documents/{document}/download', [ApplicationController::class, 'downloadDocument'])->name('applications.download-document');
         });
 
         // Trucks management (admin, fleet)
@@ -98,7 +102,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Purchase orders (admin, warehouse)
         Route::middleware('role:admin|warehouse')->group(function () {
-            Route::resource('purchase-orders', PurchaseOrderController::class)->only(['index', 'show', 'store']);
+            Route::get('reports/monthly', [BOReportController::class, 'monthly'])->name('reports.monthly');
+            Route::post('reports/monthly/generate', [BOReportController::class, 'generate'])->name('reports.monthly.generate');
+
+            Route::resource('warehouses', WarehouseController::class)->except(['show']);
+            Route::resource('stock-items', StockItemController::class)->except(['show']);
+
+            Route::resource('purchase-orders', PurchaseOrderController::class)->only(['index', 'show', 'store', 'create']);
             Route::post('purchase-orders/{id}/validate-compliance', [PurchaseOrderController::class, 'validateCompliance'])->name('purchase-orders.validate-compliance');
             Route::post('purchase-orders/{id}/update-ratio', [PurchaseOrderController::class, 'updateRatio'])->name('purchase-orders.update-ratio');
             Route::post('purchase-orders/{id}/recalculate', [PurchaseOrderController::class, 'recalculate'])->name('purchase-orders.recalculate');
@@ -113,7 +123,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('sales', SaleController::class)->only(['index', 'create', 'store']);
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
         Route::post('/reports/generate', [ReportController::class, 'generate'])->name('reports.generate');
-    Route::get('/reports/{id}/download', [ReportController::class, 'download'])->name('reports.download');
+        Route::get('/reports/{id}/download', [ReportController::class, 'download'])->name('reports.download');
     });
 
     // Profile routes

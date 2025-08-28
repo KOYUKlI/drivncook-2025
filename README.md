@@ -21,6 +21,15 @@ Laravel is a web application framework with expressive, elegant syntax. We belie
 
 Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
+## Scheduler
+
+This app defines the task scheduler in `routes/console.php` (no Console Kernel). To run scheduled tasks locally with Sail or PHP, use one of:
+
+- Sail: `./vendor/bin/sail artisan schedule:work`
+- PHP: `php artisan schedule:work`
+
+Ensure `storage:link` is run once for public files (PDFs, uploads): `php artisan storage:link`.
+
 ## Learning Laravel
 
 Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.

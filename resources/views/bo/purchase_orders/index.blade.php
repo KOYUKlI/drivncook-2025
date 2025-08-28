@@ -11,8 +11,20 @@
     ]" />
 
     <div class="mb-8">
-        <h1 class="text-2xl font-bold text-gray-900">{{ __('ui.purchase_orders') }}</h1>
-        <p class="text-gray-600">{{ __('ui.manage_purchase_orders') }}</p>
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">{{ __('ui.purchase_orders') }}</h1>
+                <p class="text-gray-600">{{ __('ui.manage_purchase_orders') }}</p>
+            </div>
+            <div class="flex gap-3">
+                <a href="{{ route('bo.purchase-orders.create') }}" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                    {{ __('ui.create_purchase_order') }}
+                </a>
+                <a href="{{ route('bo.purchase-orders.compliance-report') }}" class="border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-md text-sm font-medium">
+                    {{ __('ui.compliance_report') }}
+                </a>
+            </div>
+        </div>
     </div>
 
     <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
