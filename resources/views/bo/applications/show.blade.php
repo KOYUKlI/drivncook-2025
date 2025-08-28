@@ -124,13 +124,41 @@
                 <div class="mt-6 pt-6 border-t border-gray-200">
                     <div class="space-y-3">
                         @if($application['status'] === 'in_review')
-                            <button class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium">
-                                {{ __('ui.approve_application') }}
-                            </button>
-                            <button class="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium">
-                                {{ __('ui.reject_application') }}
-                            </button>
+                            <form method="POST" action="{{ route('bo.applications.prequalify', $application['id']) }}">
+                                @csrf
+                                <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                    {{ __('ui.prequalify') }}
+                                </button>
+                            </form>
+                        @elseif($application['status'] === 'prequalified')
+                            <form method="POST" action="{{ route('bo.applications.interview', $application['id']) }}">
+                                @csrf
+                                <button type="submit" class="w-full bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                    {{ __('ui.schedule_interview') }}
+                                </button>
+                            </form>
                         @endif
+                        
+                        @if(in_array($application['status'], ['prequalified', 'interview_scheduled']))
+                            <form method="POST" action="{{ route('bo.applications.approve', $application['id']) }}" 
+                                  onsubmit="return confirm('Êtes-vous sûr de vouloir approuver cette candidature ? Un franchisé sera créé automatiquement.')">
+                                @csrf
+                                <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                    {{ __('ui.approve_application') }}
+                                </button>
+                            </form>
+                        @endif
+                        
+                        @if(!in_array($application['status'], ['approved', 'rejected']))
+                            <form method="POST" action="{{ route('bo.applications.reject', $application['id']) }}" 
+                                  onsubmit="return confirm('Êtes-vous sûr de vouloir rejeter cette candidature ?')">
+                                @csrf
+                                <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                    {{ __('ui.reject_application') }}
+                                </button>
+                            </form>
+                        @endif
+                        
                         <button class="w-full border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-md text-sm font-medium">
                             {{ __('ui.send_message') }}
                         </button>

@@ -9,6 +9,8 @@ use App\Http\Controllers\FO\DashboardController as FODashboardController;
 use App\Http\Controllers\FO\ReportController;
 use App\Http\Controllers\FO\SaleController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Public\FranchiseApplicationController;
+use App\Http\Controllers\BO\FranchiseApplicationReviewController;
 use App\Http\Controllers\Public\FranchisePageController;
 use App\Http\Controllers\Public\HomeController;
 use App\Services\PdfService;
@@ -36,9 +38,19 @@ Route::get('/reports/demo', function (PdfService $pdf) {
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/devenir-franchise', [FranchisePageController::class, 'show'])->name('public.franchise');
 
+// Public application routes (unified /applications)
+Route::get('/applications/create', [FranchiseApplicationController::class, 'create'])->name('public.applications.create');
+Route::post('/applications/draft', [FranchiseApplicationController::class, 'draft'])->name('public.applications.draft');
+Route::post('/applications', [FranchiseApplicationController::class, 'store'])->name('public.applications.store');
+Route::get('/applications/{id}', [FranchiseApplicationController::class, 'show'])->name('public.applications.show');
+// Legacy aliases redirect permanently
+Route::redirect('/application/create', '/applications/create', 301);
+Route::get('/application/{id}', fn ($id) => redirect()->route('public.applications.show', $id));
+
 // Dashboard redirect route
 Route::get('/dashboard', function () {
-    $user = auth()->user();
+    /** @var \App\Models\User $user */
+    $user = \Illuminate\Support\Facades\Auth::user();
 
     if ($user->hasRole(['admin', 'warehouse', 'fleet', 'tech'])) {
         return redirect()->route('bo.dashboard');
@@ -63,13 +75,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::resource('applications', ApplicationController::class)->only(['index', 'show']);
             Route::post('applications/{id}/prequalify', [ApplicationController::class, 'prequalify'])->name('applications.prequalify');
             Route::post('applications/{id}/interview', [ApplicationController::class, 'interview'])->name('applications.interview');
-            Route::post('applications/{id}/approve', [ApplicationController::class, 'approve'])->name('applications.approve');
+            Route::post('applications/{id}/approve', [FranchiseApplicationReviewController::class, 'approve'])->name('applications.approve');
             Route::post('applications/{id}/reject', [ApplicationController::class, 'reject'])->name('applications.reject');
         });
 
         // Trucks management (admin, fleet)
         Route::middleware('role:admin|fleet')->group(function () {
             Route::resource('trucks', TruckController::class)->only(['index', 'show']);
+            // Mission C actions
+            Route::post('trucks/{truck}/deploy', [TruckController::class, 'openDeployment'])->name('trucks.deploy');
+            Route::post('trucks/{truck}/maintenance/open', [TruckController::class, 'openMaintenance'])->name('trucks.maintenance.open');
+            Route::post('maintenance/{log}/close', [TruckController::class, 'closeMaintenance'])->name('maintenance.close');
             Route::post('trucks/{id}/schedule-deployment', [TruckController::class, 'scheduleDeployment'])->name('trucks.schedule-deployment');
             Route::post('trucks/{id}/deployments/{deploymentId}/open', [TruckController::class, 'openDeployment'])->name('trucks.open-deployment');
             Route::post('trucks/{id}/deployments/{deploymentId}/close', [TruckController::class, 'closeDeployment'])->name('trucks.close-deployment');
@@ -82,10 +98,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Purchase orders (admin, warehouse)
         Route::middleware('role:admin|warehouse')->group(function () {
-            Route::resource('purchase-orders', PurchaseOrderController::class)->only(['index', 'show']);
+            Route::resource('purchase-orders', PurchaseOrderController::class)->only(['index', 'show', 'store']);
             Route::post('purchase-orders/{id}/validate-compliance', [PurchaseOrderController::class, 'validateCompliance'])->name('purchase-orders.validate-compliance');
             Route::post('purchase-orders/{id}/update-ratio', [PurchaseOrderController::class, 'updateRatio'])->name('purchase-orders.update-ratio');
             Route::post('purchase-orders/{id}/recalculate', [PurchaseOrderController::class, 'recalculate'])->name('purchase-orders.recalculate');
+            Route::post('purchase-orders/{id}/status', [PurchaseOrderController::class, 'updateStatus'])->name('purchase-orders.update-status');
             Route::get('purchase-orders/reports/compliance', [PurchaseOrderController::class, 'complianceReport'])->name('purchase-orders.compliance-report');
         });
     });
@@ -95,6 +112,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/dashboard', [FODashboardController::class, 'index'])->name('dashboard');
         Route::resource('sales', SaleController::class)->only(['index', 'create', 'store']);
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+        Route::post('/reports/generate', [ReportController::class, 'generate'])->name('reports.generate');
+    Route::get('/reports/{id}/download', [ReportController::class, 'download'])->name('reports.download');
     });
 
     // Profile routes
@@ -106,14 +125,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
 require __DIR__.'/auth.php';
 
 // Routes de test temporaires - à supprimer après vérification
-Route::get('/test-admin', function() { 
-    $user = App\Models\User::where('email', 'admin@local.test')->first(); 
-    auth()->login($user); 
-    return redirect()->route('bo.dashboard'); 
+Route::get('/test-admin', function () {
+    $user = App\Models\User::where('email', 'admin@local.test')->first();
+    \Illuminate\Support\Facades\Auth::login($user);
+
+    return redirect()->route('bo.dashboard');
 })->name('test.admin');
 
-Route::get('/test-franchisee', function() { 
-    $user = App\Models\User::where('email', 'fr@local.test')->first(); 
-    auth()->login($user); 
-    return redirect()->route('fo.dashboard'); 
+Route::get('/test-franchisee', function () {
+    $user = App\Models\User::where('email', 'fr@local.test')->first();
+    \Illuminate\Support\Facades\Auth::login($user);
+
+    return redirect()->route('fo.dashboard');
 })->name('test.franchisee');

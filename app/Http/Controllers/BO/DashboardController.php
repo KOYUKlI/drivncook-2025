@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\BO;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
@@ -11,8 +12,8 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        $user = auth()->user();
-        
+        $user = Auth::user();
+
         // Mock data for dashboard tiles
         $data = [
             'revenue_last_month' => 125000, // centimes

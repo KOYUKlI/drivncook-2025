@@ -1,28 +1,29 @@
 <?php
 
-require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__.'/vendor/autoload.php';
 
-$app = require_once __DIR__ . '/bootstrap/app.php';
+$app = require_once __DIR__.'/bootstrap/app.php';
 $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
 
 echo "Diagnostic complet des clés ui. manquantes\n";
 echo "==========================================\n\n";
 
 // Fonction pour tester le rendu d'une vue avec un utilisateur fictif
-function testViewWithAuth($viewName, $userRole = null) {
+function testViewWithAuth($viewName, $userRole = null)
+{
     try {
         if ($userRole) {
             // Créer un utilisateur temporaire pour les vues authentifiées
             $user = new \App\Models\User([
                 'name' => 'Test User',
                 'email' => 'test@example.com',
-                'password' => 'password'
+                'password' => 'password',
             ]);
             $user->id = 1;
-            
+
             // Simuler l'authentification
-            auth()->setUser($user);
-            
+            \Illuminate\Support\Facades\Auth::setUser($user);
+
             // Assigner le rôle si nécessaire
             if ($userRole === 'admin') {
                 $user->assignRole('admin');
@@ -30,19 +31,19 @@ function testViewWithAuth($viewName, $userRole = null) {
                 $user->assignRole('franchisee');
             }
         }
-        
+
         $content = view($viewName)->render();
-        
+
         // Chercher les clés ui. non traduites
         preg_match_all('/ui\.[a-zA-Z_]+/', $content, $matches);
-        
+
         if ($userRole) {
-            auth()->logout();
+            \Illuminate\Support\Facades\Auth::logout();
         }
-        
+
         return array_unique($matches[0]);
     } catch (Exception $e) {
-        return ["ERROR: " . $e->getMessage()];
+        return ['ERROR: '.$e->getMessage()];
     }
 }
 
@@ -51,7 +52,7 @@ $viewsToTest = [
     // Vues publiques
     'public.home' => null,
     'public.franchise-info' => null,
-    
+
     // Vues avec sidebar (nécessitent authentification)
     'layouts.partials.sidebar' => 'admin',
 ];
@@ -59,14 +60,14 @@ $viewsToTest = [
 $allFoundKeys = [];
 
 foreach ($viewsToTest as $viewName => $userRole) {
-    echo "Testing $viewName" . ($userRole ? " (as $userRole)" : "") . ":\n";
-    
+    echo "Testing $viewName".($userRole ? " (as $userRole)" : '').":\n";
+
     $keys = testViewWithAuth($viewName, $userRole);
-    
+
     if (empty($keys)) {
         echo "  ✅ Aucune clé ui. non traduite\n";
     } else {
-        echo "  ⚠️  Clés trouvées: " . implode(', ', $keys) . "\n";
+        echo '  ⚠️  Clés trouvées: '.implode(', ', $keys)."\n";
         $allFoundKeys = array_merge($allFoundKeys, $keys);
     }
     echo "\n";
@@ -83,8 +84,8 @@ $viewFiles = array_filter(explode("\n", trim($files)));
 foreach ($viewFiles as $file) {
     $content = file_get_contents($file);
     preg_match_all('/__\([\'"]ui\.([a-zA-Z_]+)[\'"]\)/', $content, $matches);
-    
-    if (!empty($matches[1])) {
+
+    if (! empty($matches[1])) {
         $shortFile = str_replace('resources/views/', '', $file);
         echo "$shortFile:\n";
         foreach (array_unique($matches[1]) as $key) {
@@ -102,11 +103,11 @@ foreach ($viewFiles as $file) {
 }
 
 $uniqueKeys = array_unique($allFoundKeys);
-if (!empty($uniqueKeys)) {
+if (! empty($uniqueKeys)) {
     echo "RÉSUMÉ - Clés manquantes trouvées:\n";
     echo "================================\n";
     foreach ($uniqueKeys as $key) {
-        if (!str_starts_with($key, 'ERROR:')) {
+        if (! str_starts_with($key, 'ERROR:')) {
             echo "- $key\n";
         }
     }

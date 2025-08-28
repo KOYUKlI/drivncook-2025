@@ -23,6 +23,7 @@ return [
     'trucks' => 'Trucks',
     'purchase_orders' => 'Purchase Orders',
     'applications' => 'Applications',
+    'status' => 'Status',
 
     // Dashboard
     'recent_events' => 'Recent Events',
@@ -182,17 +183,17 @@ return [
     'optional' => 'Optional',
     'select_option' => 'Select an option',
     'choose_file' => 'Choose file',
-    
+
     // Auth
     'login' => 'Login',
     'register' => 'Register',
-    
+
     // Additional UI keys
     'my_franchise' => 'My franchise',
     'side_navigation' => 'Side navigation',
     'close_sidebar' => 'Close sidebar',
     'all_rights_reserved' => 'All rights reserved',
-    
+
     // Public page content
     'hero_title' => 'Join the mobile culinary revolution',
     'hero_subtitle' => 'Become a Driv\'n Cook franchisee and create your own food truck business with our innovative concept',
@@ -208,7 +209,7 @@ return [
     'ready_to_start' => 'Ready to start?',
     'start_application_text' => 'Submit your application today and join our network',
     'start_application' => 'Apply now',
-    
+
     // Franchise info page
     'franchise_information' => 'Franchise Opportunity',
     'franchise_info_subtitle' => 'Discover all the details to become a Driv\'n Cook franchisee',
@@ -314,6 +315,9 @@ return [
     'approve_application' => 'Approve Application',
     'reject_application' => 'Reject Application',
     'send_message' => 'Send Message',
+    'application_approved_flash' => 'Application approved and franchisee created.',
+    'application_submitted_flash' => 'Your application has been submitted.',
+    'application_draft_saved_flash' => 'Your draft has been saved.',
 
     // Sales and FO
     'sale_location_time' => 'Sale Location & Time',
@@ -338,54 +342,54 @@ return [
     'generate_report' => 'Generate Report',
     'period_summary' => 'Period Summary',
     'total_sales' => 'Total Sales',
-        'transactions_count' => 'Number of transactions',
+    'transactions_count' => 'Number of transactions',
     'transactions' => 'Transactions',
-    
+
     // Missing dynamic keys
     'obligatoire' => 'Mandatory',
     'libre' => 'Free',
     'interview' => 'Interview',
     'contract' => 'Contract',
-    
+
     // Application statuses
     'draft' => 'Draft',
     'submitted' => 'Submitted',
     'prequalified' => 'Prequalified',
     'approved' => 'Approved',
     'rejected' => 'Rejected',
-    
+
     // Truck statuses
     'Draft' => 'Draft',
     'Active' => 'Active',
     'InMaintenance' => 'In Maintenance',
     'Retired' => 'Retired',
-    
+
     // Order statuses
     'Approved' => 'Approved',
     'Prepared' => 'Prepared',
     'Shipped' => 'Shipped',
     'Received' => 'Received',
     'Cancelled' => 'Cancelled',
-    
+
     // Maintenance types
     'Preventive' => 'Preventive',
     'Corrective' => 'Corrective',
-    
+
     // Common payment methods
     'card' => 'Card',
     'cash' => 'Cash',
     'mobile' => 'Mobile',
-    
+
     // Event types
     'sale' => 'Sale',
     'maintenance' => 'Maintenance',
     'order' => 'Order',
-    
+
     // Document statuses
     'uploaded' => 'Uploaded',
     'pending' => 'Pending',
     'rejected' => 'Rejected',
-    
+
     // Workflow statuses
     'completed' => 'Completed',
     'in_progress' => 'In Progress',

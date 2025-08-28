@@ -1,3 +1,4 @@
+@php $statusCounts = array_merge([ 'pending'=>0,'active'=>0,'in_maintenance'=>0,'retired'=>0,'maintenance'=>0,'deployed'=>0,'idle'=>0 ], $statusCounts ?? []); @endphp
 @extends('layouts.app-shell')
 
 @section('sidebar')
@@ -8,11 +9,11 @@
     <x-ui.breadcrumbs :items="[
         ['title' => __('ui.dashboard'), 'url' => route('bo.dashboard')],
         ['title' => __('ui.trucks'), 'url' => route('bo.trucks.index')],
-        ['title' => $truck['code']]
+    ['title' => $truck['code'] ?? '—']
     ]" />
 
     <div class="mb-8">
-        <h1 class="text-2xl font-bold text-gray-900">{{ __('ui.truck') }} {{ $truck['code'] }}</h1>
+        <h1 class="text-2xl font-bold text-gray-900">{{ __('ui.truck') }} {{ $truck['code'] ?? '—' }}</h1>
         <div class="flex items-center gap-4 mt-2">
             @php
             $statusColors = [
@@ -21,10 +22,10 @@
                 'inactive' => 'bg-gray-100 text-gray-800'
             ];
             @endphp
-            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $statusColors[$truck['status']] }}">
-                {{ __('ui.' . $truck['status']) }}
+            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $statusColors[$truck['status'] ?? 'inactive'] ?? 'bg-gray-100 text-gray-800' }}">
+                {{ __('ui.' . ($truck['status'] ?? 'inactive')) }}
             </span>
-            <span class="text-gray-600">{{ __('ui.assigned_to') }}: {{ $truck['franchisee'] }}</span>
+            <span class="text-gray-600">{{ __('ui.assigned_to') }}: {{ $truck['franchisee'] ?? '—' }}</span>
         </div>
     </div>
 
@@ -69,16 +70,16 @@
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            @foreach($truck['deployments'] as $deployment)
+                            @foreach(($truck['deployments'] ?? []) as $deployment)
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ \Carbon\Carbon::parse($deployment['date'])->format('d/m/Y') }}
+                                    {{ isset($deployment['date']) ? \Carbon\Carbon::parse($deployment['date'])->format('d/m/Y') : '-' }}
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-900">
-                                    {{ $deployment['location'] }}
+                                    {{ $deployment['location'] ?? '—' }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ number_format($deployment['revenue'] / 100, 2, ',', ' ') }}€
+                                    {{ isset($deployment['revenue']) ? number_format(($deployment['revenue'] ?? 0) / 100, 2, ',', ' ') : '0,00' }}€
                                 </td>
                             </tr>
                             @endforeach
@@ -113,27 +114,28 @@
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            @foreach($truck['maintenance'] as $maintenance)
+                            @foreach(($truck['maintenance'] ?? []) as $maintenance)
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                     {{ $maintenance['date'] ? \Carbon\Carbon::parse($maintenance['date'])->format('d/m/Y') : '-' }}
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-900">
-                                    {{ $maintenance['type'] }}
+                                    {{ $maintenance['type'] ?? '—' }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ number_format($maintenance['cost'] / 100, 2, ',', ' ') }}€
+                                    {{ isset($maintenance['cost']) ? number_format(($maintenance['cost'] ?? 0) / 100, 2, ',', ' ') : '0,00' }}€
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @php
                                     $statusColors = [
                                         'completed' => 'bg-green-100 text-green-800',
                                         'scheduled' => 'bg-blue-100 text-blue-800',
-                                        'in_progress' => 'bg-yellow-100 text-yellow-800'
+                                        'in_progress' => 'bg-yellow-100 text-yellow-800',
+                                        'pending' => 'bg-gray-100 text-gray-800',
                                     ];
                                     @endphp
-                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $statusColors[$maintenance['status']] }}">
-                                        {{ __('ui.' . $maintenance['status']) }}
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $statusColors[$maintenance['status'] ?? 'pending'] ?? 'bg-gray-100 text-gray-800' }}">
+                                        {{ __('ui.' . ($maintenance['status'] ?? 'pending')) }}
                                     </span>
                                 </td>
                             </tr>

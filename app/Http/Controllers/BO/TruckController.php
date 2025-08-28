@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\BO;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ScheduleTruckDeploymentRequest;
+use App\Http\Requests\UpdateTruckStatusRequest;
 use Illuminate\Http\Request;
 
 class TruckController extends Controller
@@ -13,7 +15,7 @@ class TruckController extends Controller
     public function index(Request $request)
     {
         $status = $request->input('status', 'all');
-        
+
         // Mock data - in real app, would filter from database
         $allTrucks = [
             ['id' => 1, 'code' => 'C001', 'status' => 'active', 'franchisee' => 'Paris Nord', 'last_maintenance' => '2024-08-15', 'next_maintenance' => '2024-11-15'],
@@ -24,15 +26,15 @@ class TruckController extends Controller
         ];
 
         // Filter trucks based on status
-        $trucks = $status === 'all' ? $allTrucks : 
-            array_filter($allTrucks, fn($truck) => $truck['status'] === $status);
+        $trucks = $status === 'all' ? $allTrucks :
+            array_filter($allTrucks, fn ($truck) => $truck['status'] === $status);
 
         // Calculate statistics
         $stats = [
             'total' => count($allTrucks),
-            'active' => count(array_filter($allTrucks, fn($t) => $t['status'] === 'active')),
-            'maintenance' => count(array_filter($allTrucks, fn($t) => $t['status'] === 'maintenance')),
-            'inactive' => count(array_filter($allTrucks, fn($t) => $t['status'] === 'inactive')),
+            'active' => count(array_filter($allTrucks, fn ($t) => $t['status'] === 'active')),
+            'maintenance' => count(array_filter($allTrucks, fn ($t) => $t['status'] === 'maintenance')),
+            'inactive' => count(array_filter($allTrucks, fn ($t) => $t['status'] === 'inactive')),
         ];
 
         return view('bo.trucks.index', compact('trucks', 'stats', 'status'));
@@ -66,36 +68,39 @@ class TruckController extends Controller
             ],
         ];
 
-        return view('bo.trucks.show', compact('truck'));
+        // Provide safe stats with required keys
+        $statusCounts = [
+            'active' => 3,
+            'in_maintenance' => 1,
+            'retired' => 1,
+            'pending' => 0,
+        ];
+
+        return view('bo.trucks.show', compact('truck', 'statusCounts'));
     }
 
     /**
      * Schedule a new deployment for the truck.
      */
-    public function scheduleDeployment(Request $request, string $id)
+    public function scheduleDeployment(ScheduleTruckDeploymentRequest $request, string $id)
     {
-        $request->validate([
-            'date' => 'required|date|after:today',
-            'location' => 'required|string|max:255',
-            'duration' => 'required|integer|min:1|max:12',
-            'notes' => 'nullable|string|max:500'
-        ]);
+        $validated = $request->validated();
 
         // Check truck availability before scheduling
-        $isAvailable = $this->checkTruckAvailability($id, $request->input('date'));
-        
-        if (!$isAvailable) {
+        $isAvailable = $this->checkTruckAvailability($id, $validated['deployment_date']);
+
+        if (! $isAvailable) {
             return redirect()
                 ->back()
-                ->withErrors(['date' => 'Le camion n\'est pas disponible à cette date.']);
+                ->withErrors(['deployment_date' => 'Le camion n\'est pas disponible à cette date.']);
         }
 
         // Create deployment record with status tracking
-        $deployment = $this->createDeployment($id, $request->all());
-        
+        $deployment = $this->createDeployment($id, $validated);
+
         return redirect()
             ->route('bo.trucks.show', $id)
-            ->with('success', "Déploiement #{$deployment['id']} programmé avec succès pour le " . $request->input('date'));
+            ->with('success', "Déploiement #{$deployment['id']} programmé avec succès pour le ".$validated['deployment_date']);
     }
 
     /**
@@ -106,14 +111,14 @@ class TruckController extends Controller
         $request->validate([
             'start_time' => 'nullable|date_format:H:i',
             'location_confirmed' => 'required|boolean',
-            'notes' => 'nullable|string|max:500'
+            'notes' => 'nullable|string|max:500',
         ]);
 
         // Update deployment status to 'active'
         $this->updateDeploymentStatus($deploymentId, 'active', [
             'start_time' => $request->input('start_time', now()->format('H:i')),
             'location_confirmed' => $request->boolean('location_confirmed'),
-            'opening_notes' => $request->input('notes')
+            'opening_notes' => $request->input('notes'),
         ]);
 
         return redirect()
@@ -130,7 +135,7 @@ class TruckController extends Controller
             'end_time' => 'nullable|date_format:H:i',
             'actual_revenue' => 'required|numeric|min:0',
             'issues_encountered' => 'nullable|string|max:1000',
-            'customer_feedback' => 'nullable|string|max:500'
+            'customer_feedback' => 'nullable|string|max:500',
         ]);
 
         // Update deployment status to 'completed'
@@ -138,12 +143,12 @@ class TruckController extends Controller
             'end_time' => $request->input('end_time', now()->format('H:i')),
             'actual_revenue' => $request->input('actual_revenue'),
             'issues_encountered' => $request->input('issues_encountered'),
-            'customer_feedback' => $request->input('customer_feedback')
+            'customer_feedback' => $request->input('customer_feedback'),
         ]);
 
         return redirect()
             ->route('bo.trucks.show', $id)
-            ->with('success', "Déploiement #{$deploymentId} clôturé. Recettes: " . number_format($deployment['actual_revenue'] / 100, 2) . "€");
+            ->with('success', "Déploiement #{$deploymentId} clôturé. Recettes: ".number_format($deployment['actual_revenue'] / 100, 2).'€');
     }
 
     /**
@@ -156,15 +161,15 @@ class TruckController extends Controller
             'type' => 'required|string|max:255',
             'technician' => 'required|string|max:255',
             'estimated_cost' => 'nullable|numeric|min:0',
-            'description' => 'nullable|string|max:500'
+            'description' => 'nullable|string|max:500',
         ]);
 
         // Create maintenance record and potentially update truck status
         $maintenance = $this->createMaintenanceRecord($id, $request->all());
-        
+
         return redirect()
             ->route('bo.trucks.show', $id)
-            ->with('success', "Maintenance #{$maintenance['id']} programmée avec succès pour le " . $request->input('date'));
+            ->with('success', "Maintenance #{$maintenance['id']} programmée avec succès pour le ".$request->input('date'));
     }
 
     /**
@@ -175,14 +180,14 @@ class TruckController extends Controller
         $request->validate([
             'actual_start_time' => 'nullable|date_format:H:i',
             'technician_confirmed' => 'required|boolean',
-            'initial_diagnosis' => 'nullable|string|max:1000'
+            'initial_diagnosis' => 'nullable|string|max:1000',
         ]);
 
         // Update maintenance status to 'in_progress' and truck to 'maintenance'
         $this->updateMaintenanceStatus($maintenanceId, 'in_progress', [
             'actual_start_time' => $request->input('actual_start_time', now()->format('H:i')),
             'technician_confirmed' => $request->boolean('technician_confirmed'),
-            'initial_diagnosis' => $request->input('initial_diagnosis')
+            'initial_diagnosis' => $request->input('initial_diagnosis'),
         ]);
 
         // Update truck status to maintenance
@@ -204,7 +209,7 @@ class TruckController extends Controller
             'work_performed' => 'required|string|max:1000',
             'parts_replaced' => 'nullable|string|max:500',
             'next_maintenance_date' => 'nullable|date|after:today',
-            'truck_operational' => 'required|boolean'
+            'truck_operational' => 'required|boolean',
         ]);
 
         // Update maintenance status to 'completed'
@@ -213,7 +218,7 @@ class TruckController extends Controller
             'actual_cost' => $request->input('actual_cost'),
             'work_performed' => $request->input('work_performed'),
             'parts_replaced' => $request->input('parts_replaced'),
-            'next_maintenance_date' => $request->input('next_maintenance_date')
+            'next_maintenance_date' => $request->input('next_maintenance_date'),
         ]);
 
         // Update truck status based on operational state
@@ -224,28 +229,25 @@ class TruckController extends Controller
 
         return redirect()
             ->route('bo.trucks.show', $id)
-            ->with('success', "Maintenance #{$maintenanceId} terminée. Coût: " . number_format($maintenance['actual_cost'] / 100, 2) . "€. {$statusMessage}.");
+            ->with('success', "Maintenance #{$maintenanceId} terminée. Coût: ".number_format($maintenance['actual_cost'] / 100, 2)."€. {$statusMessage}.");
     }
 
     /**
      * Update truck status (active, maintenance, inactive).
      */
-    public function updateStatus(Request $request, string $id)
+    public function updateStatus(UpdateTruckStatusRequest $request, string $id)
     {
-        $request->validate([
-            'status' => 'required|in:active,maintenance,inactive',
-            'reason' => 'nullable|string|max:500'
-        ]);
-
-        $newStatus = $request->input('status');
-        $reason = $request->input('reason');
+        $validated = $request->validated();
+        $newStatus = $validated['status'];
+        $reason = $validated['reason'] ?? null;
 
         // In real app: Update database, create status log, notify franchisee if needed
 
         $statusLabels = [
-            'active' => 'actif',
-            'maintenance' => 'en maintenance', 
-            'inactive' => 'inactif'
+            'available' => 'disponible',
+            'deployed' => 'déployé',
+            'maintenance' => 'en maintenance',
+            'out_of_service' => 'hors service',
         ];
 
         return redirect()
@@ -259,7 +261,7 @@ class TruckController extends Controller
     public function utilizationReport(Request $request)
     {
         $period = $request->input('period', 'current_month');
-        
+
         // Mock utilization data
         $utilizationData = [
             'period' => $period,
@@ -277,8 +279,8 @@ class TruckController extends Controller
             'maintenance_impact' => [
                 'days_in_maintenance' => 12,
                 'revenue_lost' => 8500,
-                'avg_maintenance_duration' => 2.4
-            ]
+                'avg_maintenance_duration' => 2.4,
+            ],
         ];
 
         return view('bo.trucks.utilization_report', compact('utilizationData'));
@@ -303,11 +305,11 @@ class TruckController extends Controller
         return [
             'id' => rand(1000, 9999),
             'truck_id' => $truckId,
-            'date' => $data['date'],
-            'location' => $data['location'],
-            'duration' => $data['duration'],
+            'deployment_date' => $data['deployment_date'],
+            'territory' => $data['territory'],
+            'franchisee_id' => $data['franchisee_id'],
             'notes' => $data['notes'] ?? null,
-            'status' => 'scheduled'
+            'status' => 'scheduled',
         ];
     }
 
@@ -320,7 +322,7 @@ class TruckController extends Controller
         return array_merge([
             'id' => $deploymentId,
             'status' => $status,
-            'updated_at' => now()
+            'updated_at' => now(),
         ], $data);
     }
 
@@ -338,7 +340,7 @@ class TruckController extends Controller
             'technician' => $data['technician'],
             'estimated_cost' => $data['estimated_cost'] ?? 0,
             'description' => $data['description'] ?? null,
-            'status' => 'scheduled'
+            'status' => 'scheduled',
         ];
     }
 
@@ -351,14 +353,14 @@ class TruckController extends Controller
         return array_merge([
             'id' => $maintenanceId,
             'status' => $status,
-            'updated_at' => now()
+            'updated_at' => now(),
         ], $data);
     }
 
     /**
      * Update truck status with reason.
      */
-    private function updateTruckStatus(string $truckId, string $status, string $reason = null): void
+    private function updateTruckStatus(string $truckId, string $status, ?string $reason = null): void
     {
         // Mock truck status update - in real app, would update database
         // Also log status change for audit trail

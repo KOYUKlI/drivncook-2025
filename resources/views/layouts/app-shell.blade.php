@@ -21,10 +21,12 @@
         <main class="flex-1">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
                 @hasSection('sidebar')
-                    <div class="lg:grid lg:grid-cols-[16rem_1fr] lg:gap-6">
-                        @yield('sidebar')
+                    <div class="lg:flex lg:gap-6">
+                        <aside class="lg:w-64 lg:flex-shrink-0 mb-6 lg:mb-0">
+                            @yield('sidebar')
+                        </aside>
                         
-                        <section id="content">
+                        <section id="content" class="lg:flex-1">
                             @yield('content')
                         </section>
                     </div>

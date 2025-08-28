@@ -20,9 +20,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        if (app()->environment(['local','testing'])) {
+        if (app()->environment(['local', 'testing'])) {
             try {
-                foreach (['admin','warehouse','fleet','tech','franchisee','applicant'] as $r) {
+                foreach (['admin', 'warehouse', 'fleet', 'tech', 'franchisee', 'applicant'] as $r) {
                     Role::findOrCreate($r, 'web');
                 }
             } catch (\Throwable $e) {

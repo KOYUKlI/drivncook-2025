@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\FO;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
@@ -11,7 +12,7 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         // Mock data for franchisee dashboard
         $data = [

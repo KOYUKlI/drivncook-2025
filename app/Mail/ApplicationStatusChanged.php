@@ -2,56 +2,49 @@
 
 namespace App\Mail;
 
+use App\Models\Application;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class ApplicationStatusChanged extends Mailable implements ShouldQueue
+class ApplicationStatusChanged extends Mailable
 {
     use Queueable, SerializesModels;
 
-    /**
-     * Create a new message instance.
-     */
     public function __construct(
-        public array $application,
-        public string $fromStatus,
-        public string $toStatus,
-        public string $message = ''
-    ) {
-        //
-    }
+        public Application|array $application,
+        public string $oldStatus,
+        public string $newStatus,
+        public ?string $adminMessage = ''
+    ) {}
 
-    /**
-     * Get the message envelope.
-     */
     public function envelope(): Envelope
     {
+        $subject = match ($this->newStatus) {
+            'prequalified' => 'Votre candidature est présélectionnée',
+            'interview' => 'Entretien programmé',
+            'approved' => 'Candidature approuvée',
+            'rejected' => 'Candidature rejetée',
+            default => 'Mise à jour de votre candidature',
+        };
+
         return new Envelope(
-            subject: 'Mise à jour de votre candidature Driv\'n Cook',
+            subject: $subject,
         );
     }
 
-    /**
-     * Get the message content definition.
-     */
     public function content(): Content
     {
         return new Content(
-            view: 'emails.applications.status_changed',
+            view: 'emails.application_status_changed',
+            with: [
+                'newStatus' => $this->newStatus,
+                'oldStatus' => $this->oldStatus,
+                'statusMessage' => $this->adminMessage ?? '',
+                'application' => $this->application,
+            ],
         );
-    }
-
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
-     */
-    public function attachments(): array
-    {
-        return [];
     }
 }

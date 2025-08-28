@@ -5,7 +5,6 @@ namespace App\Http\Controllers\BO;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ApplicationTransitionRequest;
 use App\Mail\ApplicationStatusChanged;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
 class ApplicationController extends Controller
@@ -156,11 +155,11 @@ class ApplicationController extends Controller
 
         $fromStatus = $application['status'];
         $toStatus = 'approved';
-        $message = $request->input('message');
+        $adminMessage = $request->input('message');
 
         // Send notification email
         Mail::to($application['email'])->send(
-            new ApplicationStatusChanged($application, $fromStatus, $toStatus, $message)
+            new ApplicationStatusChanged($application, $fromStatus, $toStatus, $adminMessage)
         );
 
         // In real app: Update database, generate contract, create franchisee record

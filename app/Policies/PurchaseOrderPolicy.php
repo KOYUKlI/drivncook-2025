@@ -53,4 +53,16 @@ class PurchaseOrderPolicy
     {
         return $user->hasAnyRole(['admin', 'warehouse']);
     }
+
+    /** Create allowed to franchisee (own), admin, warehouse. */
+    public function create(User $user): bool
+    {
+        return $user->hasAnyRole(['franchisee', 'admin', 'warehouse']);
+    }
+
+    /** UpdateStatus allowed to warehouse and admin */
+    public function updateStatus(User $user, $purchaseOrder): bool
+    {
+        return $user->hasAnyRole(['admin', 'warehouse']);
+    }
 }
