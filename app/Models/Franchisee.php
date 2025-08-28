@@ -18,18 +18,14 @@ class Franchisee extends Model
     protected $fillable = [
         'id',
         'name',
-        'contact_name',
-        'contact_email',
-        'contact_phone',
-        'territory',
-        'status',
-        'contract_start_date',
-        'contract_end_date',
+        'email',
+        'phone',
+        'billing_address',
+        'royalty_rate',
     ];
 
     protected $casts = [
-        'contract_start_date' => 'date',
-        'contract_end_date' => 'date',
+        'royalty_rate' => 'decimal:4',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -39,7 +35,7 @@ class Franchisee extends Model
      */
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'contact_email', 'email');
+        return $this->belongsTo(User::class, 'email', 'email');
     }
 
     /**

@@ -23,17 +23,33 @@ class TruckController extends Controller
 
         $query = Truck::query()->with('franchisee');
 
-        // Filter trucks based on status
+        // Filter trucks based on status - map frontend values to enum values
         if ($status !== 'all') {
-            $query->where('status', $status);
+            $statusMap = [
+                'active' => 'Active',
+                'maintenance' => 'InMaintenance',
+                'inactive' => 'Retired'
+            ];
+            
+            if (isset($statusMap[$status])) {
+                $query->where('status', $statusMap[$status]);
+            }
         }
 
         $trucks = $query->get()->map(function ($truck) {
+            // Map status enum values to frontend expected values
+            $statusMap = [
+                'Active' => 'active',
+                'InMaintenance' => 'maintenance', 
+                'Retired' => 'inactive',
+                'Draft' => 'inactive'
+            ];
+            
             return [
                 'id' => $truck->id,
                 'code' => $truck->plate, // use plate as code
-                'status' => $truck->status,
-                'franchisee' => $truck->franchisee->business_name ?? 'Non assigné',
+                'status' => $statusMap[$truck->status] ?? 'inactive',
+                'franchisee' => $truck->franchisee->name ?? 'Non assigné',
                 'last_maintenance' => $truck->maintenanceLogs()->latest('started_at')->first()?->started_at?->format('Y-m-d'),
                 'next_maintenance' => $truck->maintenanceLogs()
                     ->where('started_at', '>', now())
@@ -62,11 +78,18 @@ class TruckController extends Controller
         $truck = Truck::with(['franchisee', 'deployments', 'maintenanceLogs'])->findOrFail($id);
 
         // Transform truck data to expected format
+        $statusMap = [
+            'Active' => 'active',
+            'InMaintenance' => 'maintenance', 
+            'Retired' => 'inactive',
+            'Draft' => 'inactive'
+        ];
+        
         $truckData = [
             'id' => $truck->id,
             'code' => $truck->plate,
-            'status' => $truck->status,
-            'franchisee' => $truck->franchisee->business_name ?? 'Non assigné',
+            'status' => $statusMap[$truck->status] ?? 'inactive',
+            'franchisee' => $truck->franchisee->name ?? 'Non assigné',
             'franchisee_email' => $truck->franchisee->email ?? 'Non renseigné',
             'model' => 'N/A', // TODO: Add model field
             'license_plate' => $truck->plate,

@@ -2,7 +2,7 @@
 
 namespace App\Mail;
 
-use App\Models\Application;
+use App\Models\FranchiseApplication;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -14,7 +14,7 @@ class ApplicationStatusChanged extends Mailable
     use Queueable, SerializesModels;
 
     public function __construct(
-        public Application|array $application,
+        public FranchiseApplication|array $application,
         public string $oldStatus,
         public string $newStatus,
         public ?string $adminMessage = ''

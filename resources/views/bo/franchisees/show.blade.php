@@ -15,18 +15,11 @@
         <div class="flex items-center justify-between">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900">{{ $franchisee->name }}</h1>
-                <p class="text-gray-600">{{ $franchisee->contact_email }} • {{ $franchisee->territory }}</p>
+                <p class="text-gray-600">{{ $franchisee->email }} • Franchisé</p>
             </div>
             
-            @php
-            $statusColors = [
-                'active' => 'bg-green-100 text-green-800',
-                'inactive' => 'bg-gray-100 text-gray-800',
-                'suspended' => 'bg-red-100 text-red-800'
-            ];
-            @endphp
-            <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full {{ $statusColors[$franchisee->status] }}">
-                {{ __('ui.' . $franchisee->status) }}
+            <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full bg-green-100 text-green-800">
+                {{ __('ui.active') }}
             </span>
         </div>
     </div>
@@ -37,30 +30,26 @@
             <!-- Franchisee Information -->
             <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
                 <h3 class="text-lg font-medium text-gray-900 mb-4">{{ __('ui.franchisee_information') }}</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <dt class="text-sm font-medium text-gray-500">{{ __('ui.contact_name') }}</dt>
-                        <dd class="text-sm text-gray-900">{{ $franchisee->contact_name }}</dd>
+                        <dd class="text-sm text-gray-900">{{ $franchisee->name }}</dd>
                     </div>
                     <div>
                         <dt class="text-sm font-medium text-gray-500">{{ __('ui.email') }}</dt>
-                        <dd class="text-sm text-gray-900">{{ $franchisee->contact_email }}</dd>
+                        <dd class="text-sm text-gray-900">{{ $franchisee->email }}</dd>
                     </div>
                     <div>
                         <dt class="text-sm font-medium text-gray-500">{{ __('ui.phone') }}</dt>
-                        <dd class="text-sm text-gray-900">{{ $franchisee->contact_phone ?? 'Non renseigné' }}</dd>
+                        <dd class="text-sm text-gray-900">{{ $franchisee->phone ?? 'Non renseigné' }}</dd>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-gray-500">{{ __('ui.territory') }}</dt>
-                        <dd class="text-sm text-gray-900">{{ $franchisee->territory }}</dd>
+                        <dt class="text-sm font-medium text-gray-500">{{ __('ui.billing_address') }}</dt>
+                        <dd class="text-sm text-gray-900">{{ $franchisee->billing_address ?? 'Non renseigné' }}</dd>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-gray-500">{{ __('ui.contract_start') }}</dt>
-                        <dd class="text-sm text-gray-900">{{ $franchisee->contract_start_date?->format('d/m/Y') ?? 'Non défini' }}</dd>
-                    </div>
-                    <div>
-                        <dt class="text-sm font-medium text-gray-500">{{ __('ui.trucks_assigned') }}</dt>
-                        <dd class="text-sm text-gray-900">{{ $franchisee->trucks->count() }} camion(s)</dd>
+                        <dt class="text-sm font-medium text-gray-500">{{ __('ui.royalty_rate') }}</dt>
+                        <dd class="text-sm text-gray-900">{{ $franchisee->royalty_rate * 100 }}%</dd>
                     </div>
                 </div>
             </div>
