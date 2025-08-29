@@ -160,6 +160,11 @@ return [
         'login' => 'Connexion',
     ],
 
+    // === AUTH ===
+    'auth' => [
+        'logout' => 'Déconnexion',
+    ],
+
     // === ACTION TYPES ===
     'action_types' => [
         'create' => 'Créer',
@@ -303,6 +308,8 @@ return [
         'application_show' => 'Détails de la candidature',
         'application_detail' => 'Détail de la candidature',
         'franchisee_create' => 'Créer un franchisé',
+        'back_office' => 'Back Office',
+        'franchise_office' => 'Espace Franchisé',
         'franchisee_edit' => 'Modifier le franchisé',
         'franchisee_show' => 'Détails du franchisé',
         'truck_show' => 'Détails du camion',
@@ -421,6 +428,12 @@ return [
         'model' => 'Le modèle · 50k€ · 4% CA',
         'appro' => 'Appro 80/20 & 4 entrepôts IDF',
         'how_it_works' => 'Comment ça marche ? (3 étapes)',
+        'franchise_management' => 'Gestion des franchises',
+        'fleet_management' => 'Gestion de la flotte',
+        'inventory' => 'Inventaire',
+        'sales' => 'Ventes',
+        'maintenance' => 'Maintenance',
+        'my_truck' => 'Mon camion',
     ],
     'notes' => [
         'files_private' => 'Les pièces jointes de candidature sont privées et examinées côté BO',
@@ -1205,6 +1218,9 @@ return [
     'add_purchase_order' => 'Ajouter une commande',
     'add_warehouse' => 'Ajouter un entrepôt',
     'add_stock_item' => 'Ajouter un article',
+    'public_site' => 'Site public',
+    'quick_stats' => 'Statistiques rapides',
+    'notifications' => 'Notifications',
 
     // === MESSAGES ===
     'messages' => [

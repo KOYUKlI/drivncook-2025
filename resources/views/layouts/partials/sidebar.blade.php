@@ -1,191 +1,249 @@
-{{-- Desktop Sidebar --}}
-<aside class="mb-6 lg:mb-0 hidden lg:block">
-    <nav aria-label="{{ __('ui.side_navigation') }}" class="space-y-1">
-        @role('admin|warehouse|fleet|tech')
-            {{-- Back Office Navigation --}}
-            <div class="mb-4">
-                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                    {{ __('ui.back_office') }}
-                </h3>
-                <x-nav.link :href="route('bo.dashboard')" :active="request()->routeIs('bo.dashboard')">
-                    {{ __('ui.dashboard') }}
-                </x-nav.link>
+{{-- Sidebar moderne avec thème orangé subtil --}}
+@auth
+@php
+    $user = Auth::user();
+    $currentRoute = request()->route()->getName();
+    $isAdminArea = str_starts_with($currentRoute, 'bo.') || str_starts_with($currentRoute, 'fo.');
+    
+    // Navigation simplifiée selon le rôle - JUSTE L'ESSENTIEL
+    $navigation = [];
+    
+    if ($user->hasRole('admin')) {
+        $navigation = [
+            [
+                'title' => __('ui.nav.dashboard'),
+                'route' => 'bo.dashboard',
+                'icon' => 'chart-bar',
+                'active' => $currentRoute === 'bo.dashboard'
+            ],
+            [
+                'title' => __('ui.nav.applications'),
+                'route' => 'bo.applications.index',
+                'icon' => 'document-text',
+                'active' => str_contains($currentRoute, 'applications'),
+                'badge' => $sidebarData['applications_count'] ?? 0
+            ],
+            [
+                'title' => __('ui.nav.franchisees'),
+                'route' => 'bo.franchisees.index',
+                'icon' => 'users',
+                'active' => str_contains($currentRoute, 'franchisees')
+            ],
+            [
+                'title' => __('ui.nav.trucks'),
+                'route' => 'bo.trucks.index',
+                'icon' => 'truck',
+                'active' => str_contains($currentRoute, 'trucks')
+            ],
+            [
+                'title' => __('ui.nav.stock_items'),
+                'route' => 'bo.stock-items.index',
+                'icon' => 'cube',
+                'active' => str_contains($currentRoute, 'stock-items')
+            ],
+            [
+                'title' => __('ui.nav.purchase_orders'),
+                'route' => 'bo.purchase-orders.index',
+                'icon' => 'shopping-bag',
+                'active' => str_contains($currentRoute, 'purchase-orders')
+            ]
+        ];
+    } elseif ($user->hasRole('warehouse')) {
+        $navigation = [
+            [
+                'title' => __('ui.nav.dashboard'),
+                'route' => 'bo.dashboard',
+                'icon' => 'chart-bar',
+                'active' => $currentRoute === 'bo.dashboard'
+            ],
+            [
+                'title' => __('ui.nav.stock_items'),
+                'route' => 'bo.stock-items.index',
+                'icon' => 'cube',
+                'active' => str_contains($currentRoute, 'stock-items')
+            ],
+            [
+                'title' => __('ui.nav.purchase_orders'),
+                'route' => 'bo.purchase-orders.index',
+                'icon' => 'shopping-bag',
+                'active' => str_contains($currentRoute, 'purchase-orders')
+            ]
+        ];
+    } elseif ($user->hasRole('fleet') || $user->hasRole('tech')) {
+        $navigation = [
+            [
+                'title' => __('ui.nav.dashboard'),
+                'route' => 'bo.dashboard',
+                'icon' => 'chart-bar',
+                'active' => $currentRoute === 'bo.dashboard'
+            ],
+            [
+                'title' => __('ui.nav.trucks'),
+                'route' => 'bo.trucks.index',
+                'icon' => 'truck',
+                'active' => str_contains($currentRoute, 'trucks')
+            ]
+        ];
+    } elseif ($user->hasRole('franchisee')) {
+        $navigation = [
+            [
+                'title' => __('ui.nav.dashboard'),
+                'route' => 'fo.dashboard',
+                'icon' => 'chart-bar',
+                'active' => $currentRoute === 'fo.dashboard'
+            ],
+            [
+                'title' => __('ui.nav.fo_sales'),
+                'route' => 'fo.sales.index',
+                'icon' => 'currency-dollar',
+                'active' => str_contains($currentRoute, 'fo.sales')
+            ]
+        ];
+    }
+@endphp
 
-                @role('admin')
-                    <x-nav.link :href="route('bo.franchisees.index')" :active="request()->routeIs('bo.franchisees.*')">
-                        {{ __('ui.franchisees') }}
-                    </x-nav.link>
-                    <x-nav.link :href="route('bo.applications.index')" :active="request()->routeIs('bo.applications.*')">
-                        {{ __('ui.applications') }}
-                    </x-nav.link>
-                @endrole
-
-                @role('admin|fleet')
-                    <x-nav.link :href="route('bo.trucks.index')" :active="request()->routeIs('bo.trucks.*')">
-                        {{ __('ui.trucks') }}
-                    </x-nav.link>
-                @endrole
-
-                @role('admin|warehouse')
-                    <div class="mt-3 mb-2">
-                        <h4 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                            {{ __('ui.bo.referentials.title') }}
-                        </h4>
-                    </div>
-                    <x-nav.link :href="route('bo.warehouses.index')" :active="request()->routeIs('bo.warehouses.*')">
-                        {{ __('ui.bo.warehouses.title') }}
-                    </x-nav.link>
-                    <x-nav.link :href="route('bo.stock-items.index')" :active="request()->routeIs('bo.stock-items.*')">
-                        {{ __('ui.bo.stock_items.title') }}
-                    </x-nav.link>
-                    
-                    <div class="mt-3 mb-2">
-                        <h4 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                            {{ __('ui.bo.operations.title') }}
-                        </h4>
-                    </div>
-                    <x-nav.link :href="route('bo.purchase-orders.index')" :active="request()->routeIs('bo.purchase-orders.*')">
-                        {{ __('ui.bo.purchase_orders.title') }}
-                    </x-nav.link>
-                    <x-nav.link :href="route('bo.purchase-orders.create')" :active="request()->routeIs('bo.purchase-orders.create')">
-                        {{ __('ui.bo.purchase_orders.create') }}
-                    </x-nav.link>
-                    <x-nav.link :href="route('bo.purchase-orders.compliance-report')" :active="request()->routeIs('bo.purchase-orders.compliance-report')">
-                        {{ __('ui.bo.purchase_orders.compliance_report.title') }}
-                    </x-nav.link>
-                    <x-nav.link :href="route('bo.reports.monthly')" :active="request()->routeIs('bo.reports.monthly*')">
-                        {{ __('ui.monthly_sales_reports') }}
-                    </x-nav.link>
-                @endrole
+@if($isAdminArea)
+{{-- Desktop Sidebar - Position fixe sans superposition --}}
+<div class="hidden lg:fixed lg:top-16 lg:bottom-16 lg:left-0 lg:z-40 lg:flex lg:w-64 lg:flex-col">
+    <div class="flex grow flex-col overflow-y-auto bg-white border-r border-orange-100 shadow-sm">
+        {{-- Brand mini avec thème orange --}}
+        <div class="flex h-12 shrink-0 items-center justify-center border-b border-orange-50 bg-gradient-to-r from-orange-50 to-amber-50">
+            <div class="flex items-center gap-x-2">
+                <div class="h-8 w-8 rounded-lg bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center shadow-sm">
+                    <span class="text-sm font-bold text-white">DC</span>
+                </div>
+                <span class="text-sm font-semibold text-orange-800">DrivnCook</span>
             </div>
-        @endrole
+        </div>
 
-        @role('franchisee')
-            {{-- Front Office Navigation --}}
-            <div class="mb-4">
-                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                    {{ __('ui.my_franchise') }}
-                </h3>
-                <x-nav.link :href="route('fo.dashboard')" :active="request()->routeIs('fo.dashboard')">
-                    {{ __('ui.dashboard') }}
-                </x-nav.link>
-                <x-nav.link :href="route('fo.sales.index')" :active="request()->routeIs('fo.sales.index')">
-                    {{ __('ui.my_sales') }}
-                </x-nav.link>
-                <x-nav.link :href="route('fo.sales.create')" :active="request()->routeIs('fo.sales.create')">
-                    {{ __('ui.new_sale') }}
-                </x-nav.link>
-                <x-nav.link :href="route('fo.reports.index')" :active="request()->routeIs('fo.reports.*')">
-                    {{ __('ui.fo.reports.title') }}
-                </x-nav.link>
+        {{-- Navigation principale --}}
+        <nav class="flex-1 p-4">
+            <ul class="space-y-1">
+                @foreach($navigation as $item)
+                    <li>
+                        <a href="{{ route($item['route']) }}" 
+                           class="group flex items-center gap-x-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 {{ 
+                               $item['active'] 
+                                   ? 'bg-gradient-to-r from-orange-100 to-amber-100 text-orange-800 shadow-sm border border-orange-200' 
+                                   : 'text-gray-700 hover:bg-orange-50 hover:text-orange-700' 
+                           }}">
+                            @include('components.icons.' . $item['icon'], [
+                                'class' => 'h-5 w-5 shrink-0 transition-colors ' . (
+                                    $item['active'] ? 'text-orange-600' : 'text-gray-400 group-hover:text-orange-500'
+                                )
+                            ])
+                            <span>{{ $item['title'] }}</span>
+                            @if(isset($item['badge']) && $item['badge'] > 0)
+                                <span class="ml-auto inline-flex items-center justify-center px-2 py-0.5 text-xs font-medium bg-orange-500 text-white rounded-full min-w-[20px] h-5">
+                                    {{ $item['badge'] }}
+                                </span>
+                            @endif
+                        </a>
+                    </li>
+                @endforeach
+            </ul>
+        </nav>
+
+        {{-- User info compact en bas --}}
+        <div class="border-t border-orange-100 p-4">
+            <div class="flex items-center gap-x-3">
+                <div class="h-9 w-9 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center">
+                    <span class="text-sm font-semibold text-white">{{ substr($user->name, 0, 1) }}</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-900 truncate">{{ $user->name }}</p>
+                    <p class="text-xs text-orange-600 truncate">{{ $user->getRoleNames()->first() }}</p>
+                </div>
             </div>
-        @endrole
-    </nav>
-</aside>
+        </div>
+    </div>
+</div>
 
 {{-- Mobile Sidebar --}}
-<div 
-    x-show="sidebarOpen" 
-    class="fixed inset-0 z-40 lg:hidden"
-    x-transition:enter="transition-opacity ease-linear duration-300"
-    x-transition:enter-start="opacity-0"
-    x-transition:enter-end="opacity-100"
-    x-transition:leave="transition-opacity ease-linear duration-300"
-    x-transition:leave-start="opacity-100"
-    x-transition:leave-end="opacity-0"
->
-    {{-- Overlay --}}
-    <div class="absolute inset-0 bg-gray-600 bg-opacity-75" @click="sidebarOpen = false"></div>
-    
-    {{-- Sidebar content --}}
-    <div 
-        class="relative flex-1 flex flex-col max-w-xs w-full bg-white"
-        x-transition:enter="transition ease-in-out duration-300 transform"
-        x-transition:enter-start="-translate-x-full"
-        x-transition:enter-end="translate-x-0"
-        x-transition:leave="transition ease-in-out duration-300 transform"
-        x-transition:leave-start="translate-x-0"
-        x-transition:leave-end="-translate-x-full"
-    >
-        {{-- Close button --}}
-        <div class="absolute top-0 right-0 -mr-12 pt-2">
-            <button 
-                @click="sidebarOpen = false"
-                class="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
-            >
-                <span class="sr-only">{{ __('ui.close_sidebar') }}</span>
-                <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+<div class="lg:hidden">
+    {{-- Backdrop --}}
+    <div x-show="sidebarOpen" 
+         x-transition:enter="transition-opacity ease-linear duration-300"
+         x-transition:enter-start="opacity-0" 
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition-opacity ease-linear duration-300" 
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0" 
+         class="fixed inset-0 z-50 bg-gray-900/60" 
+         @click="sidebarOpen = false"
+         style="display: none;"></div>
+
+    {{-- Mobile panel --}}
+    <div x-show="sidebarOpen" 
+         x-transition:enter="transition ease-in-out duration-300 transform"
+         x-transition:enter-start="-translate-x-full" 
+         x-transition:enter-end="translate-x-0"
+         x-transition:leave="transition ease-in-out duration-300 transform" 
+         x-transition:leave-start="translate-x-0"
+         x-transition:leave-end="-translate-x-full" 
+         class="fixed inset-y-0 left-0 z-50 w-64 overflow-y-auto bg-white shadow-xl"
+         style="display: none;">
+        
+        {{-- Mobile header --}}
+        <div class="flex h-16 items-center justify-between px-4 border-b border-orange-100 bg-gradient-to-r from-orange-50 to-amber-50">
+            <div class="flex items-center gap-x-2">
+                <div class="h-8 w-8 rounded-lg bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center">
+                    <span class="text-sm font-bold text-white">DC</span>
+                </div>
+                <span class="text-sm font-semibold text-orange-800">Menu</span>
+            </div>
+            <button type="button" 
+                    class="text-gray-400 hover:text-orange-600 transition-colors" 
+                    @click="sidebarOpen = false">
+                <span class="sr-only">Fermer</span>
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </button>
         </div>
 
         {{-- Mobile navigation --}}
-        <div class="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
-            <nav class="mt-5 px-2 space-y-1" aria-label="{{ __('ui.side_navigation') }}">
-                @role('admin|warehouse|fleet|tech')
-                    {{-- Back Office Mobile Navigation --}}
-                    <div class="mb-4">
-                        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-3">
-                            {{ __('ui.back_office') }}
-                        </h3>
-                        <x-nav.link :href="route('bo.dashboard')" :active="request()->routeIs('bo.dashboard')" mobile>
-                            {{ __('ui.dashboard') }}
-                        </x-nav.link>
+        <nav class="p-4">
+            <ul class="space-y-1">
+                @foreach($navigation as $item)
+                    <li>
+                        <a href="{{ route($item['route']) }}" 
+                           class="group flex items-center gap-x-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all {{ 
+                               $item['active'] 
+                                   ? 'bg-gradient-to-r from-orange-100 to-amber-100 text-orange-800' 
+                                   : 'text-gray-700 hover:bg-orange-50 hover:text-orange-700' 
+                           }}"
+                           @click="sidebarOpen = false">
+                            @include('components.icons.' . $item['icon'], [
+                                'class' => 'h-5 w-5 shrink-0 ' . (
+                                    $item['active'] ? 'text-orange-600' : 'text-gray-400 group-hover:text-orange-500'
+                                )
+                            ])
+                            {{ $item['title'] }}
+                            @if(isset($item['badge']) && $item['badge'] > 0)
+                                <span class="ml-auto inline-flex items-center justify-center px-2 py-0.5 text-xs font-medium bg-orange-500 text-white rounded-full">
+                                    {{ $item['badge'] }}
+                                </span>
+                            @endif
+                        </a>
+                    </li>
+                @endforeach
+            </ul>
+        </nav>
 
-                        @role('admin')
-                            <x-nav.link :href="route('bo.franchisees.index')" :active="request()->routeIs('bo.franchisees.*')" mobile>
-                                {{ __('ui.franchisees') }}
-                            </x-nav.link>
-                            <x-nav.link :href="route('bo.applications.index')" :active="request()->routeIs('bo.applications.*')" mobile>
-                                {{ __('ui.applications') }}
-                            </x-nav.link>
-                        @endrole
-
-                        @role('admin|fleet')
-                            <x-nav.link :href="route('bo.trucks.index')" :active="request()->routeIs('bo.trucks.*')" mobile>
-                                {{ __('ui.trucks') }}
-                            </x-nav.link>
-                        @endrole
-
-                        @role('admin|warehouse')
-                            <x-nav.link :href="route('bo.purchase-orders.index')" :active="request()->routeIs('bo.purchase-orders.*')" mobile>
-                                {{ __('ui.bo.purchase_orders.title') }}
-                            </x-nav.link>
-                            <x-nav.link :href="route('bo.purchase-orders.create')" :active="request()->routeIs('bo.purchase-orders.create')" mobile>
-                                {{ __('ui.bo.purchase_orders.create') }}
-                            </x-nav.link>
-                            <x-nav.link :href="route('bo.purchase-orders.compliance-report')" :active="request()->routeIs('bo.purchase-orders.compliance-report')" mobile>
-                                {{ __('ui.bo.purchase_orders.compliance_report.title') }}
-                            </x-nav.link>
-                            <x-nav.link :href="route('bo.warehouses.index')" :active="request()->routeIs('bo.warehouses.*')" mobile>
-                                {{ __('ui.warehouses') }}
-                            </x-nav.link>
-                            <x-nav.link :href="route('bo.stock-items.index')" :active="request()->routeIs('bo.stock-items.*')" mobile>
-                                {{ __('ui.stock_items') }}
-                            </x-nav.link>
-                        @endrole
-                    </div>
-                @endrole
-
-                @role('franchisee')
-                    {{-- Front Office Mobile Navigation --}}
-                    <div class="mb-4">
-                        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-3">
-                            {{ __('ui.my_franchise') }}
-                        </h3>
-                        <x-nav.link :href="route('fo.dashboard')" :active="request()->routeIs('fo.dashboard')" mobile>
-                            {{ __('ui.dashboard') }}
-                        </x-nav.link>
-                        <x-nav.link :href="route('fo.sales.index')" :active="request()->routeIs('fo.sales.*')" mobile>
-                            {{ __('ui.sales') }}
-                        </x-nav.link>
-                        <x-nav.link :href="route('fo.reports.index')" :active="request()->routeIs('fo.reports.*')" mobile>
-                            {{ __('ui.fo.reports.title') }}
-                        </x-nav.link>
-                    </div>
-                @endrole
-            </nav>
+        {{-- Mobile user info --}}
+        <div class="border-t border-orange-100 p-4 mt-auto">
+            <div class="flex items-center gap-x-3">
+                <div class="h-9 w-9 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center">
+                    <span class="text-sm font-semibold text-white">{{ substr($user->name, 0, 1) }}</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-900 truncate">{{ $user->name }}</p>
+                    <p class="text-xs text-orange-600 truncate">{{ $user->getRoleNames()->first() }}</p>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+@endif
+@endauth

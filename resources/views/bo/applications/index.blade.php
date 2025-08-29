@@ -1,9 +1,5 @@
 @extends('layouts.app-shell')
 
-@section('sidebar')
-    @include('layouts.partials.sidebar')
-@endsection
-
 @section('content')
     <x-ui.breadcrumbs :items="[
         ['title' => __('ui.nav.dashboard'), 'url' => route('bo.dashboard')],

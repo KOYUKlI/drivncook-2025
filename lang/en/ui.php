@@ -24,6 +24,11 @@ return [
         'profile' => 'My Profile',
     ],
 
+    // Auth
+    'auth' => [
+        'logout' => 'Logout',
+    ],
+
     // Quick access UI keys for backward compatibility
     'add_franchisee' => 'Add Franchisee',
     'view' => 'View',
@@ -199,6 +204,8 @@ return [
         'truck_show' => 'Truck Details',
         'warehouses' => 'Warehouse Management',
         'warehouse_create' => 'New Warehouse',
+        'back_office' => 'Back Office',
+        'franchise_office' => 'Franchise Office',
         'warehouse_edit' => 'Edit Warehouse',
         'stock_items' => 'Stock Items Management',
         'stock_item_create' => 'New Stock Item',
@@ -391,6 +398,12 @@ return [
         'model' => 'The model · €50k · 4% revenue',
         'appro' => '80/20 purchasing & 4 warehouses in IDF',
         'how_it_works' => 'How it works (3 steps)',
+        'franchise_management' => 'Franchise Management',
+        'fleet_management' => 'Fleet Management',
+        'inventory' => 'Inventory',
+        'sales' => 'Sales',
+        'maintenance' => 'Maintenance',
+        'my_truck' => 'My Truck',
     ],
     'notes' => [
         'files_private' => 'Application attachments are private and reviewed in the back office',
@@ -817,6 +830,9 @@ return [
     'save' => 'Save',
     'cancel' => 'Cancel',
     'submit' => 'Submit',
+    'public_site' => 'Public Site',
+    'quick_stats' => 'Quick Stats',
+    'notifications' => 'Notifications',
 
     // === MESSAGES ===
     'messages' => [

@@ -146,6 +146,11 @@ Route::get('/test-franchisee', function () {
     return redirect()->route('fo.dashboard');
 })->name('test.franchisee');
 
+// Test route for new sidebar
+Route::get('/test-sidebar', function () {
+    return view('test-sidebar');
+})->middleware('auth')->name('test.sidebar');
+
 // Mail preview routes (local only)
 if (app()->environment('local')) {
     Route::prefix('dev/mail')->name('dev.mail.')->middleware('auth')->group(function () {
