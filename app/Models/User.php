@@ -48,4 +48,12 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Get the franchisee associated with the user.
+     */
+    public function franchisee()
+    {
+        return $this->hasOne(Franchisee::class, 'email', 'email');
+    }
 }

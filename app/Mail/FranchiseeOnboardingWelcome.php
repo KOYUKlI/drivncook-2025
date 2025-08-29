@@ -15,7 +15,7 @@ class FranchiseeOnboardingWelcome extends Mailable
 
     public function __construct(
         public Franchisee $franchisee,
-        public string $tempPassword
+        public string $passwordSetupUrl
     ) {}
 
     public function envelope(): Envelope
@@ -31,7 +31,7 @@ class FranchiseeOnboardingWelcome extends Mailable
             markdown: 'emails.franchisees.onboarding-welcome',
             with: [
                 'franchisee' => $this->franchisee,
-                'tempPassword' => $this->tempPassword,
+                'passwordSetupUrl' => $this->passwordSetupUrl,
                 'loginUrl' => route('login'),
             ],
         );

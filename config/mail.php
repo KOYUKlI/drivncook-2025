@@ -115,4 +115,19 @@ return [
         'name' => env('MAIL_FROM_NAME', "Driv'n Cook"),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Admin Notifications
+    |--------------------------------------------------------------------------
+    |
+    | Configure email addresses that should receive admin notifications
+    | for important events like new franchise applications.
+    |
+    */
+
+    'admin_notifications' => [
+        env('ADMIN_NOTIFICATION_EMAIL', 'admin@drivncook.local'),
+        // Add more admin emails here if needed
+    ],
+
 ];

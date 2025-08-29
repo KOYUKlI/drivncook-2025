@@ -74,7 +74,7 @@ class FranchiseApplicationReviewController extends Controller
 
         // Send decision email
         Mail::to($app->email)->send(new ApplicationStatusChanged(
-            ['id' => $app->id, 'name' => $app->full_name, 'email' => $app->email],
+            $app,
             $app->getOriginal('status') ?? 'submitted',
             'approved',
             $request->input('message')

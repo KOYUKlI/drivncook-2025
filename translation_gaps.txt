@@ -1,0 +1,4 @@
+🚀 Démarrage de l'analyse des traductions UI...
+
+✅ Fichier EN chargé: 559 clés trouvées
+PHP Parse error:  syntax error, unexpected token ";", expecting "]" in /home/koyuki/drivncook/lang/fr/ui.php on line 1307

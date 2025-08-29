@@ -73,7 +73,7 @@
                                             <path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"/>
                                         </svg>
                                         <div>
-                                            <p class="text-sm font-medium text-gray-900">{{ __('ui.labels.' . $document->document_type) }}</p>
+                                            <p class="text-sm font-medium text-gray-900">{{ __('ui.labels.' . ($document->kind ?? 'document')) }}</p>
                                             <p class="text-xs text-gray-500">{{ $document->created_at->format('d/m/Y H:i') }}</p>
                                         </div>
                                     </div>
@@ -103,16 +103,7 @@
                                         @endif
                                         <div class="relative flex space-x-3">
                                             <div>
-                                                @php
-                                                    $eventColors = [
-                                                        'application_created' => 'bg-blue-500',
-                                                        'application_submitted' => 'bg-green-500',
-                                                        'status_changed' => 'bg-yellow-500',
-                                                        'document_uploaded' => 'bg-purple-500',
-                                                        'comment_added' => 'bg-gray-500'
-                                                    ];
-                                                @endphp
-                                                <span class="h-8 w-8 rounded-full {{ $eventColors[$event->event_type] ?? 'bg-gray-500' }} flex items-center justify-center ring-8 ring-white">
+                                                <span class="h-8 w-8 rounded-full bg-yellow-500 flex items-center justify-center ring-8 ring-white">
                                                     <svg class="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                                                         <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
                                                     </svg>
@@ -121,13 +112,11 @@
                                             <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
                                                 <div>
                                                     <p class="text-sm text-gray-900">
-                                                        {{ __('ui.bo.applications.events.' . $event->event_type) }}
-                                                        @if($event->data && isset($event->data['old_status']) && isset($event->data['new_status']))
-                                                            ({{ __('ui.status.' . $event->data['old_status']) }} → {{ __('ui.status.' . $event->data['new_status']) }})
-                                                        @endif
+                                                        {{ __('ui.bo.applications.events.status_changed') }}
+                                                        ({{ __('ui.status.' . ($event->from_status ?? '')) }} → {{ __('ui.status.' . ($event->to_status ?? '')) }})
                                                     </p>
-                                                    @if($event->description)
-                                                        <p class="mt-1 text-sm text-gray-600">{{ $event->description }}</p>
+                                                    @if($event->message)
+                                                        <p class="mt-1 text-sm text-gray-600">{{ $event->message }}</p>
                                                     @endif
                                                 </div>
                                                 <div class="text-right text-sm whitespace-nowrap text-gray-500">

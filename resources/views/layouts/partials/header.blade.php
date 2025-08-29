@@ -3,13 +3,13 @@
         <div class="flex h-16 items-center justify-between">
             <!-- Logo et titre -->
             <div class="flex items-center gap-4">
-                <div class="flex items-center gap-2">
+                <a href="{{ route('home') }}" class="flex items-center gap-2">
                     <!-- Logo placeholder -->
                     <div class="h-8 w-8 bg-orange-500 rounded-lg flex items-center justify-center">
                         <span class="text-white font-bold text-sm">DC</span>
                     </div>
                     <span class="text-xl font-semibold text-gray-900">Driv'n Cook</span>
-                </div>
+                </a>
 
                 <!-- Bouton burger mobile -->
                 @auth
@@ -29,15 +29,18 @@
 
             <!-- Navigation utilisateur -->
             <div class="flex items-center gap-4">
+                <!-- Public Nav -->
+                <a href="{{ route('public.applications.create') }}" class="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium">
+                    {{ __('ui.nav.apply') }}
+                </a>
+                <a href="{{ route('public.franchise') }}" class="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium">
+                    {{ __('ui.nav.franchise_info') }}
+                </a>
+
                 @guest
                     <a href="{{ route('login') }}" class="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium">
                         {{ __('ui.login') }}
                     </a>
-                    @if (Route::has('register'))
-                        <a href="{{ route('register') }}" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium">
-                            {{ __('ui.register') }}
-                        </a>
-                    @endif
                 @else
                     <!-- Menu utilisateur -->
                     <div class="relative" x-data="{ open: false }">

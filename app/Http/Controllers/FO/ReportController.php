@@ -18,7 +18,7 @@ class ReportController extends Controller
     public function index(Request $request)
     {
         $franchiseeId = data_get(Auth::user(), 'franchisee_id');
-        
+
         $query = ReportPdf::query()
             ->when($franchiseeId, fn ($q) => $q->where('franchisee_id', $franchiseeId));
 
@@ -70,17 +70,17 @@ class ReportController extends Controller
     {
         $report = ReportPdf::findOrFail($id);
         $user = Auth::user();
-        
+
         // Security check: ensure franchisee can only download their own reports
         $isBackoffice = in_array(data_get($user, 'role'), ['admin', 'warehouse', 'fleet', 'tech']);
         $ownsReport = $user && $user->franchisee_id && $user->franchisee_id === $report->franchisee_id;
-        
-        if (!($isBackoffice || $ownsReport)) {
+
+        if (! ($isBackoffice || $ownsReport)) {
             abort(403, __('ui.fo.reports.messages.access_denied'));
         }
 
         // Check if file exists
-        if (!Storage::disk('public')->exists($report->storage_path)) {
+        if (! Storage::disk('public')->exists($report->storage_path)) {
             return redirect()->route('fo.reports.index')
                 ->with('error', __('ui.fo.reports.messages.file_not_found'));
         }

@@ -40,7 +40,7 @@ class FranchiseeController extends Controller
     public function store(Request $request)
     {
         $this->authorize('create', Franchisee::class);
-        
+
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:franchisees,email',
@@ -55,7 +55,7 @@ class FranchiseeController extends Controller
             'status.in' => __('ui.bo.franchisees.validation.status_invalid'),
         ]);
 
-        $franchisee = new Franchisee();
+        $franchisee = new Franchisee;
         $franchisee->id = (string) Str::ulid();
         $franchisee->name = $data['name'];
         $franchisee->email = $data['email'];

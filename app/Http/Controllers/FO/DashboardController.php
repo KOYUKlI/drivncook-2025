@@ -18,27 +18,27 @@ class DashboardController extends Controller
         // Calculate real franchisee dashboard data
         $currentMonth = now();
         $lastMonth = now()->subMonth();
-        
+
         $currentMonthSales = \App\Models\Sale::whereBetween('created_at', [
-            $currentMonth->startOfMonth(), 
-            $currentMonth->endOfMonth()
+            $currentMonth->startOfMonth(),
+            $currentMonth->endOfMonth(),
         ])
-        ->when($franchiseeId, fn($q) => $q->where('franchisee_id', $franchiseeId))
-        ->sum('total_cents');
+            ->when($franchiseeId, fn ($q) => $q->where('franchisee_id', $franchiseeId))
+            ->sum('total_cents');
 
         $lastMonthSales = \App\Models\Sale::whereBetween('created_at', [
-            $lastMonth->startOfMonth(), 
-            $lastMonth->endOfMonth()
+            $lastMonth->startOfMonth(),
+            $lastMonth->endOfMonth(),
         ])
-        ->when($franchiseeId, fn($q) => $q->where('franchisee_id', $franchiseeId))
-        ->sum('total_cents');
+            ->when($franchiseeId, fn ($q) => $q->where('franchisee_id', $franchiseeId))
+            ->sum('total_cents');
 
-        $salesGrowth = $lastMonthSales > 0 ? 
+        $salesGrowth = $lastMonthSales > 0 ?
             (($currentMonthSales - $lastMonthSales) / $lastMonthSales) * 100 : 0;
 
         $pendingOrders = \App\Models\PurchaseOrder::where('status', 'pending')
-            ->when($franchiseeId, function($q) use ($franchiseeId) {
-                return $q->whereHas('warehouse', function($subQ) use ($franchiseeId) {
+            ->when($franchiseeId, function ($q) {
+                return $q->whereHas('warehouse', function ($subQ) {
                     // TODO: Add franchisee_id to warehouses or use proper relation
                     return $subQ;
                 });
@@ -49,11 +49,11 @@ class DashboardController extends Controller
         $truckStatus = $userTruck ? $userTruck->status : 'none';
 
         $recentSales = \App\Models\Sale::query()
-            ->when($franchiseeId, fn($q) => $q->where('franchisee_id', $franchiseeId))
+            ->when($franchiseeId, fn ($q) => $q->where('franchisee_id', $franchiseeId))
             ->latest()
             ->limit(3)
             ->get()
-            ->map(function($sale) {
+            ->map(function ($sale) {
                 return [
                     'date' => $sale->sale_date->format('Y-m-d'),
                     'amount' => $sale->total_cents,

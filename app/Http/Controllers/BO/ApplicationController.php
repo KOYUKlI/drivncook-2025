@@ -7,7 +7,6 @@ use App\Http\Requests\ApplicationTransitionRequest;
 use App\Mail\FranchiseApplicationStatusChanged;
 use App\Models\FranchiseApplication;
 use App\Models\FranchiseApplicationDocument;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
@@ -173,14 +172,14 @@ class ApplicationController extends Controller
     public function downloadDocument(string $documentId)
     {
         $document = FranchiseApplicationDocument::findOrFail($documentId);
-        
+
         // Check policy
         $this->authorize('view', $document->application);
 
-        if (!Storage::exists($document->path)) {
+        if (! Storage::exists($document->path)) {
             abort(404, 'Document not found');
         }
 
-        return Storage::download($document->path, $document->kind . '_' . $document->id . '.' . pathinfo($document->path, PATHINFO_EXTENSION));
+        return Storage::download($document->path, $document->kind.'_'.$document->id.'.'.pathinfo($document->path, PATHINFO_EXTENSION));
     }
 }

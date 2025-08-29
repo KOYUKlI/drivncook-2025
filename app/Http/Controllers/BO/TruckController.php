@@ -5,10 +5,10 @@ namespace App\Http\Controllers\BO;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ScheduleTruckDeploymentRequest;
 use App\Http\Requests\UpdateTruckStatusRequest;
-use App\Models\Truck;
 use App\Models\Deployment;
-use App\Models\MaintenanceLog;
 use App\Models\Franchisee;
+use App\Models\MaintenanceLog;
+use App\Models\Truck;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -20,19 +20,22 @@ class TruckController extends Controller
     public function index(Request $request)
     {
         $status = $request->input('status', 'all');
-        $franchiseeId = $request->input('franchisee', 'all');
+        // Match Blade filter name
+        $franchiseeId = $request->input('franchisee_id', 'all');
         $search = $request->input('search');
 
         $query = Truck::query()->with('franchisee');
 
         // Filter trucks based on status - map frontend values to enum values
         if ($status !== 'all') {
+            // Accept the same keys used in the view filters
             $statusMap = [
                 'active' => 'Active',
-                'maintenance' => 'InMaintenance',
-                'inactive' => 'Retired'
+                'in_maintenance' => 'InMaintenance',
+                'retired' => 'Retired',
+                'pending' => 'Draft',
             ];
-            
+
             if (isset($statusMap[$status])) {
                 $query->where('status', $statusMap[$status]);
             }
@@ -49,14 +52,14 @@ class TruckController extends Controller
         }
 
         $trucks = $query->get()->map(function ($truck) {
-            // Map status enum values to frontend expected values
+            // Map status enum values to frontend expected values (align with translations)
             $statusMap = [
                 'Active' => 'active',
-                'InMaintenance' => 'maintenance', 
-                'Retired' => 'inactive',
-                'Draft' => 'inactive'
+                'InMaintenance' => 'in_maintenance',
+                'Retired' => 'retired',
+                'Draft' => 'pending',
             ];
-            
+
             return [
                 'id' => $truck->id,
                 'code' => $truck->plate, // use plate as code
@@ -95,11 +98,11 @@ class TruckController extends Controller
         // Transform truck data to expected format
         $statusMap = [
             'Active' => 'active',
-            'InMaintenance' => 'maintenance', 
-            'Retired' => 'inactive',
-            'Draft' => 'inactive'
+            'InMaintenance' => 'in_maintenance',
+            'Retired' => 'retired',
+            'Draft' => 'pending',
         ];
-        
+
         $truckData = [
             'id' => $truck->id,
             'code' => $truck->plate,
@@ -308,12 +311,10 @@ class TruckController extends Controller
         $truck->update(['status' => $newStatus]);
 
         $statusLabels = [
-            'available' => 'disponible',
-            'deployed' => 'déployé',
-            'maintenance' => 'en maintenance',
-            'out_of_service' => 'hors service',
             'active' => 'actif',
-            'inactive' => 'inactif',
+            'in_maintenance' => 'en maintenance',
+            'retired' => 'retiré',
+            'pending' => 'brouillon',
         ];
 
         return redirect()
@@ -330,7 +331,7 @@ class TruckController extends Controller
 
         // Get all trucks with their deployments and maintenance logs
         $trucks = Truck::with(['deployments', 'maintenanceLogs', 'sales'])->get();
-        
+
         $utilizationData = [
             'period' => $period,
             'total_trucks' => $trucks->count(),
@@ -351,7 +352,7 @@ class TruckController extends Controller
             ],
         ];
 
-        $utilizationData['average_utilization'] = $trucks->count() > 0 
+        $utilizationData['average_utilization'] = $trucks->count() > 0
             ? collect($utilizationData['by_truck'])->avg('utilization')
             : 0;
 
@@ -367,7 +368,7 @@ class TruckController extends Controller
         $deploymentDays = $truck->deployments()
             ->where('start_date', '>=', now()->subDays($totalDays))
             ->count();
-        
+
         return $totalDays > 0 ? ($deploymentDays / $totalDays) * 100 : 0;
     }
 
@@ -394,7 +395,7 @@ class TruckController extends Controller
             })
             ->exists();
 
-        return !$conflictingDeployments && !$maintenanceConflict;
+        return ! $conflictingDeployments && ! $maintenanceConflict;
     }
 
     /**
@@ -426,7 +427,7 @@ class TruckController extends Controller
     private function updateDeploymentStatus(string $deploymentId, string $status, array $data = []): array
     {
         $deployment = Deployment::findOrFail($deploymentId);
-        
+
         if ($status === 'completed') {
             $deployment->update(['end_date' => now()]);
         }
@@ -469,7 +470,7 @@ class TruckController extends Controller
     private function updateMaintenanceStatus(string $maintenanceId, string $status, array $data = []): array
     {
         $maintenance = MaintenanceLog::findOrFail($maintenanceId);
-        
+
         if ($status === 'completed') {
             $maintenance->update(['closed_at' => now()]);
         }
@@ -488,7 +489,7 @@ class TruckController extends Controller
     {
         $truck = Truck::findOrFail($truckId);
         $truck->update(['status' => $status]);
-        
+
         // TODO: Log status change for audit trail
     }
 }

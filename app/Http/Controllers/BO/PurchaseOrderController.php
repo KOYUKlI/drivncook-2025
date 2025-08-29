@@ -41,12 +41,12 @@ class PurchaseOrderController extends Controller
             ->get()
             ->map(function ($order) {
                 $ratio = $order->corp_ratio_cached ?? 0;
-                
+
                 return [
                     'id' => $order->id,
-                    'reference' => "PO-{$order->created_at->format('Y')}-" . str_pad($order->id, 3, '0', STR_PAD_LEFT),
+                    'reference' => "PO-{$order->created_at->format('Y')}-".str_pad($order->id, 3, '0', STR_PAD_LEFT),
                     'franchisee' => $order->warehouse->name ?? 'Entrepôt inconnu',
-                    'total' => $order->lines->sum(fn($line) => $line->qty * $line->unit_price_cents),
+                    'total' => $order->lines->sum(fn ($line) => $line->qty * $line->unit_price_cents),
                     'ratio_80_20' => $ratio,
                     'status' => $order->status,
                     'date' => $order->created_at->format('Y-m-d'),
@@ -64,13 +64,13 @@ class PurchaseOrderController extends Controller
     public function show(string $id)
     {
         $purchaseOrder = PurchaseOrder::with(['warehouse', 'franchisee', 'lines.stockItem'])->findOrFail($id);
-        
+
         $order = [
             'id' => $purchaseOrder->id,
-            'reference' => "PO-{$purchaseOrder->created_at->format('Y')}-" . str_pad($purchaseOrder->id, 3, '0', STR_PAD_LEFT),
+            'reference' => "PO-{$purchaseOrder->created_at->format('Y')}-".str_pad($purchaseOrder->id, 3, '0', STR_PAD_LEFT),
             'franchisee' => $purchaseOrder->warehouse->name ?? 'Entrepôt inconnu',
             'franchisee_email' => $purchaseOrder->franchisee->email ?? 'Non renseigné',
-            'total' => $purchaseOrder->lines->sum(fn($line) => $line->qty * $line->unit_price_cents),
+            'total' => $purchaseOrder->lines->sum(fn ($line) => $line->qty * $line->unit_price_cents),
             'ratio_80_20' => $purchaseOrder->corp_ratio_cached ?? 0,
             'status' => $purchaseOrder->status,
             'date' => $purchaseOrder->created_at->format('Y-m-d'),
@@ -286,10 +286,10 @@ class PurchaseOrderController extends Controller
     private function fetchOrderWithRatio(string $id): array
     {
         $purchaseOrder = PurchaseOrder::with(['warehouse', 'franchisee', 'lines.stockItem'])->findOrFail($id);
-        
+
         $order = [
             'id' => $purchaseOrder->id,
-            'reference' => "PO-{$purchaseOrder->created_at->format('Y')}-" . str_pad($purchaseOrder->id, 3, '0', STR_PAD_LEFT),
+            'reference' => "PO-{$purchaseOrder->created_at->format('Y')}-".str_pad($purchaseOrder->id, 3, '0', STR_PAD_LEFT),
             'franchisee' => $purchaseOrder->warehouse->name ?? 'Entrepôt inconnu',
             'franchisee_email' => $purchaseOrder->franchisee->email ?? 'Non renseigné',
             'ratio_80_20' => $purchaseOrder->corp_ratio_cached ?? 0,
@@ -309,7 +309,7 @@ class PurchaseOrderController extends Controller
     private function computeCentralRatio(string $id, bool $forceRecalculation = false): float
     {
         $purchaseOrder = PurchaseOrder::with('lines.stockItem')->findOrFail($id);
-        
+
         $totalRequired = $purchaseOrder->lines->sum('qty');
         $centralStock = $purchaseOrder->lines->sum(function ($line) {
             // TODO: Query actual central warehouse stock for this item
@@ -405,22 +405,22 @@ class PurchaseOrderController extends Controller
 
         // Build query based on period
         $query = PurchaseOrder::with(['warehouse', 'creator', 'franchisee']);
-        
+
         switch ($period) {
             case 'last_month':
                 $query->whereMonth('created_at', now()->subMonth()->month)
-                      ->whereYear('created_at', now()->subMonth()->year);
+                    ->whereYear('created_at', now()->subMonth()->year);
                 break;
             case 'current_quarter':
                 $query->whereBetween('created_at', [
                     now()->startOfQuarter(),
-                    now()->endOfQuarter()
+                    now()->endOfQuarter(),
                 ]);
                 break;
             case 'current_month':
             default:
                 $query->whereMonth('created_at', now()->month)
-                      ->whereYear('created_at', now()->year);
+                    ->whereYear('created_at', now()->year);
                 break;
         }
 
@@ -430,7 +430,7 @@ class PurchaseOrderController extends Controller
             'total_orders' => $orders->count(),
             'compliant_orders' => $orders->where('corp_ratio_cached', '>=', 80)->count(),
             'non_compliant_orders' => $orders->where('corp_ratio_cached', '<', 80)->count(),
-            'compliance_rate' => $orders->count() > 0 ? 
+            'compliance_rate' => $orders->count() > 0 ?
                 ($orders->where('corp_ratio_cached', '>=', 80)->count() / $orders->count()) * 100 : 0,
             'average_ratio' => $orders->avg('corp_ratio_cached') ?? 0,
             'by_franchisee' => $orders->groupBy(function ($order) {
@@ -438,7 +438,7 @@ class PurchaseOrderController extends Controller
             })->map(function ($franchiseeOrders, $franchiseeName) {
                 $compliantCount = $franchiseeOrders->where('corp_ratio_cached', '>=', 80)->count();
                 $totalCount = $franchiseeOrders->count();
-                
+
                 return [
                     'name' => $franchiseeName,
                     'orders' => $totalCount,

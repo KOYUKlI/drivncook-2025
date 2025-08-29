@@ -20,7 +20,7 @@ class FranchiseApplicationNewAdminAlert extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: __('emails.new_application_admin'),
+            subject: 'Nouvelle candidature franchise - '.$this->application->full_name,
             to: config('mail.admin_notifications', ['admin@drivncook.local']),
         );
     }
@@ -32,6 +32,7 @@ class FranchiseApplicationNewAdminAlert extends Mailable
             with: [
                 'application' => $this->application,
                 'boUrl' => route('bo.applications.show', $this->application),
+                'documentsCount' => $this->application->documents()->count(),
             ],
         );
     }

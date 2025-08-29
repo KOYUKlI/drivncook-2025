@@ -1,8 +1,6 @@
 <?php
 
-use App\Http\Controllers\BO\ApplicationController;
 use App\Http\Controllers\BO\DashboardController as BODashboardController;
-use App\Http\Controllers\BO\FranchiseApplicationReviewController;
 use App\Http\Controllers\BO\FranchiseeController;
 use App\Http\Controllers\BO\PurchaseOrderController;
 use App\Http\Controllers\BO\ReportController as BOReportController;
@@ -88,13 +86,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('trucks/{truck}/deploy', [TruckController::class, 'openDeployment'])->name('trucks.deploy');
             Route::post('trucks/{truck}/maintenance/open', [TruckController::class, 'openMaintenance'])->name('trucks.maintenance.open');
             Route::post('maintenance/{log}/close', [TruckController::class, 'closeMaintenance'])->name('maintenance.close');
-            Route::post('trucks/{id}/schedule-deployment', [TruckController::class, 'scheduleDeployment'])->name('trucks.schedule-deployment');
-            Route::post('trucks/{id}/deployments/{deploymentId}/open', [TruckController::class, 'openDeployment'])->name('trucks.open-deployment');
-            Route::post('trucks/{id}/deployments/{deploymentId}/close', [TruckController::class, 'closeDeployment'])->name('trucks.close-deployment');
-            Route::post('trucks/{id}/schedule-maintenance', [TruckController::class, 'scheduleMaintenance'])->name('trucks.schedule-maintenance');
-            Route::post('trucks/{id}/maintenance/{maintenanceId}/open', [TruckController::class, 'openMaintenance'])->name('trucks.open-maintenance');
-            Route::post('trucks/{id}/maintenance/{maintenanceId}/close', [TruckController::class, 'closeMaintenance'])->name('trucks.close-maintenance');
-            Route::patch('trucks/{id}/status', [TruckController::class, 'updateStatus'])->name('trucks.update-status');
+            Route::post('trucks/{truck}/schedule-deployment', [TruckController::class, 'scheduleDeployment'])->name('trucks.schedule-deployment');
+            Route::post('trucks/{truck}/deployments/{deploymentId}/open', [TruckController::class, 'openDeployment'])->name('trucks.open-deployment');
+            Route::post('trucks/{truck}/deployments/{deploymentId}/close', [TruckController::class, 'closeDeployment'])->name('trucks.close-deployment');
+            Route::post('trucks/{truck}/schedule-maintenance', [TruckController::class, 'scheduleMaintenance'])->name('trucks.schedule-maintenance');
+            Route::post('trucks/{truck}/maintenance/{maintenanceId}/open', [TruckController::class, 'openMaintenance'])->name('trucks.open-maintenance');
+            Route::post('trucks/{truck}/maintenance/{maintenanceId}/close', [TruckController::class, 'closeMaintenance'])->name('trucks.close-maintenance');
+            Route::patch('trucks/{truck}/status', [TruckController::class, 'updateStatus'])->name('trucks.update-status');
             Route::get('trucks/reports/utilization', [TruckController::class, 'utilizationReport'])->name('trucks.utilization-report');
         });
 
@@ -150,7 +148,7 @@ Route::get('/test-franchisee', function () {
 
 // Mail preview routes (local only)
 if (app()->environment('local')) {
-    Route::prefix('dev/mail')->name('dev.mail.')->group(function () {
+    Route::prefix('dev/mail')->name('dev.mail.')->middleware('auth')->group(function () {
         Route::get('preview', [App\Http\Controllers\Dev\MailPreviewController::class, 'index'])->name('index');
         Route::get('preview/{mailable}', [App\Http\Controllers\Dev\MailPreviewController::class, 'preview'])->name('preview');
     });

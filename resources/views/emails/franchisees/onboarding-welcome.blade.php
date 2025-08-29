@@ -3,25 +3,51 @@
 
 🎉 {{ __('emails.onboarding_welcome_intro') }}
 
-## {{ __('emails.onboarding_credentials') }}
+## {{ __('emails.onboarding_account_setup') }}
 
-**Email:** {{ $franchisee->email }}  
-**Mot de passe temporaire:** `{{ $tempPassword }}`
+**Email:** {{ $franchisee->email }}
 
-@component('mail::panel')
-⚠️ **Important:** Changez votre mot de passe lors de votre première connexion pour sécuriser votre compte.
-@endcomponent
+<table class="panel" width="100%" cellpadding="0" cellspacing="0" role="presentation">
+<tr>
+<td class="panel-content">
+<table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+<tr>
+<td class="panel-item">
+🔐 **{{ __('emails.onboarding_password_setup') }}**<br>
+{{ __('emails.onboarding_password_setup_instruction') }}
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<table class="action" align="center" width="100%" cellpadding="0" cellspacing="0" role="presentation">
+<tr>
+<td align="center">
+<table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation">
+<tr>
+<td align="center">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation">
+<tr>
+<td>
+<a href="{{ $passwordSetupUrl }}" class="button button-primary" target="_blank" rel="noopener">{{ __('emails.onboarding_setup_password') }}</a>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
 
 ## {{ __('emails.onboarding_next_steps') }}
 
-1. {{ __('emails.onboarding_step1') }}
+1. {{ __('emails.onboarding_step1_password') }}
 2. {{ __('emails.onboarding_step2') }}
 3. {{ __('emails.onboarding_step3') }}
 4. {{ __('emails.onboarding_step4') }}
-
-@component('mail::button', ['url' => $loginUrl])
-{{ __('emails.view_in_fo') }}
-@endcomponent
 
 {{ __('emails.thanks') }},  
 {{ __('emails.signature') }}

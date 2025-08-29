@@ -31,15 +31,15 @@ class SaleController extends Controller
 
         // Calculate real sales stats
         $todaySales = Sale::whereDate('created_at', now()->toDateString())
-            ->when($franchiseeId, fn($q) => $q->where('franchisee_id', $franchiseeId))
+            ->when($franchiseeId, fn ($q) => $q->where('franchisee_id', $franchiseeId))
             ->get();
-        
+
         $weekSales = Sale::whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])
-            ->when($franchiseeId, fn($q) => $q->where('franchisee_id', $franchiseeId))
+            ->when($franchiseeId, fn ($q) => $q->where('franchisee_id', $franchiseeId))
             ->get();
-        
+
         $monthSales = Sale::whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])
-            ->when($franchiseeId, fn($q) => $q->where('franchisee_id', $franchiseeId))
+            ->when($franchiseeId, fn ($q) => $q->where('franchisee_id', $franchiseeId))
             ->get();
 
         $stats = [

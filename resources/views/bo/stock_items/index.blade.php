@@ -18,7 +18,7 @@
             </div>
             @can('create', App\Models\StockItem::class)
             <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-                <a href="{{ route('bo.stock-items.create') }}" class="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                <a href="{{ route('bo.stock-items.create') }}" class="block rounded-md bg-orange-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-orange-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600">
                     {{ __('ui.bo.stock_items.create') }}
                 </a>
             </div>
@@ -95,7 +95,7 @@
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <div class="flex justify-end space-x-2">
                                 @can('update', $item)
-                                <a href="{{ route('bo.stock-items.edit', $item) }}" class="text-indigo-600 hover:text-indigo-900">
+                                <a href="{{ route('bo.stock-items.edit', $item) }}" class="text-orange-600 hover:text-orange-900">
                                     {{ __('ui.actions.edit') }}
                                 </a>
                                 @endcan

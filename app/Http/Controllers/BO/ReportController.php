@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\ReportPdf;
 use App\Services\PdfService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -22,9 +21,9 @@ class ReportController extends Controller
         // Build query for existing PDFs
         $reportsQuery = ReportPdf::where('type', 'monthly_sales')
             ->with('franchisee')
-            ->when($year, fn($q) => $q->where('year', $year))
-            ->when($month, fn($q) => $q->where('month', $month))
-            ->when($franchiseeId, fn($q) => $q->where('franchisee_id', $franchiseeId))
+            ->when($year, fn ($q) => $q->where('year', $year))
+            ->when($month, fn ($q) => $q->where('month', $month))
+            ->when($franchiseeId, fn ($q) => $q->where('franchisee_id', $franchiseeId))
             ->latest('generated_at');
 
         $reports = $reportsQuery->get();
@@ -79,13 +78,13 @@ class ReportController extends Controller
             'lines' => [], // TODO: Get actual sales lines
         ];
 
-        $filename = sprintf('monthly-%s-%s-%s.pdf', 
-            $year, 
+        $filename = sprintf('monthly-%s-%s-%s.pdf',
+            $year,
             str_pad((string) $month, 2, '0', STR_PAD_LEFT),
             $franchiseeId ?: 'all'
         );
         $path = "reports/monthly/{$filename}";
-        
+
         $pdf->monthlySales($data, $path);
 
         $report = ReportPdf::create([
@@ -100,9 +99,9 @@ class ReportController extends Controller
 
         return redirect()->route('bo.reports.monthly')
             ->with('success', __('ui.bo.reports.monthly_sales.generated_success', [
-                'month' => __('ui.months.' . $month),
+                'month' => __('ui.months.'.$month),
                 'year' => $year,
-                'franchisee' => $franchiseeName
+                'franchisee' => $franchiseeName,
             ]));
     }
 
@@ -112,10 +111,10 @@ class ReportController extends Controller
     public function download(string $id)
     {
         $report = ReportPdf::findOrFail($id);
-        
+
         $this->authorize('downloadReport', $report);
 
-        if (!Storage::disk('public')->exists($report->storage_path)) {
+        if (! Storage::disk('public')->exists($report->storage_path)) {
             return redirect()->back()
                 ->with('error', __('ui.bo.reports.monthly_sales.file_not_found'));
         }

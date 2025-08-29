@@ -24,7 +24,6 @@ class MailPreviewController extends Controller
     public function __construct()
     {
         abort_unless(app()->environment('local'), 404);
-        $this->middleware('auth');
     }
 
     public function index()

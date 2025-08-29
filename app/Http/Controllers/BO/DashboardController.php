@@ -17,15 +17,15 @@ class DashboardController extends Controller
         // Calculate real dashboard data
         $lastMonth = now()->subMonth();
         $lastMonthSales = \App\Models\Sale::whereBetween('created_at', [
-            $lastMonth->startOfMonth(), 
-            $lastMonth->endOfMonth()
+            $lastMonth->startOfMonth(),
+            $lastMonth->endOfMonth(),
         ])->sum('total_cents');
 
         $complianceRatio = \App\Models\PurchaseOrder::whereNotNull('corp_ratio_cached')
             ->avg('corp_ratio_cached') ?? 0;
 
         $trucksInMaintenance = \App\Models\Truck::where('status', 'maintenance')->count();
-        
+
         $pendingOrders = \App\Models\PurchaseOrder::where('status', 'pending')->count();
 
         $data = [
