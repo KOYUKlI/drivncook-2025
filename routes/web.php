@@ -87,6 +87,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('role:admin|fleet')->group(function () {
             Route::get('trucks/create', [TruckController::class, 'create'])->name('trucks.create');
             Route::post('trucks', [TruckController::class, 'store'])->name('trucks.store');
+            Route::get('trucks/{truck}/edit', [TruckController::class, 'edit'])->name('trucks.edit');
+            Route::patch('trucks/{truck}', [TruckController::class, 'update'])->name('trucks.update');
             Route::resource('trucks', TruckController::class)->only(['index', 'show']);
             // Mission C actions
             Route::post('trucks/{truck}/deploy', [TruckController::class, 'openDeployment'])->name('trucks.deploy');
@@ -99,11 +101,29 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('trucks/{truck}/maintenance/open', [App\Http\Controllers\BO\TruckMaintenanceController::class, 'open'])->name('maintenance.open');
             Route::post('maintenance/{log}/close', [App\Http\Controllers\BO\TruckMaintenanceController::class, 'close'])->name('maintenance.close');
             Route::get('maintenance/{log}/download', [App\Http\Controllers\BO\TruckMaintenanceController::class, 'download'])->name('maintenance.download');
+            
+            // Enhanced Maintenance System
+            Route::get('maintenance', [App\Http\Controllers\MaintenanceLogController::class, 'index'])->name('maintenance.index');
+            Route::get('maintenance/create', [App\Http\Controllers\MaintenanceLogController::class, 'create'])->name('maintenance.create');
+            Route::post('maintenance', [App\Http\Controllers\MaintenanceLogController::class, 'store'])->name('maintenance.store');
+            Route::get('maintenance/{maintenanceLog}', [App\Http\Controllers\MaintenanceLogController::class, 'show'])->name('maintenance.show');
+            Route::get('maintenance/{maintenanceLog}/edit', [App\Http\Controllers\MaintenanceLogController::class, 'edit'])->name('maintenance.edit');
+            Route::put('maintenance/{maintenanceLog}', [App\Http\Controllers\MaintenanceLogController::class, 'update'])->name('maintenance.update');
+            Route::post('trucks/{truck}/maintenance/schedule', [App\Http\Controllers\MaintenanceLogController::class, 'store'])->name('maintenance.schedule');
+            Route::post('maintenance/{maintenanceLog}/open', [App\Http\Controllers\MaintenanceLogController::class, 'open'])->name('maintenance.open');
+            Route::post('maintenance/{maintenanceLog}/pause', [App\Http\Controllers\MaintenanceLogController::class, 'pause'])->name('maintenance.pause');
+            Route::post('maintenance/{maintenanceLog}/resume', [App\Http\Controllers\MaintenanceLogController::class, 'resume'])->name('maintenance.resume');
+            Route::post('maintenance/{maintenanceLog}/close', [App\Http\Controllers\MaintenanceLogController::class, 'close'])->name('maintenance.close.enhanced');
+            Route::post('maintenance/{maintenanceLog}/cancel', [App\Http\Controllers\MaintenanceLogController::class, 'cancel'])->name('maintenance.cancel');
+            Route::get('maintenance/attachment/{attachment}', [App\Http\Controllers\MaintenanceLogController::class, 'downloadAttachment'])->name('maintenance.attachment.download');
+            Route::post('maintenance/{maintenanceLog}/attachment', [App\Http\Controllers\MaintenanceLogController::class, 'uploadAttachment'])->name('maintenance.attachment.upload');
             // Deployments (PHASE D)
             Route::post('trucks/{truck}/deployments/schedule', [App\Http\Controllers\BO\TruckDeploymentController::class, 'schedule'])->name('deployments.schedule');
             Route::post('deployments/{deployment}/open', [App\Http\Controllers\BO\TruckDeploymentController::class, 'open'])->name('deployments.open');
             Route::post('deployments/{deployment}/close', [App\Http\Controllers\BO\TruckDeploymentController::class, 'close'])->name('deployments.close');
             Route::post('deployments/{deployment}/cancel', [App\Http\Controllers\BO\TruckDeploymentController::class, 'cancel'])->name('deployments.cancel');
+            Route::post('deployments/{deployment}/reschedule', [App\Http\Controllers\BO\TruckDeploymentController::class, 'reschedule'])->name('deployments.reschedule');
+            Route::get('deployments/export', [App\Http\Controllers\BO\TruckDeploymentController::class, 'export'])->name('deployments.export');
             Route::patch('trucks/{truck}/status', [TruckController::class, 'updateStatus'])->name('trucks.update-status');
             Route::get('trucks/reports/utilization', [TruckController::class, 'utilizationReport'])->name('trucks.utilization-report');
             // Secure document download (BO-only)

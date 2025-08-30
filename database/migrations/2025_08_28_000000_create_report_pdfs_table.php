@@ -8,14 +8,8 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('report_pdfs', function (Blueprint $table) {
-            $table->id();
-            $table->string('type');
-            $table->string('period');
-            $table->string('path');
-            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
-            $table->timestamps();
-        });
+        // Migration reprise dans 2025_08_28_175817_update_report_pdfs_table_schema.php
+        // pour éviter les conflits
     }
 
     public function down(): void

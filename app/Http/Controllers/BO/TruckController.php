@@ -3,9 +3,10 @@
 namespace App\Http\Controllers\BO;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ScheduleTruckDeploymentRequest;
 use App\Http\Requests\StoreTruckRequest;
+use App\Http\Requests\UpdateTruckRequest;
 use App\Http\Requests\UpdateTruckStatusRequest;
+use App\Http\Requests\ScheduleTruckDeploymentRequest;
 use App\Models\Deployment;
 use App\Models\Franchisee;
 use App\Models\MaintenanceLog;
@@ -31,27 +32,39 @@ class TruckController extends Controller
     }
 
     /**
-     * Store a newly created truck.
+     * Show the form to edit an existing truck.
      */
-    public function store(StoreTruckRequest $request)
+    public function edit(string $id)
     {
-        $this->authorize('create', Truck::class);
+        $truck = Truck::findOrFail($id);
+        $this->authorize('update', $truck);
+
+        $franchisees = Franchisee::select('id', 'name')->orderBy('name')->get();
+
+        return view('bo.trucks.edit', compact('truck', 'franchisees'));
+    }
+
+    /**
+     * Update the specified truck.
+     */
+    public function update(UpdateTruckRequest $request, string $id)
+    {
+        $truck = Truck::findOrFail($id);
+        $this->authorize('update', $truck);
 
         $data = $request->validated();
 
-        // Map request fields to DB columns
-        $truck = new Truck();
+        // Map UI fields to DB columns
         $truck->name = $data['name'];
         $truck->plate = $data['plate_number'];
         $truck->vin = $data['vin'] ?? null;
         $truck->make = $data['make'] ?? null;
         $truck->model = $data['model'] ?? null;
         $truck->year = $data['year'] ?? null;
-        $truck->acquired_at = $data['acquired_at'] ?? null;
-        $truck->service_start = $data['commissioned_at'] ?? null; // commissioned_at -> service_start
         $truck->mileage_km = $data['mileage_km'] ?? null;
         $truck->franchisee_id = $data['franchisee_id'] ?? null;
         $truck->notes = $data['notes'] ?? null;
+        
         // Map UI status to enum
         $statusMap = [
             'draft' => 'Draft',
@@ -61,31 +74,38 @@ class TruckController extends Controller
         ];
         $truck->status = $statusMap[$data['status']] ?? 'Draft';
 
-        // ULID and code auto-generated in model boot
-        $truck->save();
-
-        // Handle private documents storage
-        // Use local disk, non-public; store hashed names in a dedicated folder
+        // Handle document uploads and archiving
         if ($request->hasFile('registration_doc')) {
-            $path = $request->file('registration_doc')->store('private/trucks/registration');
+            // Archive old document if exists
+            if ($truck->registration_doc_path) {
+                $oldPath = $truck->registration_doc_path;
+                $archivePath = 'private/trucks/' . $truck->id . '/archive/' . basename($oldPath) . '.' . now()->timestamp;
+                Storage::disk('local')->copy($oldPath, $archivePath);
+            }
+            
+            // Store new document
+            $path = $request->file('registration_doc')->store('private/trucks/' . $truck->id);
             $truck->registration_doc_path = $path;
         }
+
         if ($request->hasFile('insurance_doc')) {
-            $path = $request->file('insurance_doc')->store('private/trucks/insurance');
+            // Archive old document if exists
+            if ($truck->insurance_doc_path) {
+                $oldPath = $truck->insurance_doc_path;
+                $archivePath = 'private/trucks/' . $truck->id . '/archive/' . basename($oldPath) . '.' . now()->timestamp;
+                Storage::disk('local')->copy($oldPath, $archivePath);
+            }
+            
+            // Store new document
+            $path = $request->file('insurance_doc')->store('private/trucks/' . $truck->id);
             $truck->insurance_doc_path = $path;
         }
-        if ($truck->isDirty()) {
-            $truck->save();
-        }
 
-        // Optional: initialize a minimal exploitation event if active and commissioned
-        if ($truck->status === 'Active' && $truck->service_start) {
-            // For now, no-op to avoid impacting existing features. Could dispatch an event later.
-        }
+        $truck->save();
 
         return redirect()
             ->route('bo.trucks.show', $truck->id)
-            ->with('success', __('ui.bo_trucks.flash.created'));
+            ->with('success', __('ui.flash.updated'));
     }
     /**
      * Display a listing of trucks with status filtering.
@@ -178,7 +198,7 @@ class TruckController extends Controller
      */
     public function show(string $id)
     {
-    $truck = Truck::with(['franchisee', 'deployments', 'maintenanceLogs' => function ($q) {
+        $truck = Truck::with(['franchisee', 'deployments', 'maintenanceLogs' => function ($q) {
             if (Schema::hasColumn('maintenance_logs', 'opened_at')) {
                 $q->orderByDesc('opened_at');
             } else {
