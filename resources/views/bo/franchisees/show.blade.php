@@ -25,8 +25,8 @@
                         'inactive' => 'bg-gray-100 text-gray-800'
                     ];
                 @endphp
-                <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full {{ $statusColors[$franchisee->status ?? 'active'] ?? 'bg-gray-100 text-gray-800' }}">
-                    {{ __('ui.status.' . ($franchisee->status ?? 'active')) }}
+                <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full {{ $statusColors[$franchisee->ui_status ?? 'active'] ?? 'bg-gray-100 text-gray-800' }}">
+                    {{ __('ui.status.' . ($franchisee->ui_status ?? 'active')) }}
                 </span>
                 
                 <a href="{{ route('bo.franchisees.edit', $franchisee->id) }}" class="px-3 py-2 text-sm font-medium text-white bg-orange-500 rounded-md hover:bg-orange-600">
@@ -57,7 +57,7 @@
                     </div>
                     <div>
                         <dt class="text-sm font-medium text-gray-500">{{ __('ui.labels.status') }}</dt>
-                        <dd class="text-sm text-gray-900">{{ __('ui.status.' . ($franchisee->status ?? 'active')) }}</dd>
+                        <dd class="text-sm text-gray-900">{{ __('ui.status.' . ($franchisee->ui_status ?? 'active')) }}</dd>
                     </div>
                     <div class="md:col-span-2">
                         <dt class="text-sm font-medium text-gray-500">{{ __('ui.labels.billing_address') }}</dt>

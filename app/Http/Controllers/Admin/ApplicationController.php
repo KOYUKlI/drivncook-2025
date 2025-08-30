@@ -54,7 +54,7 @@ class ApplicationController extends Controller
 
         $statuses = ['draft', 'submitted', 'prequalified', 'interview', 'approved', 'rejected'];
 
-        return view('admin.applications.index', compact('applications', 'statuses'));
+    return view('bo.applications.index', compact('applications', 'statuses'));
     }
 
     public function show(FranchiseApplication $application)
@@ -68,7 +68,35 @@ class ApplicationController extends Controller
         // Available transitions based on current status
         $availableTransitions = $this->getAvailableTransitions($application->status);
 
-        return view('admin.applications.show', compact('application', 'availableTransitions'));
+        return view('bo.applications.show', compact('application', 'availableTransitions'));
+
+    }
+
+    /**
+     * Shortcut actions mapping to updateStatus for specific transitions
+     */
+    public function prequalify(Request $request, FranchiseApplication $application)
+    {
+        $request->merge(['status' => 'prequalified']);
+        return $this->updateStatus($request, $application);
+    }
+
+    public function interview(Request $request, FranchiseApplication $application)
+    {
+        $request->merge(['status' => 'interview']);
+        return $this->updateStatus($request, $application);
+    }
+
+    public function approve(Request $request, FranchiseApplication $application)
+    {
+        $request->merge(['status' => 'approved']);
+        return $this->updateStatus($request, $application);
+    }
+
+    public function reject(Request $request, FranchiseApplication $application)
+    {
+        $request->merge(['status' => 'rejected']);
+        return $this->updateStatus($request, $application);
     }
 
     public function updateStatus(Request $request, FranchiseApplication $application)

@@ -22,6 +22,7 @@ class Franchisee extends Model
         'phone',
         'billing_address',
         'royalty_rate',
+    'status',
     ];
 
     protected $casts = [
@@ -60,5 +61,38 @@ class Franchisee extends Model
     public function purchaseOrders(): HasMany
     {
         return $this->hasMany(PurchaseOrder::class, 'creator_id', 'user_id');
+    }
+
+    /**
+     * Accessor: Map DB status (e.g., Active, Draft, Retired) to UI status keys (active, pending, inactive).
+     */
+    public function getUiStatusAttribute(): string
+    {
+        $db = $this->attributes['status'] ?? null;
+        return match ($db) {
+            'Active' => 'active',
+            'Draft' => 'pending',
+            'InMaintenance' => 'pending',
+            'Retired' => 'inactive',
+            default => $db ? strtolower($db) : 'inactive',
+        };
+    }
+
+    /**
+     * Mutator: Accept UI status values and map them to DB enum values.
+     */
+    public function setStatusAttribute($value): void
+    {
+        if (is_string($value)) {
+            $map = [
+                'active' => 'Active',
+                'inactive' => 'Retired',
+                'pending' => 'Draft',
+            ];
+            $this->attributes['status'] = $map[strtolower($value)] ?? $value;
+            return;
+        }
+
+        $this->attributes['status'] = $value;
     }
 }

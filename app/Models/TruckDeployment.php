@@ -7,11 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
-class MaintenanceLog extends Model
+class TruckDeployment extends Model
 {
     use HasFactory;
 
-    protected $table = 'maintenance_logs';
+    protected $table = 'truck_deployments';
 
     protected $keyType = 'string';
     public $incrementing = false;
@@ -19,25 +19,21 @@ class MaintenanceLog extends Model
     protected $fillable = [
         'id',
         'truck_id',
-    'type', // new schema
-    'kind', // legacy schema
+        'franchisee_id',
+        'location_text',
+        'planned_start_at',
+        'planned_end_at',
+        'actual_start_at',
+        'actual_end_at',
         'status',
-    'opened_at', // new schema
-    'started_at', // legacy schema
-        'closed_at',
-        'opened_by',
-        'closed_by',
-        'description',
-        'resolution',
-        'cost_cents',
-        'attachment_path',
+        'notes',
     ];
 
     protected $casts = [
-    'opened_at' => 'datetime',
-    'started_at' => 'datetime',
-        'closed_at' => 'datetime',
-        'cost_cents' => 'integer',
+        'planned_start_at' => 'datetime',
+        'planned_end_at' => 'datetime',
+        'actual_start_at' => 'datetime',
+        'actual_end_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -58,13 +54,8 @@ class MaintenanceLog extends Model
         return $this->belongsTo(Truck::class);
     }
 
-    public function openedBy(): BelongsTo
+    public function franchisee(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'opened_by');
-    }
-
-    public function closedBy(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'closed_by');
+        return $this->belongsTo(Franchisee::class);
     }
 }

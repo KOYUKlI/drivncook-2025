@@ -72,8 +72,16 @@
                                 'order' => 'bg-blue-100 text-blue-800'
                             ];
                             @endphp
+                            @php
+                                $labelKey = match($event['type']) {
+                                    'sale' => 'ui.labels.sales',
+                                    'maintenance' => 'ui.labels.maintenance',
+                                    'order' => 'ui.labels.purchase_orders',
+                                    default => 'ui.labels.type',
+                                };
+                            @endphp
                             <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $typeColors[$event['type']] }}">
-                                {{ __('ui.' . $event['type']) }}
+                                {{ __($labelKey) }}
                             </span>
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-900">

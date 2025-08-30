@@ -24,15 +24,22 @@ return [
         'profile' => 'My Profile',
     ],
 
-    // Auth
-    'auth' => [
-        'logout' => 'Logout',
-    ],
-
     // Quick access UI keys for backward compatibility
     'add_franchisee' => 'Add Franchisee',
     'view' => 'View',
     'monthly_revenue' => 'Monthly Revenue',
+    'dashboard' => 'Dashboard',
+    'trucks' => 'Trucks',
+    'truck' => 'Truck',
+    'documents' => 'Documents',
+    'date' => 'Date',
+    'location' => 'Location',
+    'revenue' => 'Revenue',
+    'download' => 'Download',
+    'assigned_to' => 'Assigned to',
+    'deployments' => 'Deployments',
+    'maintenance' => 'Maintenance',
+    'cost' => 'Cost',
 
     // Actions
     'actions' => [
@@ -54,7 +61,11 @@ return [
         'interview' => 'Schedule Interview',
         'open' => 'Open',
         'close' => 'Close',
+        'schedule' => 'Schedule',
         'deploy' => 'Deploy',
+        'schedule_deployment' => 'Schedule Deployment',
+        'open_maintenance' => 'Open Maintenance',
+        'close_maintenance' => 'Close Maintenance',
         'schedule_maintenance' => 'Schedule Maintenance',
         'cancel' => 'Cancel',
         'confirm' => 'Confirm',
@@ -66,6 +77,10 @@ return [
         'download' => 'Download',
         'filter' => 'Filter',
         'reset' => 'Reset',
+        // Maintenance specific
+        'open_maintenance' => 'Open maintenance',
+        'close_maintenance' => 'Close maintenance',
+        'download_report' => 'Download',
     ],
 
     // Statuses
@@ -93,6 +108,38 @@ return [
         'in_progress' => 'In Progress',
     ],
 
+    'bo_trucks' => [
+        'create' => [
+            'title' => 'New Truck',
+        ],
+        'fields' => [
+            'name' => 'Truck name',
+            'plate_number' => 'License plate',
+            'vin' => 'VIN',
+            'make' => 'Make',
+            'model' => 'Model',
+            'year' => 'Year',
+            'status' => 'Status',
+            'franchisee' => 'Franchisee',
+            'acquired_at' => 'Acquired on',
+            'commissioned_at' => 'Commissioned on',
+            'mileage_km' => 'Mileage (km)',
+            'notes' => 'Notes',
+            'registration_doc' => 'Registration document (PDF/JPG/PNG)',
+            'insurance_doc' => 'Insurance document (PDF/JPG/PNG)',
+        ],
+        'flash' => [
+            'created' => 'Truck created successfully.',
+        ],
+        'sections' => [
+            'identity' => 'Identity',
+            'assignment' => 'Assignment',
+            'status_dates' => 'Status & dates',
+            'documents' => 'Private documents',
+            'notes' => 'Notes',
+        ],
+    ],
+
     // Labels
     'labels' => [
         'name' => 'Name',
@@ -100,6 +147,7 @@ return [
         'phone' => 'Phone',
         'billing_address' => 'Billing Address',
         'status' => 'Status',
+        'actions' => 'Actions',
         'area' => 'Area',
         'city' => 'City',
         'zip' => 'ZIP Code',
@@ -171,6 +219,14 @@ return [
         'status_updated' => 'Status updated successfully',
         'invalid_transition' => 'Status transition not allowed',
         'file_not_found' => 'File not found',
+        // Maintenance
+        'maintenance_opened' => 'Maintenance opened successfully',
+        'maintenance_closed' => 'Maintenance closed successfully',
+        // Deployments
+        'deployment_scheduled' => 'Deployment scheduled successfully',
+        'deployment_opened' => 'Deployment opened successfully',
+        'deployment_closed' => 'Deployment closed successfully',
+        'deployment_cancelled' => 'Deployment cancelled successfully',
     ],
 
     // Empty states
@@ -181,6 +237,8 @@ return [
         'no_applications' => 'No applications',
         'no_franchisees' => 'No franchisees',
         'no_trucks' => 'No trucks',
+        'no_deployments' => 'No deployments scheduled for this truck',
+        'no_maintenance' => 'No maintenance records for this truck',
         'no_purchase_orders' => 'No purchase orders',
         'no_sales' => 'No sales',
         'no_reports' => 'No reports',
@@ -204,8 +262,6 @@ return [
         'truck_show' => 'Truck Details',
         'warehouses' => 'Warehouse Management',
         'warehouse_create' => 'New Warehouse',
-        'back_office' => 'Back Office',
-        'franchise_office' => 'Franchise Office',
         'warehouse_edit' => 'Edit Warehouse',
         'stock_items' => 'Stock Items Management',
         'stock_item_create' => 'New Stock Item',
@@ -274,6 +330,58 @@ return [
         'not_provided' => 'Not provided',
     ],
 
+    // Maintenance i18n
+    'maintenance' => [
+        'history' => 'Maintenance history',
+        'type' => [
+            'label' => 'Type',
+            'preventive' => 'Preventive',
+            'corrective' => 'Corrective',
+        ],
+        'status' => [
+            'open' => 'Open',
+            'closed' => 'Closed',
+        ],
+        'fields' => [
+            'description' => 'Description',
+            'resolution' => 'Resolution',
+            'cost_cents' => 'Cost (cents)',
+            'attachment' => 'Attachment',
+            'opened_at' => 'Opened at',
+            'closed_at' => 'Closed at',
+        ],
+        'placeholder' => [
+            'description' => 'Describe the issue or operation...',
+        ],
+    ],
+
+    // Deployment i18n
+    'deployment' => [
+        'fields' => [
+            'location' => 'Location',
+            'planned_start_at' => 'Planned start',
+            'planned_end_at' => 'Planned end',
+            'actual_start_at' => 'Actual start',
+            'actual_end_at' => 'Actual end',
+            'notes' => 'Notes',
+        ],
+        'placeholder' => [
+            'location' => 'e.g. Market square, Paris 15th',
+            'notes' => 'Additional notes for this deployment...',
+        ],
+        'status' => [
+            'planned' => 'Planned',
+            'open' => 'Open',
+            'closed' => 'Closed',
+            'cancelled' => 'Cancelled',
+        ],
+    ],
+
+    // Utilization labels
+    'utilization' => [
+        'last_30_days' => 'Utilization (last 30 days)'
+    ],
+
     // Common phrases
     'common' => [
         'manage_truck_fleet' => 'Manage truck fleet',
@@ -297,6 +405,9 @@ return [
         'download_file' => 'Download file',
         'file_uploaded' => 'File uploaded',
         'file_download' => 'File download',
+        'save' => 'Save',
+        'cancel' => 'Cancel',
+        'unassigned' => 'Unassigned',
     ],
 
     // Public interface keys
@@ -398,12 +509,6 @@ return [
         'model' => 'The model · €50k · 4% revenue',
         'appro' => '80/20 purchasing & 4 warehouses in IDF',
         'how_it_works' => 'How it works (3 steps)',
-        'franchise_management' => 'Franchise Management',
-        'fleet_management' => 'Fleet Management',
-        'inventory' => 'Inventory',
-        'sales' => 'Sales',
-        'maintenance' => 'Maintenance',
-        'my_truck' => 'My Truck',
     ],
     'notes' => [
         'files_private' => 'Application attachments are private and reviewed in the back office',
@@ -830,9 +935,6 @@ return [
     'save' => 'Save',
     'cancel' => 'Cancel',
     'submit' => 'Submit',
-    'public_site' => 'Public Site',
-    'quick_stats' => 'Quick Stats',
-    'notifications' => 'Notifications',
 
     // === MESSAGES ===
     'messages' => [

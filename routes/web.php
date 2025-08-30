@@ -76,11 +76,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('applications', [App\Http\Controllers\Admin\ApplicationController::class, 'index'])->name('applications.index');
             Route::get('applications/{application}', [App\Http\Controllers\Admin\ApplicationController::class, 'show'])->name('applications.show');
             Route::post('applications/{application}/status', [App\Http\Controllers\Admin\ApplicationController::class, 'updateStatus'])->name('applications.update-status');
-            Route::get('applications/files/{document}/download', [App\Http\Controllers\Admin\ApplicationController::class, 'downloadDocument'])->name('applications.files.download');
+            Route::get('applications/files/{document}/download', [App\Http\Controllers\Admin\ApplicationController::class, 'downloadDocument'])->name('applications.download-document');
+            Route::post('applications/{application}/prequalify', [App\Http\Controllers\Admin\ApplicationController::class, 'prequalify'])->name('applications.prequalify');
+            Route::post('applications/{application}/interview', [App\Http\Controllers\Admin\ApplicationController::class, 'interview'])->name('applications.interview');
+            Route::post('applications/{application}/approve', [App\Http\Controllers\Admin\ApplicationController::class, 'approve'])->name('applications.approve');
+            Route::post('applications/{application}/reject', [App\Http\Controllers\Admin\ApplicationController::class, 'reject'])->name('applications.reject');
         });
 
-        // Trucks management (admin, fleet)
-        Route::middleware('role:admin|fleet')->group(function () {
+    // Trucks management (admin, fleet)
+    Route::middleware('role:admin|fleet')->group(function () {
+            Route::get('trucks/create', [TruckController::class, 'create'])->name('trucks.create');
+            Route::post('trucks', [TruckController::class, 'store'])->name('trucks.store');
             Route::resource('trucks', TruckController::class)->only(['index', 'show']);
             // Mission C actions
             Route::post('trucks/{truck}/deploy', [TruckController::class, 'openDeployment'])->name('trucks.deploy');
@@ -89,11 +95,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('trucks/{truck}/schedule-deployment', [TruckController::class, 'scheduleDeployment'])->name('trucks.schedule-deployment');
             Route::post('trucks/{truck}/deployments/{deploymentId}/open', [TruckController::class, 'openDeployment'])->name('trucks.open-deployment');
             Route::post('trucks/{truck}/deployments/{deploymentId}/close', [TruckController::class, 'closeDeployment'])->name('trucks.close-deployment');
-            Route::post('trucks/{truck}/schedule-maintenance', [TruckController::class, 'scheduleMaintenance'])->name('trucks.schedule-maintenance');
-            Route::post('trucks/{truck}/maintenance/{maintenanceId}/open', [TruckController::class, 'openMaintenance'])->name('trucks.open-maintenance');
-            Route::post('trucks/{truck}/maintenance/{maintenanceId}/close', [TruckController::class, 'closeMaintenance'])->name('trucks.close-maintenance');
+            // Maintenance (PHASE C)
+            Route::post('trucks/{truck}/maintenance/open', [App\Http\Controllers\BO\TruckMaintenanceController::class, 'open'])->name('maintenance.open');
+            Route::post('maintenance/{log}/close', [App\Http\Controllers\BO\TruckMaintenanceController::class, 'close'])->name('maintenance.close');
+            Route::get('maintenance/{log}/download', [App\Http\Controllers\BO\TruckMaintenanceController::class, 'download'])->name('maintenance.download');
+            // Deployments (PHASE D)
+            Route::post('trucks/{truck}/deployments/schedule', [App\Http\Controllers\BO\TruckDeploymentController::class, 'schedule'])->name('deployments.schedule');
+            Route::post('deployments/{deployment}/open', [App\Http\Controllers\BO\TruckDeploymentController::class, 'open'])->name('deployments.open');
+            Route::post('deployments/{deployment}/close', [App\Http\Controllers\BO\TruckDeploymentController::class, 'close'])->name('deployments.close');
+            Route::post('deployments/{deployment}/cancel', [App\Http\Controllers\BO\TruckDeploymentController::class, 'cancel'])->name('deployments.cancel');
             Route::patch('trucks/{truck}/status', [TruckController::class, 'updateStatus'])->name('trucks.update-status');
             Route::get('trucks/reports/utilization', [TruckController::class, 'utilizationReport'])->name('trucks.utilization-report');
+            // Secure document download (BO-only)
+            Route::get('trucks/{truck}/files/{type}', [TruckController::class, 'downloadDocument'])
+                ->whereIn('type', ['registration','insurance'])
+                ->name('trucks.files.download');
         });
 
         // Purchase orders (admin, warehouse)
@@ -145,11 +161,6 @@ Route::get('/test-franchisee', function () {
 
     return redirect()->route('fo.dashboard');
 })->name('test.franchisee');
-
-// Test route for new sidebar
-Route::get('/test-sidebar', function () {
-    return view('test-sidebar');
-})->middleware('auth')->name('test.sidebar');
 
 // Mail preview routes (local only)
 if (app()->environment('local')) {

@@ -58,6 +58,16 @@ return [
     'home' => 'Accueil',
     'initial_investment' => 'Investissement initial',
     'initial_stock' => 'Stock initial',
+    
+    // Clés compatibilité pour la navigation
+    'add_franchisee' => 'Ajouter un franchisé',
+    'view' => 'Voir',
+    'edit' => 'Modifier',
+    'monthly_revenue' => 'Chiffre d\'affaires mensuel',
+    'trucks' => 'Camions',
+    'warehouses' => 'Entrepôts',
+    'purchase_orders' => 'Commandes d\'achat',
+    'stock_items' => 'Articles en stock',
     'investment_details' => 'Détails de l\'investissement',
     'learn_more' => 'En savoir plus',
     'location' => 'Localisation',
@@ -160,11 +170,6 @@ return [
         'login' => 'Connexion',
     ],
 
-    // === AUTH ===
-    'auth' => [
-        'logout' => 'Déconnexion',
-    ],
-
     // === ACTION TYPES ===
     'action_types' => [
         'create' => 'Créer',
@@ -173,10 +178,13 @@ return [
         'view' => 'Voir',
         'save' => 'Sauvegarder',
         'cancel' => 'Annuler',
+    'open' => 'Ouvrir',
+    'close' => 'Fermer',
         'submit' => 'Soumettre',
         'update' => 'Mettre à jour',
         'back' => 'Retour',
         'download' => 'Télécharger',
+    'download_report' => 'Télécharger',
         'filter' => 'Filtrer',
         'reset' => 'Réinitialiser',
         'search' => 'Rechercher',
@@ -187,6 +195,8 @@ return [
         'prequalify' => 'Préqualifier',
         'schedule_interview' => 'Programmer entretien',
         'deploy' => 'Déployer',
+    'open_maintenance' => 'Ouvrir maintenance',
+    'close_maintenance' => 'Clôturer maintenance',
         'add_item' => 'Ajouter article',
         'remove' => 'Supprimer',
     ],
@@ -199,10 +209,14 @@ return [
         'view' => 'Voir',
         'save' => 'Sauvegarder',
         'cancel' => 'Annuler',
+        'open' => 'Ouvrir',
+        'close' => 'Fermer',
+        'schedule' => 'Programmer',
         'submit' => 'Soumettre',
         'update' => 'Mettre à jour',
         'back' => 'Retour',
         'download' => 'Télécharger',
+        'download_report' => 'Télécharger',
         'filter' => 'Filtrer',
         'reset' => 'Réinitialiser',
         'search' => 'Rechercher',
@@ -213,6 +227,9 @@ return [
         'prequalify' => 'Préqualifier',
         'schedule_interview' => 'Programmer entretien',
         'deploy' => 'Déployer',
+    'schedule_deployment' => 'Programmer un déploiement',
+        'open_maintenance' => 'Ouvrir maintenance',
+        'close_maintenance' => 'Clôturer maintenance',
         'add_item' => 'Ajouter article',
         'remove' => 'Supprimer',
     ],
@@ -231,7 +248,9 @@ return [
         'interview' => 'Entretien',
         'operational' => 'Opérationnel',
         'maintenance' => 'En maintenance',
-        'out_of_service' => 'Hors service',
+            'in_maintenance' => 'En maintenance',
+            'out_of_service' => 'Hors service',
+            'retired' => 'Retiré',
     ],
 
     // === LABELS ===
@@ -243,6 +262,7 @@ return [
         'city' => 'Ville',
         'zip' => 'Code postal',
         'status' => 'Statut',
+    'actions' => 'Actions',
         'date' => 'Date',
         'created_at' => 'Créé le',
         'updated_at' => 'Modifié le',
@@ -308,8 +328,6 @@ return [
         'application_show' => 'Détails de la candidature',
         'application_detail' => 'Détail de la candidature',
         'franchisee_create' => 'Créer un franchisé',
-        'back_office' => 'Back Office',
-        'franchise_office' => 'Espace Franchisé',
         'franchisee_edit' => 'Modifier le franchisé',
         'franchisee_show' => 'Détails du franchisé',
         'truck_show' => 'Détails du camion',
@@ -372,6 +390,14 @@ return [
         'status_updated' => 'Statut mis à jour',
         'invalid_transition' => 'Transition invalide',
         'file_not_found' => 'Fichier non trouvé',
+    'maintenance_opened' => 'Maintenance ouverte avec succès',
+    'maintenance_closed' => 'Maintenance clôturée avec succès',
+    'invalid_transition' => 'Transition de statut invalide',
+    // Déploiements
+    'deployment_scheduled' => 'Déploiement programmé avec succès',
+    'deployment_opened' => 'Déploiement ouvert avec succès',
+    'deployment_closed' => 'Déploiement clôturé avec succès',
+    'deployment_cancelled' => 'Déploiement annulé avec succès',
     ],
 
     // === MISC ===
@@ -419,6 +445,8 @@ return [
         'max_file_size' => 'Taille maximale du fichier',
     ],
 
+    // (supprimé: ancien bloc bo_trucks en double)
+
     // === PUBLIC MINIMAL KEYS ===
     'ctas' => [
         'become_franchisee' => 'Devenir franchisé',
@@ -428,12 +456,6 @@ return [
         'model' => 'Le modèle · 50k€ · 4% CA',
         'appro' => 'Appro 80/20 & 4 entrepôts IDF',
         'how_it_works' => 'Comment ça marche ? (3 étapes)',
-        'franchise_management' => 'Gestion des franchises',
-        'fleet_management' => 'Gestion de la flotte',
-        'inventory' => 'Inventaire',
-        'sales' => 'Ventes',
-        'maintenance' => 'Maintenance',
-        'my_truck' => 'Mon camion',
     ],
     'notes' => [
         'files_private' => 'Les pièces jointes de candidature sont privées et examinées côté BO',
@@ -468,7 +490,64 @@ return [
         'download_file' => 'Télécharger le fichier',
         'file_uploaded' => 'Fichier téléchargé',
         'file_download' => 'Téléchargement de fichier',
+            'save' => 'Enregistrer',
+            'cancel' => 'Annuler',
+            'unassigned' => 'Non attribué',
     ],
+
+        // Maintenance i18n
+        'maintenance' => [
+            'history' => 'Historique de maintenance',
+            'type' => [
+                'label' => 'Type',
+                'preventive' => 'Préventive',
+                'corrective' => 'Corrective',
+            ],
+            'status' => [
+                'open' => 'Ouverte',
+                'closed' => 'Clôturée',
+            ],
+            'fields' => [
+                'description' => 'Description',
+                'resolution' => 'Résolution',
+                'cost_cents' => 'Coût (centimes)',
+                'attachment' => 'Pièce jointe',
+                'opened_at' => 'Ouverte le',
+                'closed_at' => 'Clôturée le',
+            ],
+            'placeholder' => [
+                'description' => 'Décrire le problème ou l\'opération...',
+            ],
+        ],
+
+    // actions for maintenance are now declared in the global 'actions' block above
+
+        // Déploiements i18n
+        'deployment' => [
+            'fields' => [
+                'location' => 'Localisation',
+                'planned_start_at' => 'Début planifié',
+                'planned_end_at' => 'Fin planifiée',
+                'actual_start_at' => 'Début réel',
+                'actual_end_at' => 'Fin réelle',
+                'notes' => 'Notes',
+            ],
+            'placeholder' => [
+                'location' => 'Ex: Place du marché, Paris 15e',
+                'notes' => 'Notes additionnelles pour ce déploiement...',
+            ],
+            'status' => [
+                'planned' => 'Planifié',
+                'open' => 'Ouvert',
+                'closed' => 'Clôturé',
+                'cancelled' => 'Annulé',
+            ],
+        ],
+
+        // Libellés d'utilisation
+        'utilization' => [
+            'last_30_days' => 'Utilisation (30 derniers jours)'
+        ],
 
     // === EMPTY STATES ===
     'empty' => [
@@ -478,6 +557,8 @@ return [
         'no_franchisees' => 'Aucun franchisé',
         'no_trucks' => 'Aucun camion',
         'no_sales' => 'Aucune vente',
+        'no_deployments' => 'Aucun déploiement programmé pour ce camion',
+        'no_maintenance' => 'Aucune maintenance enregistrée pour ce camion',
         'try_changing_filters' => 'Essayez de changer les filtres',
         'no_purchase_orders' => 'Aucune commande',
         'no_reports' => 'Aucun rapport',
@@ -986,6 +1067,41 @@ return [
         ],
     ],
 
+    // BO Trucks (création)
+    'bo_trucks' => [
+        'create' => [
+            'title' => 'Nouveau camion',
+        ],
+        'fields' => [
+            'name' => 'Nom du camion',
+            'plate_number' => 'Immatriculation',
+            'vin' => 'VIN',
+            'make' => 'Marque',
+            'model' => 'Modèle',
+            'year' => 'Année',
+            'status' => 'Statut',
+            'franchisee' => 'Franchisé',
+            'acquired_at' => 'Date d’acquisition',
+            'commissioned_at' => 'Mise en service',
+            'mileage_km' => 'Kilométrage (km)',
+            'notes' => 'Notes',
+            'registration_doc' => 'Carte grise (PDF/JPG/PNG)',
+            'insurance_doc' => 'Assurance (PDF/JPG/PNG)',
+        ],
+        'flash' => [
+            'created' => 'Camion créé avec succès.',
+        ],
+        'sections' => [
+            'identity' => 'Identité',
+            'assignment' => 'Affectation',
+            'status_dates' => 'État & dates',
+            'documents' => 'Documents privés',
+            'notes' => 'Notes',
+        ],
+    ],
+
+    
+
     // === FRONT OFFICE ===
     'fo' => [
         'dashboard' => 'Tableau de bord',
@@ -1218,9 +1334,6 @@ return [
     'add_purchase_order' => 'Ajouter une commande',
     'add_warehouse' => 'Ajouter un entrepôt',
     'add_stock_item' => 'Ajouter un article',
-    'public_site' => 'Site public',
-    'quick_stats' => 'Statistiques rapides',
-    'notifications' => 'Notifications',
 
     // === MESSAGES ===
     'messages' => [

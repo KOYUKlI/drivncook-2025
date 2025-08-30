@@ -1,25 +1,15 @@
-@props(['active' => false, 'mobile' => false, 'icon' => null, 'badge' => null])
+@props(['active' => false, 'mobile' => false])
 
 @php
 $baseClasses = $mobile 
-    ? 'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
-    : 'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold';
+    ? 'block px-3 py-2 rounded-md text-base font-medium'
+    : 'block px-3 py-2 rounded-md text-sm font-medium';
 
 $classes = $active 
-    ? $baseClasses . ' bg-indigo-50 text-indigo-600'
-    : $baseClasses . ' text-gray-700 hover:text-indigo-600 hover:bg-gray-50';
+    ? $baseClasses . ' bg-orange-50 text-orange-700 border-l-2 border-orange-500 sidebar-link-active'
+    : $baseClasses . ' text-gray-700 hover:bg-gray-50 hover:text-orange-700 hover:border-l-2 hover:border-orange-300 sidebar-link';
 @endphp
 
 <a {{ $attributes->merge(['class' => $classes]) }}>
-    @if($icon)
-        @include('components.icons.' . $icon, ['class' => 'h-5 w-5 shrink-0 ' . ($active ? 'text-indigo-600' : 'text-gray-400 group-hover:text-indigo-600')])
-    @endif
-    
-    <span class="truncate">{{ $slot }}</span>
-    
-    @if($badge && $badge > 0)
-        <span class="ml-auto w-6 h-6 text-xs font-medium text-white bg-indigo-600 rounded-full flex items-center justify-center">
-            {{ $badge }}
-        </span>
-    @endif
+    {{ $slot }}
 </a>
