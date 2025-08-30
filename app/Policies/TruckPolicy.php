@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\User;
+use App\Models\Truck;
 
 class TruckPolicy
 {
@@ -17,9 +18,33 @@ class TruckPolicy
     /**
      * Determine whether the user can view the truck.
      */
-    public function view(User $user, $truck): bool
+    public function view(User $user, Truck $truck): bool
     {
         return $user->hasAnyRole(['admin', 'fleet']);
+    }
+
+    /**
+     * Determine whether the user can create trucks.
+     */
+    public function create(User $user): bool
+    {
+        return $user->hasAnyRole(['admin', 'fleet']);
+    }
+
+    /**
+     * Determine whether the user can update the truck.
+     */
+    public function update(User $user, Truck $truck): bool
+    {
+        return $user->hasAnyRole(['admin', 'fleet']);
+    }
+
+    /**
+     * Determine whether the user can delete the truck.
+     */
+    public function delete(User $user, Truck $truck): bool
+    {
+        return $user->hasRole('admin');
     }
 
     /**

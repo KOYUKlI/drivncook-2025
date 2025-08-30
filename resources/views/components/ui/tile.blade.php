@@ -1,4 +1,4 @@
-@props(['title', 'value', 'subtitle' => null, 'icon' => null, 'color' => 'blue'])
+@props(['title', 'value', 'subtitle' => null, 'color' => 'blue'])
 
 @php
 $colorClasses = [
@@ -20,9 +20,9 @@ $colorClasses = [
             @endif
         </div>
         
-        @if($icon)
+        @if(isset($icon))
             <div class="p-3 rounded-full {{ $colorClasses[$color] }}">
-                {!! $icon !!}
+                {{ $icon }}
             </div>
         @endif
     </div>

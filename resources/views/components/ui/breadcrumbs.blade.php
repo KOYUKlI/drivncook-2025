@@ -1,7 +1,7 @@
 @props(['items' => []])
 
 @if(count($items) > 0)
-<nav class="flex mb-6" aria-label="{{ __('ui.breadcrumb') }}">
+<nav class="flex mb-6" aria-label="{{ __('ui.misc.breadcrumb') }}">
     <ol class="flex items-center space-x-2">
         @foreach($items as $index => $item)
             <li class="flex items-center">

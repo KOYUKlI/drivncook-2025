@@ -3,61 +3,61 @@
 namespace App\Http\Controllers\FO;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreSaleRequest;
+use App\Models\Sale;
+use App\Models\SaleLine;
+use App\Models\StockItem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class SaleController extends Controller
 {
     /**
      * Display a listing of sales.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Mock stats data
+        $user = Auth::user();
+        $from = $request->input('from') ? now()->parse($request->input('from')) : now()->startOfMonth();
+        $to = $request->input('to') ? now()->parse($request->input('to')) : now();
+
+        $query = Sale::query()->whereBetween('created_at', [$from, $to]);
+        $franchiseeId = data_get($user, 'franchisee_id');
+        if ($franchiseeId) {
+            $query->where('franchisee_id', $franchiseeId);
+        }
+        $sales = $query->with('lines')->latest()->get();
+
+        // Calculate real sales stats
+        $todaySales = Sale::whereDate('created_at', now()->toDateString())
+            ->when($franchiseeId, fn ($q) => $q->where('franchisee_id', $franchiseeId))
+            ->get();
+
+        $weekSales = Sale::whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])
+            ->when($franchiseeId, fn ($q) => $q->where('franchisee_id', $franchiseeId))
+            ->get();
+
+        $monthSales = Sale::whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])
+            ->when($franchiseeId, fn ($q) => $q->where('franchisee_id', $franchiseeId))
+            ->get();
+
         $stats = [
-            'today_sales' => 25000, // centimes
-            'today_count' => 12,
-            'week_sales' => 185000,
-            'week_count' => 78,
-            'month_sales' => 650000,
-            'month_count' => 285,
-            'best_location' => 'Place de la République',
-            'best_location_sales' => 45000,
+            'period_from' => $from,
+            'period_to' => $to,
+            'count' => $sales->count(),
+            'sum_cents' => $sales->sum('total_cents'),
+            'today_sales' => $todaySales->sum('total_cents'),
+            'today_count' => $todaySales->count(),
+            'week_sales' => $weekSales->sum('total_cents'),
+            'week_count' => $weekSales->count(),
+            'month_sales' => $monthSales->sum('total_cents'),
+            'month_count' => $monthSales->count(),
+            'best_location' => 'Centre-ville', // TODO: Calculate from deployment data
+            'best_location_sales' => $monthSales->max('total_cents') ?? 0,
         ];
 
-        // Mock data
-        $sales = [
-            [
-                'id' => 1,
-                'created_at' => '2024-08-27 14:30:00',
-                'location' => 'Place de la République',
-                'coordinates' => '48.8566, 2.3522',
-                'payment_method' => 'card',
-                'items_count' => 3,
-                'total_amount' => 850, // centimes
-            ],
-            [
-                'id' => 2,
-                'created_at' => '2024-08-26 12:15:00',
-                'location' => 'Gare du Nord',
-                'coordinates' => '48.8809, 2.3553',
-                'payment_method' => 'cash',
-                'items_count' => 2,
-                'total_amount' => 920,
-            ],
-            [
-                'id' => 3,
-                'created_at' => '2024-08-25 16:45:00',
-                'location' => 'Châtelet',
-                'coordinates' => '48.8583, 2.3472',
-                'payment_method' => 'mobile',
-                'items_count' => 4,
-                'total_amount' => 750,
-            ],
-        ];
-
-        $total_sales = count($sales);
-
-        return view('fo.sales.index', compact('sales', 'stats', 'total_sales'));
+        return view('fo.sales.index', compact('sales', 'stats'));
     }
 
     /**
@@ -65,14 +65,16 @@ class SaleController extends Controller
      */
     public function create()
     {
-        // Mock products data
-        $products = [
-            ['id' => 1, 'name' => 'Burger Classic', 'price' => 950], // centimes
-            ['id' => 2, 'name' => 'Sandwich Jambon', 'price' => 650],
-            ['id' => 3, 'name' => 'Salade César', 'price' => 850],
-            ['id' => 4, 'name' => 'Boisson 33cl', 'price' => 250],
-            ['id' => 5, 'name' => 'Frites', 'price' => 350],
-        ];
+        $products = StockItem::select('id', 'name', 'price_cents as price')
+            ->where('price_cents', '>', 0)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'name' => $item->name,
+                    'price' => $item->price,
+                ];
+            });
 
         return view('fo.sales.create', compact('products'));
     }
@@ -80,9 +82,34 @@ class SaleController extends Controller
     /**
      * Store a newly created sale.
      */
-    public function store(Request $request)
+    public function store(StoreSaleRequest $request)
     {
-        // Validation and storage logic here
-        return redirect()->route('fo.sales.index')->with('success', 'Vente enregistrée avec succès');
+        $validated = $request->validated();
+
+        // Calculate total on server side
+        $total = 0;
+        foreach ($validated['items'] as $item) {
+            $total += (int) $item['quantity'] * (int) $item['unit_price'];
+        }
+
+        $sale = new Sale;
+        $sale->id = (string) Str::ulid();
+        $sale->franchisee_id = Auth::user()->franchisee_id ?? null;
+        $sale->sale_date = now()->toDateString();
+        $sale->total_cents = $total;
+        $sale->save();
+
+        foreach ($validated['items'] as $item) {
+            $line = new SaleLine;
+            $line->id = (string) Str::ulid();
+            $line->sale_id = $sale->id;
+            $line->stock_item_id = null;
+            $line->qty = (int) $item['quantity'];
+            $line->unit_price_cents = (int) $item['unit_price'];
+            $line->save();
+        }
+
+        return redirect()->route('fo.sales.index')
+            ->with('success', __('Vente enregistrée (:amount€)', ['amount' => number_format($total / 100, 2, ',', ' ')]));
     }
 }

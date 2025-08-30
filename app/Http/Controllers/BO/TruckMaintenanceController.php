@@ -1,0 +1,111 @@
+<?php
+
+namespace App\Http\Controllers\BO;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\CloseMaintenanceRequest;
+use App\Http\Requests\OpenMaintenanceRequest;
+use App\Models\MaintenanceLog;
+use App\Models\Truck;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Schema;
+
+class TruckMaintenanceController extends Controller
+{
+    public function open(Truck $truck, OpenMaintenanceRequest $request)
+    {
+        $this->authorize('create', MaintenanceLog::class);
+
+        $data = $request->validated();
+
+        $log = new MaintenanceLog();
+        $log->truck_id = $truck->id;
+        // Type/kind depending on schema
+        if (Schema::hasColumn('maintenance_logs', 'type')) {
+            $log->type = $data['type'];
+        } elseif (Schema::hasColumn('maintenance_logs', 'kind')) {
+            $log->kind = ucfirst($data['type']);
+        }
+        // Status column may not exist in legacy schema
+        if (Schema::hasColumn('maintenance_logs', 'status')) {
+            $log->status = 'open';
+        }
+        // Opened/start datetime depending on schema
+        if (Schema::hasColumn('maintenance_logs', 'opened_at')) {
+            $log->opened_at = $data['opened_at'];
+        } elseif (Schema::hasColumn('maintenance_logs', 'started_at')) {
+            $log->started_at = $data['opened_at'];
+        }
+        // Audit columns if available
+        if (Schema::hasColumn('maintenance_logs', 'opened_by')) {
+            $log->opened_by = Auth::id();
+        }
+        $log->description = $data['description'];
+        if (Schema::hasColumn('maintenance_logs', 'cost_cents')) {
+            $log->cost_cents = $data['cost_cents'] ?? null;
+        }
+
+        if ($request->hasFile('attachment') && Schema::hasColumn('maintenance_logs', 'attachment_path')) {
+            $path = $request->file('attachment')->store("private/maintenance/{$truck->id}");
+            $log->attachment_path = $path;
+        }
+
+        $log->save();
+
+        return redirect()
+            ->route('bo.trucks.show', $truck->id)
+            ->with('success', __('ui.flash.maintenance_opened'));
+    }
+
+    public function close(string $log, CloseMaintenanceRequest $request)
+    {
+        $logModel = MaintenanceLog::findOrFail($log);
+        $this->authorize('close', $logModel);
+        // If status column exists, enforce transition; else rely on closed_at presence
+        if (Schema::hasColumn('maintenance_logs', 'status')) {
+            if ($logModel->status !== 'open') {
+                return back()->with('error', __('ui.flash.invalid_transition'));
+            }
+        } elseif (!empty($logModel->closed_at)) {
+            return back()->with('error', __('ui.flash.invalid_transition'));
+        }
+
+        $data = $request->validated();
+
+        if (Schema::hasColumn('maintenance_logs', 'status')) {
+            $logModel->status = 'closed';
+        }
+        $logModel->closed_at = $data['closed_at'];
+        if (Schema::hasColumn('maintenance_logs', 'closed_by')) {
+            $logModel->closed_by = Auth::id();
+        }
+        if (Schema::hasColumn('maintenance_logs', 'resolution')) {
+            $logModel->resolution = $data['resolution'];
+        }
+
+        if ($request->hasFile('attachment') && Schema::hasColumn('maintenance_logs', 'attachment_path') && empty($logModel->attachment_path)) {
+            $path = $request->file('attachment')->store("private/maintenance/{$logModel->truck_id}");
+            $logModel->attachment_path = $path;
+        }
+
+        $logModel->save();
+
+        return redirect()
+            ->route('bo.trucks.show', $logModel->truck_id)
+            ->with('success', __('ui.flash.maintenance_closed'));
+    }
+
+    public function download(string $log)
+    {
+        $logModel = MaintenanceLog::findOrFail($log);
+        $this->authorize('view', $logModel);
+
+    if (! Schema::hasColumn('maintenance_logs', 'attachment_path') || ! $logModel->attachment_path || ! Storage::disk('local')->exists($logModel->attachment_path)) {
+            return back()->with('error', __('ui.flash.file_not_found'));
+        }
+
+        return response()->download(Storage::disk('local')->path($logModel->attachment_path));
+    }
+}

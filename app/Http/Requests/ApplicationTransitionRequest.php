@@ -21,23 +21,37 @@ class ApplicationTransitionRequest extends FormRequest
      */
     public function rules(): array
     {
-        $transition = $this->route('transition');
+        $routeName = $this->route()->getName();
 
-        return match ($transition) {
-            'prequalify' => [
+        return match (true) {
+            str_contains($routeName, 'prequalify') => [
                 'message' => 'nullable|string|max:500',
             ],
-            'interview' => [
+            str_contains($routeName, 'interview') => [
                 'message' => 'nullable|string|max:500',
                 'interview_date' => 'nullable|date|after:today',
             ],
-            'approve' => [
+            str_contains($routeName, 'approve') => [
                 'message' => 'nullable|string|max:500',
             ],
-            'reject' => [
+            str_contains($routeName, 'reject') => [
                 'reason' => 'required|string|max:500',
             ],
             default => [],
         };
+    }
+
+    /**
+     * Get custom error messages for validation rules.
+     */
+    public function messages(): array
+    {
+        return [
+            'reason.required' => 'La raison du rejet est obligatoire.',
+            'reason.max' => 'La raison ne peut pas dépasser 500 caractères.',
+            'interview_date.after' => 'La date d\'entretien doit être future.',
+            'interview_date.date' => 'La date d\'entretien doit être une date valide.',
+            'message.max' => 'Le message ne peut pas dépasser 500 caractères.',
+        ];
     }
 }

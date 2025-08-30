@@ -2,56 +2,49 @@
 
 namespace App\Mail;
 
+use App\Models\FranchiseApplication;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class ApplicationStatusChanged extends Mailable implements ShouldQueue
+class ApplicationStatusChanged extends Mailable
 {
     use Queueable, SerializesModels;
 
-    /**
-     * Create a new message instance.
-     */
     public function __construct(
-        public array $application,
-        public string $fromStatus,
-        public string $toStatus,
-        public string $message = ''
-    ) {
-        //
-    }
+        public FranchiseApplication $application,
+        public string $oldStatus,
+        public string $newStatus,
+        public ?string $adminMessage = ''
+    ) {}
 
-    /**
-     * Get the message envelope.
-     */
     public function envelope(): Envelope
     {
+        $subject = match ($this->newStatus) {
+            'prequalified' => __('emails.application_status_prequalified'),
+            'interview' => __('emails.application_status_interview'),
+            'approved' => __('emails.application_status_approved'),
+            'rejected' => __('emails.application_status_rejected'),
+            default => __('emails.application_status_rejected'),
+        };
+
         return new Envelope(
-            subject: 'Mise à jour de votre candidature Driv\'n Cook',
+            subject: $subject,
         );
     }
 
-    /**
-     * Get the message content definition.
-     */
     public function content(): Content
     {
         return new Content(
-            view: 'emails.applications.status_changed',
+            markdown: 'emails.applications.status-changed',
+            with: [
+                'application' => $this->application,
+                'oldStatus' => $this->oldStatus,
+                'newStatus' => $this->newStatus,
+                'adminMessage' => $this->adminMessage,
+            ],
         );
-    }
-
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
-     */
-    public function attachments(): array
-    {
-        return [];
     }
 }

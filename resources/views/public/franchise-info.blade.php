@@ -1,226 +1,199 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
+<x-app-layout>
+    <x-slot name="title">{{ __('ui.titles.franchise_info') }}</x-slot>
 
-        <title>{{ __('ui.franchise_information') }} - {{ config('app.name', 'Laravel') }}</title>
-        <meta name="description" content="{{ __('ui.franchise_info_meta_description') }}">
-
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700" rel="stylesheet" />
-
-        <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body class="min-h-screen bg-white text-gray-900">
-        
-        <!-- Header -->
-        <header class="bg-white border-b border-gray-200">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div class="flex h-16 items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <a href="{{ route('home') }}" class="flex items-center gap-2">
-                            <div class="h-8 w-8 bg-orange-500 rounded-lg flex items-center justify-center">
-                                <span class="text-white font-bold text-sm">DC</span>
-                            </div>
-                            <span class="text-xl font-semibold text-gray-900">Driv'n Cook</span>
-                        </a>
-                    </div>
-
-                    <div class="flex items-center gap-4">
-                        @guest
-                            <a href="{{ route('login') }}" class="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium">
-                                {{ __('ui.login') }}
-                            </a>
-                            @if (Route::has('register'))
-                                <a href="{{ route('register') }}" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium">
-                                    {{ __('ui.register') }}
-                                </a>
-                            @endif
-                        @else
-                            <a href="{{ route('dashboard') }}" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium">
-                                {{ __('ui.dashboard') }}
-                            </a>
-                        @endguest
-                    </div>
-                </div>
-            </div>
-        </header>
-
-        <!-- Breadcrumb -->
-        <nav class="bg-gray-50 py-4">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <ol class="flex items-center space-x-2 text-sm">
-                    <li><a href="{{ route('home') }}" class="text-gray-600 hover:text-gray-900">{{ __('ui.home') }}</a></li>
-                    <li class="text-gray-400">/</li>
-                    <li class="text-gray-900 font-medium">{{ __('ui.franchise_information') }}</li>
-                </ol>
-            </div>
-        </nav>
-
-        <!-- Hero -->
-        <section class="bg-gradient-to-r from-orange-50 to-orange-100 py-16">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-                <h1 class="text-4xl font-bold text-gray-900 mb-4">
-                    {{ __('ui.franchise_information') }}
+    <!-- Hero Section -->
+    <section class="bg-white py-16">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                    {{ __('ui.titles.franchise_info') }}
                 </h1>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                    {{ __('ui.franchise_opportunity') }} - {{ __('ui.franchise_info_subtitle') }}
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+                    {{ __('ui.public.franchise_info.subtitle') }}
                 </p>
+                <div class="inline-flex items-center bg-orange-50 border border-orange-200 rounded-full px-6 py-3">
+                    <svg class="w-5 h-5 text-orange-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <span class="text-orange-800 font-medium">{{ __('Opportunité d\'investissement') }}</span>
+                </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- Detailed Information -->
-        <section class="py-20">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                    
-                    <!-- Left column: Details -->
-                    <div>
-                        <h2 class="text-3xl font-bold text-gray-900 mb-6">{{ __('ui.investment_details') }}</h2>
-                        
-                        <div class="space-y-6">
-                            <div class="bg-white p-6 border border-gray-200 rounded-lg shadow-sm">
-                                <h3 class="text-xl font-semibold text-gray-900 mb-3">{{ __('ui.initial_investment') }}</h3>
-                                <ul class="space-y-2 text-gray-600">
-                                    <li class="flex justify-between">
-                                        <span>{{ __('ui.franchise_fee') }}</span>
-                                        <span class="font-semibold">50 000€</span>
-                                    </li>
-                                    <li class="flex justify-between">
-                                        <span>{{ __('ui.truck_equipment') }}</span>
-                                        <span class="font-semibold">35 000€</span>
-                                    </li>
-                                    <li class="flex justify-between">
-                                        <span>{{ __('ui.initial_stock') }}</span>
-                                        <span class="font-semibold">8 000€</span>
-                                    </li>
-                                    <li class="flex justify-between border-t pt-2 font-semibold text-gray-900">
-                                        <span>{{ __('ui.total_investment') }}</span>
-                                        <span>93 000€</span>
-                                    </li>
-                                </ul>
-                            </div>
-
-                            <div class="bg-white p-6 border border-gray-200 rounded-lg shadow-sm">
-                                <h3 class="text-xl font-semibold text-gray-900 mb-3">{{ __('ui.ongoing_costs') }}</h3>
-                                <ul class="space-y-2 text-gray-600">
-                                    <li class="flex justify-between">
-                                        <span>{{ __('ui.royalty_fee') }}</span>
-                                        <span class="font-semibold">4% {{ __('ui.of_revenue') }}</span>
-                                    </li>
-                                    <li class="flex justify-between">
-                                        <span>{{ __('ui.marketing_fee') }}</span>
-                                        <span class="font-semibold">2% {{ __('ui.of_revenue') }}</span>
-                                    </li>
-                                </ul>
+    <!-- Investissement & Conditions -->
+    <section class="py-16 bg-gray-50">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <!-- Investissement -->
+                <div class="bg-white rounded-xl p-8 shadow-sm border border-gray-200">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mr-4">
+                            <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-900">{{ __('Investissement requis') }}</h2>
+                    </div>
+                    <div class="space-y-4">
+                        <p class="text-gray-700 leading-relaxed">{{ __('ui.public.franchise_info.investment_desc') }}</p>
+                        <div class="bg-orange-50 border-l-4 border-orange-400 p-4 rounded-r-lg">
+                            <div class="flex">
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium text-orange-800">{{ __('ui.public.franchise_info.fees_desc') }}</p>
+                                    <p class="text-lg font-bold text-orange-600 mt-1">{{ __('ui.public.franchise_info.fees_amount') }}</p>
+                                </div>
                             </div>
                         </div>
+                        <div class="mt-6 pt-6 border-t border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-3">{{ __('ui.sections.appro') }}</h3>
+                            <p class="text-gray-700">{{ __('ui.public.franchise_info.ratio_desc') }} ({{ __('ui.public.franchise_info.ratio_title') }})</p>
+                        </div>
                     </div>
+                </div>
 
-                    <!-- Right column: Process -->
-                    <div>
-                        <h2 class="text-3xl font-bold text-gray-900 mb-6">{{ __('ui.application_process') }}</h2>
-                        
-                        <div class="space-y-4">
-                            @php
-                            $steps = [
-                                ['number' => 1, 'title' => __('ui.step_1_title'), 'description' => __('ui.step_1_description')],
-                                ['number' => 2, 'title' => __('ui.step_2_title'), 'description' => __('ui.step_2_description')],
-                                ['number' => 3, 'title' => __('ui.step_3_title'), 'description' => __('ui.step_3_description')],
-                                ['number' => 4, 'title' => __('ui.step_4_title'), 'description' => __('ui.step_4_description')],
-                            ];
-                            @endphp
-
-                            @foreach($steps as $step)
-                            <div class="flex items-start gap-4 p-4 bg-white border border-gray-200 rounded-lg">
-                                <div class="flex-shrink-0 w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center font-semibold">
-                                    {{ $step['number'] }}
-                                </div>
-                                <div>
-                                    <h3 class="font-semibold text-gray-900 mb-1">{{ $step['title'] }}</h3>
-                                    <p class="text-gray-600 text-sm">{{ $step['description'] }}</p>
-                                </div>
+                <!-- Conditions d'éligibilité -->
+                <div class="bg-white rounded-xl p-8 shadow-sm border border-gray-200">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-900">{{ __('ui.eligibility_conditions') }}</h2>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center mt-0.5">
+                                <span class="text-orange-600 text-sm font-bold">1</span>
                             </div>
-                            @endforeach
+                            <p class="text-gray-700">{{ __('ui.eligibility_1') }}</p>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center mt-0.5">
+                                <span class="text-orange-600 text-sm font-bold">2</span>
+                            </div>
+                            <p class="text-gray-700">{{ __('ui.eligibility_2') }}</p>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center mt-0.5">
+                                <span class="text-orange-600 text-sm font-bold">3</span>
+                            </div>
+                            <p class="text-gray-700">{{ __('ui.eligibility_3') }}</p>
                         </div>
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- FAQ Section -->
-        <section class="py-20 bg-gray-50">
-            <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-                <h2 class="text-3xl font-bold text-gray-900 text-center mb-12">{{ __('ui.frequently_asked_questions') }}</h2>
+    <!-- Processus de candidature -->
+    <section class="py-16 bg-white">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">{{ __('ui.application_process') }}</h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">{{ __('Votre parcours en 4 étapes simples') }}</p>
+            </div>
+            
+            <div class="relative">
+                <!-- Timeline line -->
+                <div class="absolute top-8 left-8 right-8 h-0.5 bg-gray-200 hidden lg:block"></div>
                 
-                <div class="space-y-6" x-data="{ openFaq: null }">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                     @php
-                    $faqs = [
-                        ['q' => __('ui.faq_1_question'), 'a' => __('ui.faq_1_answer')],
-                        ['q' => __('ui.faq_2_question'), 'a' => __('ui.faq_2_answer')],
-                        ['q' => __('ui.faq_3_question'), 'a' => __('ui.faq_3_answer')],
-                        ['q' => __('ui.faq_4_question'), 'a' => __('ui.faq_4_answer')],
-                    ];
+                        $steps = [
+                            ['n' => 1, 't' => __('ui.public.application.step_identity'), 'desc' => 'Complétez vos informations personnelles'],
+                            ['n' => 2, 't' => __('ui.public.application.step_zone'), 'desc' => 'Choisissez votre territoire d\'activité'],
+                            ['n' => 3, 't' => __('ui.public.application.step_acknowledgments'), 'desc' => 'Validez votre engagement'],
+                            ['n' => 4, 't' => __('ui.public.application.step_documents'), 'desc' => 'Joignez vos documents'],
+                        ];
                     @endphp
-
-                    @foreach($faqs as $index => $faq)
-                    <div class="bg-white border border-gray-200 rounded-lg">
-                        <button 
-                            @click="openFaq = openFaq === {{ $index }} ? null : {{ $index }}"
-                            class="w-full text-left p-6 flex items-center justify-between font-semibold text-gray-900 hover:bg-gray-50"
-                        >
-                            <span>{{ $faq['q'] }}</span>
-                            <svg 
-                                class="w-5 h-5 transform transition-transform"
-                                :class="{ 'rotate-180': openFaq === {{ $index }} }"
-                                fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                            >
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </button>
-                        <div x-show="openFaq === {{ $index }}" x-transition class="px-6 pb-6">
-                            <p class="text-gray-600">{{ $faq['a'] }}</p>
+                    @foreach($steps as $s)
+                        <div class="relative text-center">
+                            <div class="w-16 h-16 bg-orange-500 text-white rounded-full flex items-center justify-center font-bold text-xl mx-auto mb-4 relative z-10">
+                                {{ $s['n'] }}
+                            </div>
+                            <h3 class="font-semibold text-gray-900 mb-2">{{ $s['t'] }}</h3>
+                            <p class="text-sm text-gray-600">{{ $s['desc'] }}</p>
                         </div>
-                    </div>
                     @endforeach
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- CTA Final -->
-        <section class="bg-orange-500 py-16">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-                <h2 class="text-3xl font-bold text-white mb-4">
-                    {{ __('ui.ready_to_apply') }}
-                </h2>
-                <p class="text-xl text-orange-100 mb-8">
-                    {{ __('ui.application_cta_text') }}
-                </p>
-                <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <a href="#" class="bg-white hover:bg-gray-100 text-orange-500 px-8 py-4 rounded-lg text-lg font-semibold transition-colors">
-                        {{ __('ui.start_application') }}
-                    </a>
-                    <a href="mailto:contact@drivncook.fr" class="border border-white hover:bg-white hover:text-orange-500 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors">
-                        {{ __('ui.contact_us') }}
-                    </a>
-                </div>
+    <!-- Documents requis -->
+    <section class="py-16 bg-gray-50">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">{{ __('ui.required_documents') }}</h2>
+                <p class="text-lg text-gray-600">{{ __('Préparez ces documents essentiels') }}</p>
             </div>
-        </section>
-
-        <!-- Footer -->
-        <footer class="bg-gray-900 py-12">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div class="flex items-center justify-center text-center">
-                    <div class="text-gray-400">
-                        <p>&copy; {{ date('Y') }} Driv'n Cook. {{ __('ui.all_rights_reserved') }}</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-lg p-6 border border-gray-200 hover:border-orange-300 transition-colors">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-4">
+                            <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900">{{ __('ui.labels.cv') }}</h3>
                     </div>
+                    <p class="text-gray-600 text-sm">{{ __('Votre parcours professionnel détaillé') }}</p>
+                </div>
+                
+                <div class="bg-white rounded-lg p-6 border border-gray-200 hover:border-orange-300 transition-colors">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-4">
+                            <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V4a2 2 0 114 0v2m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900">{{ __('ui.labels.identity') }}</h3>
+                    </div>
+                    <p class="text-gray-600 text-sm">{{ __('Carte d\'identité ou passeport') }}</p>
+                </div>
+                
+                <div class="bg-white rounded-lg p-6 border border-gray-200 hover:border-orange-300 transition-colors">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-4">
+                            <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900">{{ __('ui.labels.motivation_letter') }}</h3>
+                    </div>
+                    <p class="text-gray-600 text-sm">{{ __('Vos motivations pour rejoindre le réseau') }}</p>
+                </div>
+                
+                <div class="bg-white rounded-lg p-6 border border-gray-200 hover:border-orange-300 transition-colors">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-4">
+                            <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H9a2 2 0 01-2-2z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900">{{ __('ui.labels.financial_statement') }}</h3>
+                    </div>
+                    <p class="text-gray-600 text-sm">{{ __('Justificatifs de capacité financière') }}</p>
                 </div>
             </div>
-        </footer>
+        </div>
+    </section>
 
-    </body>
-</html>
+    <!-- CTA -->
+    <section class="relative bg-gradient-to-r from-orange-500 to-orange-600 py-20 overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-orange-600/20 to-red-600/20"></div>
+        <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-4xl font-bold text-white mb-6">{{ __('ui.public.franchise_info.cta_title') }}</h2>
+            <p class="text-xl text-orange-100 mb-10 max-w-2xl mx-auto">{{ __('ui.public.franchise_info.cta_subtitle') }}</p>
+            <a href="{{ route('public.applications.create') }}" class="group inline-flex items-center bg-white hover:bg-gray-50 text-orange-600 px-10 py-4 rounded-xl text-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                <span>{{ __('ui.public.franchise_info.cta_button') }}</span>
+                <svg class="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+            </a>
+        </div>
+    </section>
+</x-app-layout>

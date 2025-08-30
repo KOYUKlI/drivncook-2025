@@ -3,12 +3,14 @@
 @tailwind utilities;
 
 /* Custom sidebar styles */
+/* Keep these minimal so the Blade component classes stay authoritative */
 .sidebar-link {
-    @apply block px-3 py-2 rounded-md hover:bg-gray-100 text-gray-700 transition-colors duration-150;
+    @apply block px-3 py-2 rounded-md text-gray-700 transition-colors duration-150;
 }
 
 .sidebar-link-active {
-    @apply bg-gray-100 font-semibold text-gray-900;
+    /* Active look handled by the Blade component (bg/border/colors). */
+    @apply font-medium;
 }
 
 /* Custom form styles */

@@ -22,19 +22,19 @@ class PurchaseOrderRequest extends FormRequest
     public function rules(): array
     {
         $route = $this->route()->getName();
-        
-        return match($route) {
+
+        return match ($route) {
             'bo.purchase-orders.validate-compliance' => [
                 'action' => 'required|in:approve,flag,reject',
                 'message' => 'nullable|string|max:500',
-                'override_reason' => 'required_if:action,approve|string|max:500'
+                'override_reason' => 'required_if:action,approve|string|max:500',
             ],
             'bo.purchase-orders.update-ratio' => [
-                'central_ratio' => 'required|numeric|min:0|max:100',
-                'reason' => 'required|string|max:500'
+                'central_ratio' => 'nullable|numeric|between:0,100',
+                'reason' => 'required|string|max:500',
             ],
             'bo.purchase-orders.recalculate' => [
-                'force_recalculation' => 'boolean'
+                'force_recalculation' => 'boolean',
             ],
             default => []
         };
@@ -56,7 +56,7 @@ class PurchaseOrderRequest extends FormRequest
             'reason.required' => 'Une raison est obligatoire.',
             'message.max' => 'Le message ne peut dépasser 500 caractères.',
             'reason.max' => 'La raison ne peut dépasser 500 caractères.',
-            'override_reason.max' => 'La raison de dérogation ne peut dépasser 500 caractères.'
+            'override_reason.max' => 'La raison de dérogation ne peut dépasser 500 caractères.',
         ];
     }
 }

@@ -23,6 +23,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'franchisee_id',
     ];
 
     /**
@@ -46,5 +47,13 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Get the franchisee associated with the user.
+     */
+    public function franchisee()
+    {
+        return $this->hasOne(Franchisee::class, 'email', 'email');
     }
 }

@@ -3,39 +3,174 @@
 namespace App\Http\Controllers\BO;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ScheduleTruckDeploymentRequest;
+use App\Http\Requests\StoreTruckRequest;
+use App\Http\Requests\UpdateTruckStatusRequest;
+use App\Models\Deployment;
+use App\Models\Franchisee;
+use App\Models\MaintenanceLog;
+use App\Models\Truck;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Schema;
+use Carbon\Carbon;
 
 class TruckController extends Controller
 {
+    /**
+     * Show the form to create a new truck.
+     */
+    public function create()
+    {
+        $this->authorize('create', Truck::class);
+
+        $franchisees = Franchisee::select('id', 'name')->orderBy('name')->get();
+
+        return view('bo.trucks.create', compact('franchisees'));
+    }
+
+    /**
+     * Store a newly created truck.
+     */
+    public function store(StoreTruckRequest $request)
+    {
+        $this->authorize('create', Truck::class);
+
+        $data = $request->validated();
+
+        // Map request fields to DB columns
+        $truck = new Truck();
+        $truck->name = $data['name'];
+        $truck->plate = $data['plate_number'];
+        $truck->vin = $data['vin'] ?? null;
+        $truck->make = $data['make'] ?? null;
+        $truck->model = $data['model'] ?? null;
+        $truck->year = $data['year'] ?? null;
+        $truck->acquired_at = $data['acquired_at'] ?? null;
+        $truck->service_start = $data['commissioned_at'] ?? null; // commissioned_at -> service_start
+        $truck->mileage_km = $data['mileage_km'] ?? null;
+        $truck->franchisee_id = $data['franchisee_id'] ?? null;
+        $truck->notes = $data['notes'] ?? null;
+        // Map UI status to enum
+        $statusMap = [
+            'draft' => 'Draft',
+            'active' => 'Active',
+            'in_maintenance' => 'InMaintenance',
+            'retired' => 'Retired',
+        ];
+        $truck->status = $statusMap[$data['status']] ?? 'Draft';
+
+        // ULID and code auto-generated in model boot
+        $truck->save();
+
+        // Handle private documents storage
+        // Use local disk, non-public; store hashed names in a dedicated folder
+        if ($request->hasFile('registration_doc')) {
+            $path = $request->file('registration_doc')->store('private/trucks/registration');
+            $truck->registration_doc_path = $path;
+        }
+        if ($request->hasFile('insurance_doc')) {
+            $path = $request->file('insurance_doc')->store('private/trucks/insurance');
+            $truck->insurance_doc_path = $path;
+        }
+        if ($truck->isDirty()) {
+            $truck->save();
+        }
+
+        // Optional: initialize a minimal exploitation event if active and commissioned
+        if ($truck->status === 'Active' && $truck->service_start) {
+            // For now, no-op to avoid impacting existing features. Could dispatch an event later.
+        }
+
+        return redirect()
+            ->route('bo.trucks.show', $truck->id)
+            ->with('success', __('ui.bo_trucks.flash.created'));
+    }
     /**
      * Display a listing of trucks with status filtering.
      */
     public function index(Request $request)
     {
         $status = $request->input('status', 'all');
-        
-        // Mock data - in real app, would filter from database
-        $allTrucks = [
-            ['id' => 1, 'code' => 'C001', 'status' => 'active', 'franchisee' => 'Paris Nord', 'last_maintenance' => '2024-08-15', 'next_maintenance' => '2024-11-15'],
-            ['id' => 2, 'code' => 'C002', 'status' => 'maintenance', 'franchisee' => 'Lyon Centre', 'last_maintenance' => '2024-08-20', 'next_maintenance' => '2024-08-30'],
-            ['id' => 3, 'code' => 'C003', 'status' => 'active', 'franchisee' => 'Marseille Sud', 'last_maintenance' => '2024-08-10', 'next_maintenance' => '2024-11-10'],
-            ['id' => 4, 'code' => 'C004', 'status' => 'inactive', 'franchisee' => 'Toulouse Nord', 'last_maintenance' => '2024-07-20', 'next_maintenance' => '2024-10-20'],
-            ['id' => 5, 'code' => 'C005', 'status' => 'active', 'franchisee' => 'Bordeaux Est', 'last_maintenance' => '2024-08-22', 'next_maintenance' => '2024-11-22'],
-        ];
+        // Match Blade filter name
+        $franchiseeId = $request->input('franchisee_id', 'all');
+        $search = $request->input('search');
 
-        // Filter trucks based on status
-        $trucks = $status === 'all' ? $allTrucks : 
-            array_filter($allTrucks, fn($truck) => $truck['status'] === $status);
+        $query = Truck::query()->with('franchisee');
+
+        // Filter trucks based on status - map frontend values to enum values
+        if ($status !== 'all') {
+            // Accept the same keys used in the view filters
+            $statusMap = [
+                'active' => 'Active',
+                'in_maintenance' => 'InMaintenance',
+                'retired' => 'Retired',
+                'pending' => 'Draft',
+            ];
+
+            if (isset($statusMap[$status])) {
+                $query->where('status', $statusMap[$status]);
+            }
+        }
+
+        // Filter by franchisee
+        if ($franchiseeId !== 'all') {
+            $query->where('franchisee_id', $franchiseeId);
+        }
+
+        // Search by truck code/plate
+        if ($search) {
+            $query->where('plate', 'like', "%{$search}%");
+        }
+
+        $trucks = $query->get()->map(function ($truck) {
+            // Map status enum values to frontend expected values (align with translations)
+            $statusMap = [
+                'Active' => 'active',
+                'InMaintenance' => 'in_maintenance',
+                'Retired' => 'retired',
+                'Draft' => 'pending',
+            ];
+
+            // Handle legacy/new maintenance schemas
+            if (Schema::hasColumn('maintenance_logs', 'opened_at')) {
+                $lastMaintenance = $truck->maintenanceLogs()->latest('opened_at')->first()?->opened_at?->format('Y-m-d');
+                $nextMaintenance = $truck->maintenanceLogs()
+                    ->where('opened_at', '>', now())
+                    ->orderBy('opened_at')
+                    ->first()?->opened_at?->format('Y-m-d');
+            } else {
+                $lastMaintenance = $truck->maintenanceLogs()->latest('started_at')->first()?->started_at?->format('Y-m-d');
+                $nextMaintenance = $truck->maintenanceLogs()
+                    ->where('started_at', '>', now())
+                    ->orderBy('started_at')
+                    ->first()?->started_at?->format('Y-m-d');
+            }
+
+            return [
+                'id' => $truck->id,
+                'code' => $truck->plate, // use plate as code
+                'status' => $statusMap[$truck->status] ?? 'inactive',
+                'franchisee' => $truck->franchisee->name ?? __('ui.bo.trucks.unassigned'),
+                'last_maintenance' => $lastMaintenance,
+                'next_maintenance' => $nextMaintenance,
+            ];
+        })->toArray();
+
+        // Get franchisees for filter
+        $franchisees = \App\Models\Franchisee::select('id', 'name')->get();
 
         // Calculate statistics
+        $allTrucks = Truck::all();
         $stats = [
-            'total' => count($allTrucks),
-            'active' => count(array_filter($allTrucks, fn($t) => $t['status'] === 'active')),
-            'maintenance' => count(array_filter($allTrucks, fn($t) => $t['status'] === 'maintenance')),
-            'inactive' => count(array_filter($allTrucks, fn($t) => $t['status'] === 'inactive')),
+            'total' => $allTrucks->count(),
+            'active' => $allTrucks->where('status', 'Active')->count(),
+            'maintenance' => $allTrucks->where('status', 'InMaintenance')->count(),
+            'inactive' => $allTrucks->where('status', 'Retired')->count(),
         ];
 
-        return view('bo.trucks.index', compact('trucks', 'stats', 'status'));
+        return view('bo.trucks.index', compact('trucks', 'stats', 'status', 'franchisees', 'franchiseeId', 'search'));
     }
 
     /**
@@ -43,59 +178,145 @@ class TruckController extends Controller
      */
     public function show(string $id)
     {
-        // Mock data
-        $truck = [
-            'id' => $id,
-            'code' => 'C001',
-            'status' => 'active',
-            'franchisee' => 'Paris Nord',
-            'franchisee_email' => 'franchise.parisnord@drivncook.fr',
-            'model' => 'Food Truck Pro 2023',
-            'license_plate' => 'AB-123-CD',
-            'purchase_date' => '2023-03-15',
-            'warranty_end' => '2025-03-15',
-            'deployments' => [
-                ['id' => 1, 'date' => '2024-08-27', 'location' => 'Place de la République', 'revenue' => 850, 'status' => 'completed'],
-                ['id' => 2, 'date' => '2024-08-26', 'location' => 'Gare du Nord', 'revenue' => 920, 'status' => 'completed'],
-                ['id' => 3, 'date' => '2024-08-28', 'location' => 'Châtelet-Les Halles', 'revenue' => 0, 'status' => 'scheduled'],
-            ],
-            'maintenance' => [
-                ['id' => 1, 'date' => '2024-08-15', 'type' => 'Révision générale', 'cost' => 1200, 'status' => 'completed', 'technician' => 'Garage Central'],
-                ['id' => 2, 'date' => '2024-08-25', 'type' => 'Changement pneus', 'cost' => 450, 'status' => 'scheduled', 'technician' => 'Pneus Service'],
-                ['id' => 3, 'date' => '2024-09-10', 'type' => 'Contrôle technique', 'cost' => 85, 'status' => 'pending', 'technician' => 'CT Auto'],
-            ],
+    $truck = Truck::with(['franchisee', 'deployments', 'maintenanceLogs' => function ($q) {
+            if (Schema::hasColumn('maintenance_logs', 'opened_at')) {
+                $q->orderByDesc('opened_at');
+            } else {
+                $q->orderByDesc('started_at');
+            }
+        }])->findOrFail($id);
+
+        // Transform truck data to expected format
+        $statusMap = [
+            'Active' => 'active',
+            'InMaintenance' => 'in_maintenance',
+            'Retired' => 'retired',
+            'Draft' => 'pending',
         ];
 
-        return view('bo.trucks.show', compact('truck'));
+        $truckData = [
+            'id' => $truck->id,
+            'code' => $truck->plate,
+            'status' => $statusMap[$truck->status] ?? 'inactive',
+            'franchisee' => $truck->franchisee->name ?? __('ui.bo.trucks.unassigned'),
+            'franchisee_email' => $truck->franchisee->email ?? __('ui.bo.trucks.not_provided'),
+            'has_registration' => !empty($truck->registration_doc_path),
+            'has_insurance' => !empty($truck->insurance_doc_path),
+            'model' => 'N/A', // TODO: Add model field
+            'license_plate' => $truck->plate,
+            'purchase_date' => $truck->service_start?->format('Y-m-d'),
+            'warranty_end' => 'N/A', // TODO: Add warranty field
+            'deployments' => $truck->deployments->map(function ($d) {
+                $usingNew = Schema::hasTable('truck_deployments');
+                if ($usingNew) {
+                    $status = $d->status ?? 'planned';
+                    return [
+                        'id' => $d->id,
+                        'location' => $d->location_text,
+                        'planned_start_at' => $d->planned_start_at?->format('Y-m-d H:i'),
+                        'planned_end_at' => $d->planned_end_at?->format('Y-m-d H:i'),
+                        'actual_start_at' => $d->actual_start_at?->format('Y-m-d H:i'),
+                        'actual_end_at' => $d->actual_end_at?->format('Y-m-d H:i'),
+                        'franchisee' => optional($d->franchisee)->name,
+                        'status' => $status,
+                    ];
+                }
+                // Legacy mapping
+                $status = $d->end_date ? 'closed' : 'planned';
+                return [
+                    'id' => $d->id,
+                    'location' => $d->location,
+                    'planned_start_at' => $d->start_date?->format('Y-m-d H:i'),
+                    'planned_end_at' => $d->end_date?->format('Y-m-d H:i'),
+                    'actual_start_at' => null,
+                    'actual_end_at' => null,
+                    'franchisee' => optional($d->franchisee)->name ?? null,
+                    'status' => $status,
+                ];
+            })->toArray(),
+            'maintenance' => $truck->maintenanceLogs->map(function ($log) {
+                $openedRaw = $log->opened_at ?? $log->started_at ?? null;
+                $typeRaw = $log->type ?? $log->kind ?? null;
+                $typeKey = $typeRaw ? strtolower($typeRaw) : null;
+                $status = $log->status ?? (empty($log->closed_at) ? 'open' : 'closed');
+
+                return [
+                    'id' => $log->id,
+                    'opened_at' => $openedRaw ? Carbon::parse($openedRaw)->format('Y-m-d H:i') : null,
+                    'closed_at' => $log->closed_at ? Carbon::parse($log->closed_at)->format('Y-m-d H:i') : null,
+                    'type' => $typeKey,
+                    'status' => $status,
+                    'cost' => $log->cost_cents ?? null,
+                    'has_attachment' => !empty($log->attachment_path),
+                    'description' => $log->description,
+                    'resolution' => $log->resolution ?? null,
+                ];
+            })->toArray(),
+        ];
+
+        // Calculate status counts for trucks (secure with ?? 0)
+        $statusCounts = [
+            'active' => Truck::where('status', 'Active')->count() ?? 0,
+            'in_maintenance' => Truck::where('status', 'InMaintenance')->count() ?? 0,
+            'retired' => Truck::where('status', 'Retired')->count() ?? 0,
+            'pending' => Truck::where('status', 'Draft')->count() ?? 0,
+        ];
+
+        // Utilization last 30 days
+        $since = now()->subDays(30);
+        $seconds = 0;
+        foreach ($truck->deployments as $d) {
+            $usingNew = Schema::hasTable('truck_deployments');
+            // Ignore cancelled deployments for utilization
+            if ($usingNew && isset($d->status) && $d->status === 'cancelled') {
+                continue;
+            }
+            $start = $usingNew ? ($d->actual_start_at ?? $d->planned_start_at) : $d->start_date;
+            $end = $usingNew ? ($d->actual_end_at ?? $d->planned_end_at) : $d->end_date;
+            if ($start) {
+                $startC = \Carbon\Carbon::parse($start);
+                $endC = $end ? \Carbon\Carbon::parse($end) : now();
+                if ($endC->lessThan($since)) { continue; }
+                if ($startC->lessThan($since)) { $startC = $since; }
+                if ($endC->greaterThan($startC)) {
+                    $seconds += $endC->diffInSeconds($startC);
+                }
+            }
+        }
+        // Convert to percentage and clamp between 0 and 100 to avoid negative/overflow values
+        $utilization = ($seconds / (30 * 24 * 3600)) * 100;
+        $utilization = max(0, min(100, round($utilization, 1)));
+
+        return view('bo.trucks.show', [
+            'truck' => $truckData,
+            'statusCounts' => $statusCounts,
+            'truckModel' => $truck,
+            'utilization30' => $utilization,
+        ]);
     }
 
     /**
      * Schedule a new deployment for the truck.
      */
-    public function scheduleDeployment(Request $request, string $id)
+    public function scheduleDeployment(ScheduleTruckDeploymentRequest $request, string $id)
     {
-        $request->validate([
-            'date' => 'required|date|after:today',
-            'location' => 'required|string|max:255',
-            'duration' => 'required|integer|min:1|max:12',
-            'notes' => 'nullable|string|max:500'
-        ]);
+        $validated = $request->validated();
 
         // Check truck availability before scheduling
-        $isAvailable = $this->checkTruckAvailability($id, $request->input('date'));
-        
-        if (!$isAvailable) {
+        $isAvailable = $this->checkTruckAvailability($id, $validated['deployment_date']);
+
+        if (! $isAvailable) {
             return redirect()
                 ->back()
-                ->withErrors(['date' => 'Le camion n\'est pas disponible à cette date.']);
+                ->withErrors(['deployment_date' => 'Le camion n\'est pas disponible à cette date.']);
         }
 
         // Create deployment record with status tracking
-        $deployment = $this->createDeployment($id, $request->all());
-        
+        $deployment = $this->createDeployment($id, $validated);
+
         return redirect()
             ->route('bo.trucks.show', $id)
-            ->with('success', "Déploiement #{$deployment['id']} programmé avec succès pour le " . $request->input('date'));
+            ->with('success', "Déploiement #{$deployment['id']} programmé avec succès pour le ".$validated['deployment_date']);
     }
 
     /**
@@ -106,14 +327,14 @@ class TruckController extends Controller
         $request->validate([
             'start_time' => 'nullable|date_format:H:i',
             'location_confirmed' => 'required|boolean',
-            'notes' => 'nullable|string|max:500'
+            'notes' => 'nullable|string|max:500',
         ]);
 
         // Update deployment status to 'active'
         $this->updateDeploymentStatus($deploymentId, 'active', [
             'start_time' => $request->input('start_time', now()->format('H:i')),
             'location_confirmed' => $request->boolean('location_confirmed'),
-            'opening_notes' => $request->input('notes')
+            'opening_notes' => $request->input('notes'),
         ]);
 
         return redirect()
@@ -130,7 +351,7 @@ class TruckController extends Controller
             'end_time' => 'nullable|date_format:H:i',
             'actual_revenue' => 'required|numeric|min:0',
             'issues_encountered' => 'nullable|string|max:1000',
-            'customer_feedback' => 'nullable|string|max:500'
+            'customer_feedback' => 'nullable|string|max:500',
         ]);
 
         // Update deployment status to 'completed'
@@ -138,12 +359,12 @@ class TruckController extends Controller
             'end_time' => $request->input('end_time', now()->format('H:i')),
             'actual_revenue' => $request->input('actual_revenue'),
             'issues_encountered' => $request->input('issues_encountered'),
-            'customer_feedback' => $request->input('customer_feedback')
+            'customer_feedback' => $request->input('customer_feedback'),
         ]);
 
         return redirect()
             ->route('bo.trucks.show', $id)
-            ->with('success', "Déploiement #{$deploymentId} clôturé. Recettes: " . number_format($deployment['actual_revenue'] / 100, 2) . "€");
+            ->with('success', "Déploiement #{$deploymentId} clôturé. Recettes: ".number_format($deployment['actual_revenue'] / 100, 2).'€');
     }
 
     /**
@@ -156,15 +377,15 @@ class TruckController extends Controller
             'type' => 'required|string|max:255',
             'technician' => 'required|string|max:255',
             'estimated_cost' => 'nullable|numeric|min:0',
-            'description' => 'nullable|string|max:500'
+            'description' => 'nullable|string|max:500',
         ]);
 
         // Create maintenance record and potentially update truck status
         $maintenance = $this->createMaintenanceRecord($id, $request->all());
-        
+
         return redirect()
             ->route('bo.trucks.show', $id)
-            ->with('success', "Maintenance #{$maintenance['id']} programmée avec succès pour le " . $request->input('date'));
+            ->with('success', "Maintenance #{$maintenance['id']} programmée avec succès pour le ".$request->input('date'));
     }
 
     /**
@@ -175,18 +396,18 @@ class TruckController extends Controller
         $request->validate([
             'actual_start_time' => 'nullable|date_format:H:i',
             'technician_confirmed' => 'required|boolean',
-            'initial_diagnosis' => 'nullable|string|max:1000'
+            'initial_diagnosis' => 'nullable|string|max:1000',
         ]);
 
         // Update maintenance status to 'in_progress' and truck to 'maintenance'
         $this->updateMaintenanceStatus($maintenanceId, 'in_progress', [
             'actual_start_time' => $request->input('actual_start_time', now()->format('H:i')),
             'technician_confirmed' => $request->boolean('technician_confirmed'),
-            'initial_diagnosis' => $request->input('initial_diagnosis')
+            'initial_diagnosis' => $request->input('initial_diagnosis'),
         ]);
 
         // Update truck status to maintenance
-        $this->updateTruckStatus($id, 'maintenance', 'Maintenance en cours');
+        $this->updateTruckStatus($id, 'InMaintenance', 'Maintenance en cours');
 
         return redirect()
             ->route('bo.trucks.show', $id)
@@ -204,7 +425,7 @@ class TruckController extends Controller
             'work_performed' => 'required|string|max:1000',
             'parts_replaced' => 'nullable|string|max:500',
             'next_maintenance_date' => 'nullable|date|after:today',
-            'truck_operational' => 'required|boolean'
+            'truck_operational' => 'required|boolean',
         ]);
 
         // Update maintenance status to 'completed'
@@ -213,39 +434,37 @@ class TruckController extends Controller
             'actual_cost' => $request->input('actual_cost'),
             'work_performed' => $request->input('work_performed'),
             'parts_replaced' => $request->input('parts_replaced'),
-            'next_maintenance_date' => $request->input('next_maintenance_date')
+            'next_maintenance_date' => $request->input('next_maintenance_date'),
         ]);
 
         // Update truck status based on operational state
-        $newTruckStatus = $request->boolean('truck_operational') ? 'active' : 'inactive';
+        $newTruckStatus = $request->boolean('truck_operational') ? 'Active' : 'Retired';
         $this->updateTruckStatus($id, $newTruckStatus, 'Maintenance terminée');
 
-        $statusMessage = $newTruckStatus === 'active' ? 'Le camion est de nouveau opérationnel' : 'Le camion nécessite des réparations supplémentaires';
+        $statusMessage = $newTruckStatus === 'Active' ? 'Le camion est de nouveau opérationnel' : 'Le camion nécessite des réparations supplémentaires';
 
         return redirect()
             ->route('bo.trucks.show', $id)
-            ->with('success', "Maintenance #{$maintenanceId} terminée. Coût: " . number_format($maintenance['actual_cost'] / 100, 2) . "€. {$statusMessage}.");
+            ->with('success', "Maintenance #{$maintenanceId} terminée. Coût: ".number_format($maintenance['actual_cost'] / 100, 2)."€. {$statusMessage}.");
     }
 
     /**
      * Update truck status (active, maintenance, inactive).
      */
-    public function updateStatus(Request $request, string $id)
+    public function updateStatus(UpdateTruckStatusRequest $request, string $id)
     {
-        $request->validate([
-            'status' => 'required|in:active,maintenance,inactive',
-            'reason' => 'nullable|string|max:500'
-        ]);
+        $validated = $request->validated();
+        $newStatus = $validated['status'];
+        $reason = $validated['reason'] ?? null;
 
-        $newStatus = $request->input('status');
-        $reason = $request->input('reason');
-
-        // In real app: Update database, create status log, notify franchisee if needed
+        $truck = Truck::findOrFail($id);
+        $truck->update(['status' => $newStatus]);
 
         $statusLabels = [
             'active' => 'actif',
-            'maintenance' => 'en maintenance', 
-            'inactive' => 'inactif'
+            'in_maintenance' => 'en maintenance',
+            'retired' => 'retiré',
+            'pending' => 'brouillon',
         ];
 
         return redirect()
@@ -258,30 +477,73 @@ class TruckController extends Controller
      */
     public function utilizationReport(Request $request)
     {
-        $period = $request->input('period', 'current_month');
-        
-        // Mock utilization data
-        $utilizationData = [
-            'period' => $period,
-            'total_trucks' => 5,
-            'average_utilization' => 78.5,
-            'total_deployments' => 156,
-            'total_revenue' => 142350, // centimes
-            'by_truck' => [
-                ['code' => 'C001', 'deployments' => 22, 'utilization' => 85.2, 'revenue' => 18750],
-                ['code' => 'C002', 'deployments' => 18, 'utilization' => 72.1, 'revenue' => 15200],
-                ['code' => 'C003', 'deployments' => 25, 'utilization' => 89.3, 'revenue' => 21400],
-                ['code' => 'C004', 'deployments' => 15, 'utilization' => 65.8, 'revenue' => 12850],
-                ['code' => 'C005', 'deployments' => 20, 'utilization' => 78.9, 'revenue' => 17100],
-            ],
-            'maintenance_impact' => [
-                'days_in_maintenance' => 12,
-                'revenue_lost' => 8500,
-                'avg_maintenance_duration' => 2.4
-            ]
-        ];
+        $period = $request->input('period', 'custom');
+        $from = $request->filled('from') ? Carbon::parse($request->input('from'))->startOfDay() : now()->subDays(30)->startOfDay();
+        $to = $request->filled('to') ? Carbon::parse($request->input('to'))->endOfDay() : now();
 
-        return view('bo.trucks.utilization_report', compact('utilizationData'));
+        // Get all trucks with their deployments
+        $trucks = Truck::with(['deployments'])->get();
+
+        // Build printable rows expected by the Blade view
+        $rows = $trucks->map(function (Truck $truck) use ($from, $to) {
+            $seconds = 0;
+            $activeDays = collect();
+
+            foreach ($truck->deployments as $d) {
+                $usingNew = Schema::hasTable('truck_deployments');
+                $start = $usingNew ? ($d->actual_start_at ?? $d->planned_start_at) : $d->start_date;
+                $end = $usingNew ? ($d->actual_end_at ?? $d->planned_end_at) : $d->end_date;
+                if (!$start) { continue; }
+
+                $startC = Carbon::parse($start);
+                $endC = $end ? Carbon::parse($end) : $to;
+                if ($endC->lt($from)) { continue; }
+                if ($startC->lt($from)) { $startC = $from; }
+                if ($endC->gt($to)) { $endC = $to; }
+                if ($endC->gt($startC)) {
+                    $seconds += $endC->diffInSeconds($startC);
+                    // Mark each active day spanned by this deployment
+                    $cursor = $startC->copy()->startOfDay();
+                    while ($cursor->lte($endC)) {
+                        $activeDays->push($cursor->toDateString());
+                        $cursor->addDay();
+                    }
+                }
+            }
+
+            $hours = round($seconds / 3600, 1);
+            $days = $activeDays->unique()->count();
+
+            return [
+                'truck' => $truck->plate,
+                'km' => 0, // TODO: integrate odometer/sales data
+                'hours' => $hours,
+                'active_days' => $days,
+                'revenue' => 0, // TODO: integrate revenue once available
+            ];
+        })->toArray();
+
+        $fromStr = $from->format('Y-m-d');
+        $toStr = $to->format('Y-m-d');
+
+        return view('bo.trucks.utilization_report', [
+            'rows' => $rows,
+            'from' => $fromStr,
+            'to' => $toStr,
+        ]);
+    }
+
+    /**
+     * Calculate truck utilization percentage.
+     */
+    private function calculateUtilization(Truck $truck): float
+    {
+        $totalDays = 30; // Last 30 days
+        $deploymentDays = $truck->deployments()
+            ->where('start_date', '>=', now()->subDays($totalDays))
+            ->count();
+
+        return $totalDays > 0 ? ($deploymentDays / $totalDays) * 100 : 0;
     }
 
     /**
@@ -289,9 +551,25 @@ class TruckController extends Controller
      */
     private function checkTruckAvailability(string $id, string $date): bool
     {
-        // Mock availability check - in real app, would query database
-        // Check for conflicting deployments or maintenance
-        return true; // Simplified for demo
+        // Check for conflicting deployments
+        $conflictingDeployments = Deployment::where('truck_id', $id)
+            ->whereDate('start_date', '<=', $date)
+            ->where(function ($query) use ($date) {
+                $query->whereNull('end_date')
+                    ->orWhereDate('end_date', '>=', $date);
+            })
+            ->exists();
+
+        // Check for maintenance on that date
+        $maintenanceConflict = MaintenanceLog::where('truck_id', $id)
+            ->whereDate(Schema::hasColumn('maintenance_logs', 'opened_at') ? 'opened_at' : 'started_at', '<=', $date)
+            ->where(function ($query) use ($date) {
+                $query->whereNull('closed_at')
+                    ->orWhereDate('closed_at', '>=', $date);
+            })
+            ->exists();
+
+        return ! $conflictingDeployments && ! $maintenanceConflict;
     }
 
     /**
@@ -299,15 +577,21 @@ class TruckController extends Controller
      */
     private function createDeployment(string $truckId, array $data): array
     {
-        // Mock deployment creation - in real app, would save to database
-        return [
-            'id' => rand(1000, 9999),
+        $deployment = Deployment::create([
+            'id' => Str::ulid()->toBase32(),
             'truck_id' => $truckId,
-            'date' => $data['date'],
-            'location' => $data['location'],
-            'duration' => $data['duration'],
+            'location' => $data['territory'],
+            'start_date' => $data['deployment_date'],
+        ]);
+
+        return [
+            'id' => $deployment->id,
+            'truck_id' => $deployment->truck_id,
+            'deployment_date' => $deployment->start_date->format('Y-m-d'),
+            'territory' => $deployment->location,
+            'franchisee_id' => $data['franchisee_id'] ?? null,
             'notes' => $data['notes'] ?? null,
-            'status' => 'scheduled'
+            'status' => 'scheduled',
         ];
     }
 
@@ -316,11 +600,16 @@ class TruckController extends Controller
      */
     private function updateDeploymentStatus(string $deploymentId, string $status, array $data = []): array
     {
-        // Mock status update - in real app, would update database
+        $deployment = Deployment::findOrFail($deploymentId);
+
+        if ($status === 'completed') {
+            $deployment->update(['end_date' => now()]);
+        }
+
         return array_merge([
-            'id' => $deploymentId,
+            'id' => $deployment->id,
             'status' => $status,
-            'updated_at' => now()
+            'updated_at' => now(),
         ], $data);
     }
 
@@ -329,16 +618,33 @@ class TruckController extends Controller
      */
     private function createMaintenanceRecord(string $truckId, array $data): array
     {
-        // Mock maintenance creation - in real app, would save to database
-        return [
-            'id' => rand(1000, 9999),
+        $payload = [
+            'id' => Str::ulid()->toBase32(),
             'truck_id' => $truckId,
-            'date' => $data['date'],
-            'type' => $data['type'],
+            'description' => $data['description'] ?? null,
+        ];
+        if (Schema::hasColumn('maintenance_logs', 'type')) {
+            $payload['type'] = $data['type'];
+        } else {
+            $payload['kind'] = ucfirst($data['type']);
+        }
+        if (Schema::hasColumn('maintenance_logs', 'opened_at')) {
+            $payload['opened_at'] = $data['date'];
+        } else {
+            $payload['started_at'] = $data['date'];
+        }
+
+        $maintenance = MaintenanceLog::create($payload);
+
+        return [
+            'id' => $maintenance->id,
+            'truck_id' => $maintenance->truck_id,
+            'date' => ($maintenance->opened_at ?? $maintenance->started_at)?->format('Y-m-d'),
+            'type' => ($maintenance->type ?? strtolower($maintenance->kind ?? '')),
             'technician' => $data['technician'],
             'estimated_cost' => $data['estimated_cost'] ?? 0,
-            'description' => $data['description'] ?? null,
-            'status' => 'scheduled'
+            'description' => $maintenance->description,
+            'status' => 'scheduled',
         ];
     }
 
@@ -347,20 +653,45 @@ class TruckController extends Controller
      */
     private function updateMaintenanceStatus(string $maintenanceId, string $status, array $data = []): array
     {
-        // Mock status update - in real app, would update database
+        $maintenance = MaintenanceLog::findOrFail($maintenanceId);
+
+        if ($status === 'completed') {
+            $maintenance->update(['closed_at' => now()]);
+        }
+
         return array_merge([
-            'id' => $maintenanceId,
+            'id' => $maintenance->id,
             'status' => $status,
-            'updated_at' => now()
+            'updated_at' => now(),
         ], $data);
     }
 
     /**
      * Update truck status with reason.
      */
-    private function updateTruckStatus(string $truckId, string $status, string $reason = null): void
+    private function updateTruckStatus(string $truckId, string $status, ?string $reason = null): void
     {
-        // Mock truck status update - in real app, would update database
-        // Also log status change for audit trail
+        $truck = Truck::findOrFail($truckId);
+        $truck->update(['status' => $status]);
+
+        // TODO: Log status change for audit trail
+    }
+
+    /**
+     * Download a private truck document (registration or insurance) for BO users.
+     */
+    public function downloadDocument(Request $request, string $truck, string $type)
+    {
+    $model = Truck::findOrFail($truck);
+    $this->authorize('view', $model);
+
+        $column = $type === 'registration' ? 'registration_doc_path' : 'insurance_doc_path';
+        $path = $model->{$column};
+
+        if (! $path || ! Storage::disk('local')->exists($path)) {
+            return back()->with('error', __('ui.flash.file_not_found'));
+        }
+
+    return response()->download(Storage::disk('local')->path($path));
     }
 }

@@ -1,23 +1,27 @@
 <?php
 
-require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__.'/vendor/autoload.php';
 
-$app = require_once __DIR__ . '/bootstrap/app.php';
+$app = require_once __DIR__.'/bootstrap/app.php';
 $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
 
 echo "Recherche EXHAUSTIVE des clés ui. manquantes\n";
 echo "=============================================\n\n";
 
 // Fonction pour extraire toutes les clés ui. d'un fichier
-function extractUiKeys($filePath) {
+function extractUiKeys($filePath)
+{
     $content = file_get_contents($filePath);
     preg_match_all('/__\([\'"]ui\.([a-zA-Z_]+)[\'"]\)/', $content, $matches);
+
     return array_unique($matches[1]);
 }
 
 // Fonction pour vérifier si une clé existe dans le fichier de traduction
-function keyExists($key) {
+function keyExists($key)
+{
     $frContent = file_get_contents('lang/fr/ui.php');
+
     return strpos($frContent, "'$key'") !== false;
 }
 
@@ -34,16 +38,16 @@ echo "---------------------------------\n";
 foreach ($viewFiles as $file) {
     $shortFile = str_replace('resources/views/', '', $file);
     $keys = extractUiKeys($file);
-    
+
     $missingKeys = [];
     foreach ($keys as $key) {
-        if (!keyExists($key)) {
+        if (! keyExists($key)) {
             $missingKeys[] = $key;
             $allMissingKeys[] = $key;
         }
     }
-    
-    if (!empty($missingKeys)) {
+
+    if (! empty($missingKeys)) {
         echo "❌ $shortFile:\n";
         foreach ($missingKeys as $key) {
             echo "   - ui.$key\n";
@@ -57,20 +61,20 @@ $command = 'find resources/views/components -name "*.blade.php" 2>/dev/null';
 $componentFiles = shell_exec($command);
 if ($componentFiles) {
     $componentFiles = array_filter(explode("\n", trim($componentFiles)));
-    
+
     foreach ($componentFiles as $file) {
         $shortFile = str_replace('resources/views/', '', $file);
         $keys = extractUiKeys($file);
-        
+
         $missingKeys = [];
         foreach ($keys as $key) {
-            if (!keyExists($key)) {
+            if (! keyExists($key)) {
                 $missingKeys[] = $key;
                 $allMissingKeys[] = $key;
             }
         }
-        
-        if (!empty($missingKeys)) {
+
+        if (! empty($missingKeys)) {
             echo "❌ $shortFile (component):\n";
             foreach ($missingKeys as $key) {
                 echo "   - ui.$key\n";
@@ -90,5 +94,5 @@ if (empty($uniqueMissingKeys)) {
     foreach ($uniqueMissingKeys as $key) {
         echo "- ui.$key\n";
     }
-    echo "\nTotal: " . count($uniqueMissingKeys) . " clés manquantes\n";
+    echo "\nTotal: ".count($uniqueMissingKeys)." clés manquantes\n";
 }

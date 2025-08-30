@@ -7,12 +7,24 @@
 @section('content')
     <x-ui.breadcrumbs :items="[
         ['title' => __('ui.dashboard'), 'url' => route('bo.dashboard')],
-        ['title' => __('ui.purchase_orders')]
+        ['title' => __('ui.bo.purchase_orders.title')]
     ]" />
 
     <div class="mb-8">
-        <h1 class="text-2xl font-bold text-gray-900">{{ __('ui.purchase_orders') }}</h1>
-        <p class="text-gray-600">{{ __('ui.manage_purchase_orders') }}</p>
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">{{ __('ui.bo.purchase_orders.title') }}</h1>
+                <p class="text-gray-600">{{ __('ui.bo.purchase_orders.subtitle') }}</p>
+            </div>
+            <div class="flex gap-3">
+                <a href="{{ route('bo.purchase-orders.create') }}" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                    {{ __('ui.bo.purchase_orders.create') }}
+                </a>
+                <a href="{{ route('bo.purchase-orders.compliance-report') }}" class="border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-md text-sm font-medium">
+                    {{ __('ui.bo.purchase_orders.compliance_report.title') }}
+                </a>
+            </div>
+        </div>
     </div>
 
     <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
@@ -21,25 +33,25 @@
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            {{ __('ui.reference') }}
+                            {{ __('ui.labels.reference') }}
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            {{ __('ui.franchisee') }}
+                            {{ __('ui.labels.franchisee') }}
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            {{ __('ui.total') }}
+                            {{ __('ui.labels.total') }}
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            {{ __('ui.ratio_80_20') }}
+                            {{ __('ui.labels.ratio_8020') }}
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            {{ __('ui.status') }}
+                            {{ __('ui.labels.status') }}
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            {{ __('ui.date') }}
+                            {{ __('ui.labels.date') }}
                         </th>
                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            {{ __('ui.actions') }}
+                            {{ __('ui.labels.actions') }}
                         </th>
                     </tr>
                 </thead>
@@ -72,7 +84,7 @@
                             ];
                             @endphp
                             <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $statusColors[$order['status']] }}">
-                                {{ __('ui.' . $order['status']) }}
+                                {{ __('ui.status.' . $order['status']) }}
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

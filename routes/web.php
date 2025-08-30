@@ -1,14 +1,17 @@
 <?php
 
-use App\Http\Controllers\BO\ApplicationController;
 use App\Http\Controllers\BO\DashboardController as BODashboardController;
 use App\Http\Controllers\BO\FranchiseeController;
 use App\Http\Controllers\BO\PurchaseOrderController;
+use App\Http\Controllers\BO\ReportController as BOReportController;
+use App\Http\Controllers\BO\StockItemController;
 use App\Http\Controllers\BO\TruckController;
+use App\Http\Controllers\BO\WarehouseController;
 use App\Http\Controllers\FO\DashboardController as FODashboardController;
 use App\Http\Controllers\FO\ReportController;
 use App\Http\Controllers\FO\SaleController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Public\FranchiseApplicationController;
 use App\Http\Controllers\Public\FranchisePageController;
 use App\Http\Controllers\Public\HomeController;
 use App\Services\PdfService;
@@ -36,9 +39,19 @@ Route::get('/reports/demo', function (PdfService $pdf) {
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/devenir-franchise', [FranchisePageController::class, 'show'])->name('public.franchise');
 
+// Public application routes (unified /applications)
+Route::get('/applications/create', [FranchiseApplicationController::class, 'create'])->name('public.applications.create');
+Route::post('/applications/draft', [FranchiseApplicationController::class, 'draft'])->name('public.applications.draft');
+Route::post('/applications', [FranchiseApplicationController::class, 'store'])->name('public.applications.store');
+Route::get('/applications/{id}', [FranchiseApplicationController::class, 'show'])->name('public.applications.show');
+// Legacy aliases redirect permanently
+Route::redirect('/application/create', '/applications/create', 301);
+Route::get('/application/{id}', fn ($id) => redirect()->route('public.applications.show', $id));
+
 // Dashboard redirect route
 Route::get('/dashboard', function () {
-    $user = auth()->user();
+    /** @var \App\Models\User $user */
+    $user = \Illuminate\Support\Facades\Auth::user();
 
     if ($user->hasRole(['admin', 'warehouse', 'fleet', 'tech'])) {
         return redirect()->route('bo.dashboard');
@@ -60,32 +73,59 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Franchisees management (admin only)
         Route::middleware('role:admin')->group(function () {
             Route::resource('franchisees', FranchiseeController::class);
-            Route::resource('applications', ApplicationController::class)->only(['index', 'show']);
-            Route::post('applications/{id}/prequalify', [ApplicationController::class, 'prequalify'])->name('applications.prequalify');
-            Route::post('applications/{id}/interview', [ApplicationController::class, 'interview'])->name('applications.interview');
-            Route::post('applications/{id}/approve', [ApplicationController::class, 'approve'])->name('applications.approve');
-            Route::post('applications/{id}/reject', [ApplicationController::class, 'reject'])->name('applications.reject');
+            Route::get('applications', [App\Http\Controllers\Admin\ApplicationController::class, 'index'])->name('applications.index');
+            Route::get('applications/{application}', [App\Http\Controllers\Admin\ApplicationController::class, 'show'])->name('applications.show');
+            Route::post('applications/{application}/status', [App\Http\Controllers\Admin\ApplicationController::class, 'updateStatus'])->name('applications.update-status');
+            Route::get('applications/files/{document}/download', [App\Http\Controllers\Admin\ApplicationController::class, 'downloadDocument'])->name('applications.download-document');
+            Route::post('applications/{application}/prequalify', [App\Http\Controllers\Admin\ApplicationController::class, 'prequalify'])->name('applications.prequalify');
+            Route::post('applications/{application}/interview', [App\Http\Controllers\Admin\ApplicationController::class, 'interview'])->name('applications.interview');
+            Route::post('applications/{application}/approve', [App\Http\Controllers\Admin\ApplicationController::class, 'approve'])->name('applications.approve');
+            Route::post('applications/{application}/reject', [App\Http\Controllers\Admin\ApplicationController::class, 'reject'])->name('applications.reject');
         });
 
-        // Trucks management (admin, fleet)
-        Route::middleware('role:admin|fleet')->group(function () {
+    // Trucks management (admin, fleet)
+    Route::middleware('role:admin|fleet')->group(function () {
+            Route::get('trucks/create', [TruckController::class, 'create'])->name('trucks.create');
+            Route::post('trucks', [TruckController::class, 'store'])->name('trucks.store');
             Route::resource('trucks', TruckController::class)->only(['index', 'show']);
-            Route::post('trucks/{id}/schedule-deployment', [TruckController::class, 'scheduleDeployment'])->name('trucks.schedule-deployment');
-            Route::post('trucks/{id}/deployments/{deploymentId}/open', [TruckController::class, 'openDeployment'])->name('trucks.open-deployment');
-            Route::post('trucks/{id}/deployments/{deploymentId}/close', [TruckController::class, 'closeDeployment'])->name('trucks.close-deployment');
-            Route::post('trucks/{id}/schedule-maintenance', [TruckController::class, 'scheduleMaintenance'])->name('trucks.schedule-maintenance');
-            Route::post('trucks/{id}/maintenance/{maintenanceId}/open', [TruckController::class, 'openMaintenance'])->name('trucks.open-maintenance');
-            Route::post('trucks/{id}/maintenance/{maintenanceId}/close', [TruckController::class, 'closeMaintenance'])->name('trucks.close-maintenance');
-            Route::patch('trucks/{id}/status', [TruckController::class, 'updateStatus'])->name('trucks.update-status');
+            // Mission C actions
+            Route::post('trucks/{truck}/deploy', [TruckController::class, 'openDeployment'])->name('trucks.deploy');
+            Route::post('trucks/{truck}/maintenance/open', [TruckController::class, 'openMaintenance'])->name('trucks.maintenance.open');
+            Route::post('maintenance/{log}/close', [TruckController::class, 'closeMaintenance'])->name('maintenance.close');
+            Route::post('trucks/{truck}/schedule-deployment', [TruckController::class, 'scheduleDeployment'])->name('trucks.schedule-deployment');
+            Route::post('trucks/{truck}/deployments/{deploymentId}/open', [TruckController::class, 'openDeployment'])->name('trucks.open-deployment');
+            Route::post('trucks/{truck}/deployments/{deploymentId}/close', [TruckController::class, 'closeDeployment'])->name('trucks.close-deployment');
+            // Maintenance (PHASE C)
+            Route::post('trucks/{truck}/maintenance/open', [App\Http\Controllers\BO\TruckMaintenanceController::class, 'open'])->name('maintenance.open');
+            Route::post('maintenance/{log}/close', [App\Http\Controllers\BO\TruckMaintenanceController::class, 'close'])->name('maintenance.close');
+            Route::get('maintenance/{log}/download', [App\Http\Controllers\BO\TruckMaintenanceController::class, 'download'])->name('maintenance.download');
+            // Deployments (PHASE D)
+            Route::post('trucks/{truck}/deployments/schedule', [App\Http\Controllers\BO\TruckDeploymentController::class, 'schedule'])->name('deployments.schedule');
+            Route::post('deployments/{deployment}/open', [App\Http\Controllers\BO\TruckDeploymentController::class, 'open'])->name('deployments.open');
+            Route::post('deployments/{deployment}/close', [App\Http\Controllers\BO\TruckDeploymentController::class, 'close'])->name('deployments.close');
+            Route::post('deployments/{deployment}/cancel', [App\Http\Controllers\BO\TruckDeploymentController::class, 'cancel'])->name('deployments.cancel');
+            Route::patch('trucks/{truck}/status', [TruckController::class, 'updateStatus'])->name('trucks.update-status');
             Route::get('trucks/reports/utilization', [TruckController::class, 'utilizationReport'])->name('trucks.utilization-report');
+            // Secure document download (BO-only)
+            Route::get('trucks/{truck}/files/{type}', [TruckController::class, 'downloadDocument'])
+                ->whereIn('type', ['registration','insurance'])
+                ->name('trucks.files.download');
         });
 
         // Purchase orders (admin, warehouse)
         Route::middleware('role:admin|warehouse')->group(function () {
-            Route::resource('purchase-orders', PurchaseOrderController::class)->only(['index', 'show']);
+            Route::get('reports/monthly', [BOReportController::class, 'monthly'])->name('reports.monthly');
+            Route::post('reports/monthly/generate', [BOReportController::class, 'generate'])->name('reports.monthly.generate');
+            Route::get('reports/{id}/download', [BOReportController::class, 'download'])->name('reports.download');
+
+            Route::resource('warehouses', WarehouseController::class)->except(['show']);
+            Route::resource('stock-items', StockItemController::class)->except(['show']);
+
+            Route::resource('purchase-orders', PurchaseOrderController::class)->only(['index', 'show', 'store', 'create']);
             Route::post('purchase-orders/{id}/validate-compliance', [PurchaseOrderController::class, 'validateCompliance'])->name('purchase-orders.validate-compliance');
             Route::post('purchase-orders/{id}/update-ratio', [PurchaseOrderController::class, 'updateRatio'])->name('purchase-orders.update-ratio');
             Route::post('purchase-orders/{id}/recalculate', [PurchaseOrderController::class, 'recalculate'])->name('purchase-orders.recalculate');
+            Route::post('purchase-orders/{id}/status', [PurchaseOrderController::class, 'updateStatus'])->name('purchase-orders.update-status');
             Route::get('purchase-orders/reports/compliance', [PurchaseOrderController::class, 'complianceReport'])->name('purchase-orders.compliance-report');
         });
     });
@@ -95,6 +135,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/dashboard', [FODashboardController::class, 'index'])->name('dashboard');
         Route::resource('sales', SaleController::class)->only(['index', 'create', 'store']);
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+        Route::post('/reports/generate', [ReportController::class, 'generate'])->name('reports.generate');
+        Route::get('/reports/{id}/download', [ReportController::class, 'download'])->name('reports.download');
     });
 
     // Profile routes
@@ -106,14 +148,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
 require __DIR__.'/auth.php';
 
 // Routes de test temporaires - à supprimer après vérification
-Route::get('/test-admin', function() { 
-    $user = App\Models\User::where('email', 'admin@local.test')->first(); 
-    auth()->login($user); 
-    return redirect()->route('bo.dashboard'); 
+Route::get('/test-admin', function () {
+    $user = App\Models\User::where('email', 'admin@local.test')->first();
+    \Illuminate\Support\Facades\Auth::login($user);
+
+    return redirect()->route('bo.dashboard');
 })->name('test.admin');
 
-Route::get('/test-franchisee', function() { 
-    $user = App\Models\User::where('email', 'fr@local.test')->first(); 
-    auth()->login($user); 
-    return redirect()->route('fo.dashboard'); 
+Route::get('/test-franchisee', function () {
+    $user = App\Models\User::where('email', 'fr@local.test')->first();
+    \Illuminate\Support\Facades\Auth::login($user);
+
+    return redirect()->route('fo.dashboard');
 })->name('test.franchisee');
+
+// Mail preview routes (local only)
+if (app()->environment('local')) {
+    Route::prefix('dev/mail')->name('dev.mail.')->middleware('auth')->group(function () {
+        Route::get('preview', [App\Http\Controllers\Dev\MailPreviewController::class, 'index'])->name('index');
+        Route::get('preview/{mailable}', [App\Http\Controllers\Dev\MailPreviewController::class, 'preview'])->name('preview');
+    });
+}

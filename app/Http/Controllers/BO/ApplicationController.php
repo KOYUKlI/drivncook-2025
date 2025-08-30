@@ -4,9 +4,11 @@ namespace App\Http\Controllers\BO;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ApplicationTransitionRequest;
-use App\Mail\ApplicationStatusChanged;
-use Illuminate\Http\Request;
+use App\Mail\FranchiseApplicationStatusChanged;
+use App\Models\FranchiseApplication;
+use App\Models\FranchiseApplicationDocument;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 
 class ApplicationController extends Controller
 {
@@ -15,36 +17,12 @@ class ApplicationController extends Controller
      */
     public function index()
     {
-        // Mock data
-        $applications = [
-            [
-                'id' => 1,
-                'name' => 'Jean Dupont',
-                'email' => 'jean.dupont@email.fr',
-                'territory' => 'Nice Centre',
-                'status' => 'in_review',
-                'step' => 'documents',
-                'submitted_at' => '2024-08-20',
-            ],
-            [
-                'id' => 2,
-                'name' => 'Marie Martin',
-                'email' => 'marie.martin@email.fr',
-                'territory' => 'Toulouse Nord',
-                'status' => 'approved',
-                'step' => 'contract',
-                'submitted_at' => '2024-08-15',
-            ],
-            [
-                'id' => 3,
-                'name' => 'Pierre Durand',
-                'email' => 'pierre.durand@email.fr',
-                'territory' => 'Bordeaux Est',
-                'status' => 'rejected',
-                'step' => 'interview',
-                'submitted_at' => '2024-08-10',
-            ],
-        ];
+        $this->authorize('viewAny', FranchiseApplication::class);
+
+        $applications = FranchiseApplication::query()
+            ->with(['events', 'documents'])
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         return view('bo.applications.index', compact('applications'));
     }
@@ -54,28 +32,8 @@ class ApplicationController extends Controller
      */
     public function show(string $id)
     {
-        // Mock data
-        $application = [
-            'id' => $id,
-            'name' => 'Jean Dupont',
-            'email' => 'jean.dupont@email.fr',
-            'phone' => '+33 6 12 34 56 78',
-            'territory' => 'Nice Centre',
-            'status' => 'in_review',
-            'current_step' => 'documents',
-            'submitted_at' => '2024-08-20',
-            'workflow_steps' => [
-                ['step' => 'application', 'status' => 'completed', 'date' => '2024-08-20'],
-                ['step' => 'documents', 'status' => 'in_progress', 'date' => null],
-                ['step' => 'interview', 'status' => 'pending', 'date' => null],
-                ['step' => 'contract', 'status' => 'pending', 'date' => null],
-            ],
-            'documents' => [
-                ['name' => 'Pièce d\'identité', 'status' => 'uploaded'],
-                ['name' => 'Justificatif de revenus', 'status' => 'pending'],
-                ['name' => 'Business plan', 'status' => 'uploaded'],
-            ],
-        ];
+        $application = FranchiseApplication::with(['events', 'documents'])->findOrFail($id);
+        $this->authorize('view', $application);
 
         return view('bo.applications.show', compact('application'));
     }
@@ -85,25 +43,27 @@ class ApplicationController extends Controller
      */
     public function prequalify(ApplicationTransitionRequest $request, string $id)
     {
-        // Mock application data - in real app, would fetch from database
-        $application = [
-            'id' => $id,
-            'name' => 'Jean Dupont',
-            'email' => 'jean.dupont@email.fr',
-            'territory' => 'Nice Centre',
-            'status' => 'submitted',
-        ];
+        $application = FranchiseApplication::findOrFail($id);
+        $this->authorize('update', $application);
 
-        $fromStatus = $application['status'];
+        $fromStatus = $application->status;
         $toStatus = 'prequalified';
         $message = $request->input('message');
 
-        // Send notification email
-        Mail::to($application['email'])->send(
-            new ApplicationStatusChanged($application, $fromStatus, $toStatus, $message)
-        );
+        // Update application status
+        $application->update(['status' => $toStatus]);
 
-        // In real app: Update database status and create audit log
+        // Create event log
+        $application->events()->create([
+            'from_status' => $fromStatus,
+            'to_status' => $toStatus,
+            'message' => $message,
+        ]);
+
+        // Send notification email
+        Mail::to($application->email)->send(
+            new FranchiseApplicationStatusChanged($application, $fromStatus, $toStatus, $message)
+        );
 
         return redirect()
             ->route('bo.applications.show', $id)
@@ -115,25 +75,27 @@ class ApplicationController extends Controller
      */
     public function interview(ApplicationTransitionRequest $request, string $id)
     {
-        // Mock application data
-        $application = [
-            'id' => $id,
-            'name' => 'Jean Dupont',
-            'email' => 'jean.dupont@email.fr',
-            'territory' => 'Nice Centre',
-            'status' => 'prequalified',
-        ];
+        $application = FranchiseApplication::findOrFail($id);
+        $this->authorize('update', $application);
 
-        $fromStatus = $application['status'];
+        $fromStatus = $application->status;
         $toStatus = 'interview';
         $message = $request->input('message');
 
-        // Send notification email
-        Mail::to($application['email'])->send(
-            new ApplicationStatusChanged($application, $fromStatus, $toStatus, $message)
-        );
+        // Update application status
+        $application->update(['status' => $toStatus]);
 
-        // In real app: Update database and schedule interview
+        // Create event log
+        $application->events()->create([
+            'from_status' => $fromStatus,
+            'to_status' => $toStatus,
+            'message' => $message,
+        ]);
+
+        // Send notification email
+        Mail::to($application->email)->send(
+            new FranchiseApplicationStatusChanged($application, $fromStatus, $toStatus, $message)
+        );
 
         return redirect()
             ->route('bo.applications.show', $id)
@@ -145,25 +107,27 @@ class ApplicationController extends Controller
      */
     public function approve(ApplicationTransitionRequest $request, string $id)
     {
-        // Mock application data
-        $application = [
-            'id' => $id,
-            'name' => 'Jean Dupont',
-            'email' => 'jean.dupont@email.fr',
-            'territory' => 'Nice Centre',
-            'status' => 'interview',
-        ];
+        $application = FranchiseApplication::findOrFail($id);
+        $this->authorize('update', $application);
 
-        $fromStatus = $application['status'];
+        $fromStatus = $application->status;
         $toStatus = 'approved';
-        $message = $request->input('message');
+        $adminMessage = $request->input('message');
+
+        // Update application status
+        $application->update(['status' => $toStatus]);
+
+        // Create event log
+        $application->events()->create([
+            'from_status' => $fromStatus,
+            'to_status' => $toStatus,
+            'message' => $adminMessage,
+        ]);
 
         // Send notification email
-        Mail::to($application['email'])->send(
-            new ApplicationStatusChanged($application, $fromStatus, $toStatus, $message)
+        Mail::to($application->email)->send(
+            new FranchiseApplicationStatusChanged($application, $fromStatus, $toStatus, $adminMessage)
         );
-
-        // In real app: Update database, generate contract, create franchisee record
 
         return redirect()
             ->route('bo.applications.show', $id)
@@ -175,28 +139,47 @@ class ApplicationController extends Controller
      */
     public function reject(ApplicationTransitionRequest $request, string $id)
     {
-        // Mock application data
-        $application = [
-            'id' => $id,
-            'name' => 'Jean Dupont',
-            'email' => 'jean.dupont@email.fr',
-            'territory' => 'Nice Centre',
-            'status' => 'in_review',
-        ];
+        $application = FranchiseApplication::findOrFail($id);
+        $this->authorize('update', $application);
 
-        $fromStatus = $application['status'];
+        $fromStatus = $application->status;
         $toStatus = 'rejected';
         $reason = $request->input('reason');
 
-        // Send notification email
-        Mail::to($application['email'])->send(
-            new ApplicationStatusChanged($application, $fromStatus, $toStatus, $reason)
-        );
+        // Update application status
+        $application->update(['status' => $toStatus]);
 
-        // In real app: Update database and create audit log
+        // Create event log
+        $application->events()->create([
+            'from_status' => $fromStatus,
+            'to_status' => $toStatus,
+            'message' => $reason,
+        ]);
+
+        // Send notification email
+        Mail::to($application->email)->send(
+            new FranchiseApplicationStatusChanged($application, $fromStatus, $toStatus, $reason)
+        );
 
         return redirect()
             ->route('bo.applications.index')
             ->with('success', 'Candidature rejetée. Email de notification envoyé.');
+    }
+
+    /**
+     * Download application document (BO-only, secure).
+     */
+    public function downloadDocument(string $documentId)
+    {
+        $document = FranchiseApplicationDocument::findOrFail($documentId);
+
+        // Check policy
+        $this->authorize('view', $document->application);
+
+        if (! Storage::exists($document->path)) {
+            abort(404, 'Document not found');
+        }
+
+        return Storage::download($document->path, $document->kind.'_'.$document->id.'.'.pathinfo($document->path, PATHINFO_EXTENSION));
     }
 }
