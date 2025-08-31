@@ -18,6 +18,7 @@ return [
         'location' => 'Emplacement',
         'planned_start_at' => 'Date de début prévue',
         'planned_end_at' => 'Date de fin prévue',
+        'planned_date_range' => 'Date de début prévue / Date de fin prévue',
         'actual_start_at' => 'Date de début réelle',
         'actual_end_at' => 'Date de fin réelle',
         'status' => 'Statut',
@@ -40,6 +41,7 @@ return [
     // Actions
     'actions' => [
         'schedule' => 'Planifier',
+        'program_deployment' => 'Programmer un déploiement',
         'reschedule' => 'Replanifier',
         'open' => 'Démarrer',
         'close' => 'Terminer',
@@ -53,6 +55,7 @@ return [
     // Messages
     'messages' => [
         'scheduled' => 'Déploiement planifié avec succès.',
+        'success' => 'Déploiement planifié avec succès.',
         'rescheduled' => 'Déploiement replanifié avec succès.',
         'opened' => 'Déploiement démarré avec succès.',
         'closed' => 'Déploiement terminé avec succès.',

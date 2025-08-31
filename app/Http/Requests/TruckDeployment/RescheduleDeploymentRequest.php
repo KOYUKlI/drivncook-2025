@@ -11,7 +11,13 @@ class RescheduleDeploymentRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('reschedule', $this->route('deployment')) ?? false;
+        $deployment = $this->route('deployment');
+        
+        if (!$deployment instanceof TruckDeployment) {
+            return false;
+        }
+        
+        return $this->user()?->can('reschedule', $deployment) ?? false;
     }
 
     public function rules(): array
@@ -20,8 +26,6 @@ class RescheduleDeploymentRequest extends FormRequest
             'planned_start_at' => 'required|date',
             'planned_end_at' => 'required|date|after_or_equal:planned_start_at',
             'location_text' => 'sometimes|string|min:2',
-            'geo_lat' => 'sometimes|nullable|numeric|between:-90,90',
-            'geo_lng' => 'sometimes|nullable|numeric|between:-180,180',
             'notes' => 'sometimes|nullable|string',
         ];
     }
@@ -55,8 +59,6 @@ class RescheduleDeploymentRequest extends FormRequest
             'planned_start_at' => __('deployment.fields.planned_start_at'),
             'planned_end_at' => __('deployment.fields.planned_end_at'),
             'location_text' => __('deployment.fields.location'),
-            'geo_lat' => __('deployment.fields.geo_lat'),
-            'geo_lng' => __('deployment.fields.geo_lng'),
             'notes' => __('deployment.fields.notes'),
         ];
     }

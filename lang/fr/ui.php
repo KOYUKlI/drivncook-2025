@@ -856,6 +856,8 @@ return [
                 'price_cents_help' => 'Prix en centimes',
                 'is_central' => 'Article central',
                 'is_central_help' => 'Compte dans le ratio 80/20',
+                'is_active' => 'Article actif',
+                'status' => 'Statut',
             ],
             'type' => [
                 'central' => 'Central',

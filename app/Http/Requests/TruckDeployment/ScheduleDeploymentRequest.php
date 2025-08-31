@@ -20,8 +20,6 @@ class ScheduleDeploymentRequest extends FormRequest
             'planned_start_at' => 'required|date',
             'planned_end_at' => 'required|date|after_or_equal:planned_start_at',
             'franchisee_id' => 'nullable|exists:franchisees,id',
-            'geo_lat' => 'nullable|numeric|between:-90,90',
-            'geo_lng' => 'nullable|numeric|between:-180,180',
             'notes' => 'nullable|string',
         ];
     }
@@ -51,8 +49,6 @@ class ScheduleDeploymentRequest extends FormRequest
             'planned_start_at' => __('deployment.fields.planned_start_at'),
             'planned_end_at' => __('deployment.fields.planned_end_at'),
             'franchisee_id' => __('deployment.fields.franchisee'),
-            'geo_lat' => __('deployment.fields.geo_lat'),
-            'geo_lng' => __('deployment.fields.geo_lng'),
             'notes' => __('deployment.fields.notes'),
         ];
     }

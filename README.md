@@ -21,12 +21,21 @@ Laravel is a web application framework with expressive, elegant syntax. We belie
 
 Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
-## Scheduler
+## Scheduler (Laravel 12)
 
-This app defines the task scheduler in `routes/console.php` (no Console Kernel). To run scheduled tasks locally with Sail or PHP, use one of:
+Task scheduling is defined in `bootstrap/app.php` using `->withSchedule(...)` (no Console Kernel). To run scheduled tasks locally:
 
 - Sail: `./vendor/bin/sail artisan schedule:work`
 - PHP: `php artisan schedule:work`
+
+Monthly job: Generate monthly sales PDFs every 1st of the month at 02:00.
+
+After changing scheduling or removing legacy Console Kernel files, run:
+
+```
+composer dump-autoload
+php artisan optimize:clear
+```
 
 Ensure `storage:link` is run once for public files (PDFs, uploads): `php artisan storage:link`.
 

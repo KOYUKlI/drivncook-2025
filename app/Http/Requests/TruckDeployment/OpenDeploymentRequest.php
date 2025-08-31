@@ -10,15 +10,19 @@ class OpenDeploymentRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('open', $this->route('deployment')) ?? false;
+        $deployment = $this->route('deployment');
+        
+        if (!$deployment instanceof TruckDeployment) {
+            return false;
+        }
+        
+        return $this->user()?->can('open', $deployment) ?? false;
     }
 
     public function rules(): array
     {
         return [
             'actual_start_at' => 'required|date',
-            'geo_lat' => 'sometimes|nullable|numeric|between:-90,90',
-            'geo_lng' => 'sometimes|nullable|numeric|between:-180,180',
             'location_text' => 'sometimes|string|min:2',
         ];
     }
@@ -50,8 +54,6 @@ class OpenDeploymentRequest extends FormRequest
     {
         return [
             'actual_start_at' => __('deployment.fields.actual_start_at'),
-            'geo_lat' => __('deployment.fields.geo_lat'),
-            'geo_lng' => __('deployment.fields.geo_lng'),
             'location_text' => __('deployment.fields.location'),
         ];
     }

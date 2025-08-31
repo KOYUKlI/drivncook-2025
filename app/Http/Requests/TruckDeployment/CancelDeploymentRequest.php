@@ -2,13 +2,20 @@
 
 namespace App\Http\Requests\TruckDeployment;
 
+use App\Models\TruckDeployment;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CancelDeploymentRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('cancel', $this->route('deployment')) ?? false;
+        $deployment = $this->route('deployment');
+        
+        if (!$deployment instanceof TruckDeployment) {
+            return false;
+        }
+        
+        return $this->user()?->can('cancel', $deployment) ?? false;
     }
 
     public function rules(): array

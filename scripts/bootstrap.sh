@@ -41,4 +41,7 @@ echo "[7/8] Migrate + Seed"
 echo "[8/8] Storage link"
 ./vendor/bin/sail artisan storage:link || true
 
+echo "[Post] Optimize clear"
+./vendor/bin/sail artisan optimize:clear || true
+
 echo "Bootstrap terminé ✅"

@@ -52,6 +52,20 @@
                         <span class="text-sm">{{ __('ui.bo.stock_items.title') }}</span>
                     </x-nav.link>
 
+                    <x-nav.link :href="route('bo.warehouses.inventory')" :active="request()->routeIs('bo.warehouses.inventory*')" class="group transition-all duration-150 flex items-center py-2">
+                        <svg class="mr-2 h-4 w-4 text-gray-400 group-hover:text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                        </svg>
+                        <span class="text-sm">{{ __('ui.inventory.title') }}</span>
+                    </x-nav.link>
+
+                    <x-nav.link :href="route('bo.stock-movements.create')" :active="request()->routeIs('bo.stock-movements.*')" class="group transition-all duration-150 flex items-center py-2">
+                        <svg class="mr-2 h-4 w-4 text-gray-400 group-hover:text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                        </svg>
+                        <span class="text-sm">{{ __('ui.inventory.create_movement') }}</span>
+                    </x-nav.link>
+
                     <!-- Séparateur visuel -->
                     <div class="border-t border-gray-200 my-1"></div>
 
@@ -188,6 +202,12 @@
                         </x-nav.link>
                         <x-nav.link :href="route('bo.stock-items.index')" :active="request()->routeIs('bo.stock-items.*')" mobile>
                             {{ __('ui.bo.stock_items.title') }}
+                        </x-nav.link>
+                        <x-nav.link :href="route('bo.warehouses.inventory')" :active="request()->routeIs('bo.warehouses.inventory*')" mobile>
+                            {{ __('ui.inventory.title') }}
+                        </x-nav.link>
+                        <x-nav.link :href="route('bo.stock-movements.create')" :active="request()->routeIs('bo.stock-movements.*')" mobile>
+                            {{ __('ui.inventory.create_movement') }}
                         </x-nav.link>
                         <x-nav.link :href="route('bo.purchase-orders.index')" :active="request()->routeIs('bo.purchase-orders.*')" mobile>
                             {{ __('ui.bo.purchase_orders.title') }}

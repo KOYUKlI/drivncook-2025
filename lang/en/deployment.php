@@ -79,5 +79,11 @@ return [
         'status' => 'Status',
         'franchisee' => 'Franchisee',
         'location' => 'Location',
+        'upcoming' => 'Upcoming Deployments',
+        'sort_by' => 'Sort by',
+        'sort_newest' => 'Date (newest)',
+        'sort_oldest' => 'Date (oldest)',
+        'sort_location' => 'Location',
+        'sort_status' => 'Status',
     ],
 ];

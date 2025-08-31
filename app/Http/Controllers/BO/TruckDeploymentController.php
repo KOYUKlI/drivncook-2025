@@ -66,8 +66,6 @@ class TruckDeploymentController extends Controller
             'truck_id' => $truck->id,
             'franchisee_id' => $data['franchisee_id'] ?? null,
             'location_text' => $data['location_text'],
-            'geo_lat' => $data['geo_lat'] ?? null,
-            'geo_lng' => $data['geo_lng'] ?? null,
             'planned_start_at' => $data['planned_start_at'] ?? null,
             'planned_end_at' => $data['planned_end_at'] ?? null,
             'status' => TruckDeployment::STATUS_PLANNED,
@@ -80,9 +78,8 @@ class TruckDeploymentController extends Controller
     /**
      * Reschedule an existing deployment
      */
-    public function reschedule(string $deployment, RescheduleDeploymentRequest $request)
+    public function reschedule(TruckDeployment $deployment, RescheduleDeploymentRequest $request)
     {
-        $deployment = TruckDeployment::findOrFail($deployment);
         $this->authorize('reschedule', $deployment);
 
         if ($deployment->status !== TruckDeployment::STATUS_PLANNED) {
@@ -98,14 +95,6 @@ class TruckDeploymentController extends Controller
             $deployment->location_text = $data['location_text'];
         }
         
-        if (isset($data['geo_lat'])) {
-            $deployment->geo_lat = $data['geo_lat'];
-        }
-        
-        if (isset($data['geo_lng'])) {
-            $deployment->geo_lng = $data['geo_lng'];
-        }
-        
         if (isset($data['notes'])) {
             $deployment->notes = $data['notes'];
         }
@@ -118,47 +107,57 @@ class TruckDeploymentController extends Controller
     /**
      * Open/start a deployment
      */
-    public function open(string $deployment, OpenDeploymentRequest $request)
+    public function open(TruckDeployment $deployment, OpenDeploymentRequest $request)
     {
-        $deployment = TruckDeployment::findOrFail($deployment);
         $this->authorize('open', $deployment);
 
         if ($deployment->status !== TruckDeployment::STATUS_PLANNED) {
-            return response()->json(['message' => __('deployment.errors.invalid_transition')], Response::HTTP_CONFLICT);
+            $message = __('deployment.errors.invalid_transition');
+            
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $message], Response::HTTP_CONFLICT);
+            }
+            
+            return back()->withErrors(['deployment' => $message]);
         }
 
         $data = $request->validated();
         $deployment->status = TruckDeployment::STATUS_OPEN;
         $deployment->actual_start_at = $data['actual_start_at'];
         
-        // Update location if provided
         if (isset($data['location_text'])) {
             $deployment->location_text = $data['location_text'];
         }
         
-        if (isset($data['geo_lat'])) {
-            $deployment->geo_lat = $data['geo_lat'];
-        }
-        
-        if (isset($data['geo_lng'])) {
-            $deployment->geo_lng = $data['geo_lng'];
-        }
-        
         $deployment->save();
 
-        return back()->with('success', __('deployment.messages.opened'));
+        $message = __('deployment.messages.opened');
+        
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => $message,
+                'deployment' => $deployment->fresh()
+            ]);
+        }
+
+        return back()->with('success', $message);
     }
 
     /**
      * Close/end a deployment
      */
-    public function close(string $deployment, CloseDeploymentRequest $request)
+    public function close(TruckDeployment $deployment, CloseDeploymentRequest $request)
     {
-        $deployment = TruckDeployment::findOrFail($deployment);
         $this->authorize('close', $deployment);
 
         if ($deployment->status !== TruckDeployment::STATUS_OPEN) {
-            return response()->json(['message' => __('deployment.errors.invalid_transition')], Response::HTTP_CONFLICT);
+            $message = __('deployment.errors.invalid_transition');
+            
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $message], Response::HTTP_CONFLICT);
+            }
+            
+            return back()->withErrors(['deployment' => $message]);
         }
 
         $data = $request->validated();
@@ -176,27 +175,50 @@ class TruckDeploymentController extends Controller
         
         $deployment->save();
 
-        return back()->with('success', __('deployment.messages.closed'));
+        $message = __('deployment.messages.closed');
+        
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => $message,
+                'deployment' => $deployment->fresh()
+            ]);
+        }
+
+        return back()->with('success', $message);
     }
 
     /**
      * Cancel a deployment
      */
-    public function cancel(string $deployment, CancelDeploymentRequest $request)
+    public function cancel(TruckDeployment $deployment, CancelDeploymentRequest $request)
     {
-        $deployment = TruckDeployment::findOrFail($deployment);
         $this->authorize('cancel', $deployment);
 
         if (!in_array($deployment->status, [TruckDeployment::STATUS_PLANNED, TruckDeployment::STATUS_OPEN])) {
-            return response()->json(['message' => __('deployment.errors.invalid_transition')], Response::HTTP_CONFLICT);
+            $message = __('deployment.errors.invalid_transition');
+            
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $message], Response::HTTP_CONFLICT);
+            }
+            
+            return back()->withErrors(['deployment' => $message]);
         }
 
         $data = $request->validated();
         $deployment->status = TruckDeployment::STATUS_CANCELLED;
-        $deployment->cancel_reason = $data['cancel_reason'];
+        $deployment->cancel_reason = $data['cancel_reason'] ?? null;
         $deployment->save();
 
-        return back()->with('success', __('deployment.messages.cancelled'));
+        $message = __('deployment.messages.cancelled');
+        
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => $message,
+                'deployment' => $deployment->fresh()
+            ]);
+        }
+
+        return back()->with('success', $message);
     }
     
     /**

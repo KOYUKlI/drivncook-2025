@@ -14,6 +14,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Public\FranchiseApplicationController;
 use App\Http\Controllers\Public\FranchisePageController;
 use App\Http\Controllers\Public\HomeController;
+use App\Http\Controllers\Admin\ApplicationController;
+use App\Http\Controllers\BO\TruckDeploymentController;
 use App\Services\PdfService;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -73,14 +75,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Franchisees management (admin only)
         Route::middleware('role:admin')->group(function () {
             Route::resource('franchisees', FranchiseeController::class);
-            Route::get('applications', [App\Http\Controllers\Admin\ApplicationController::class, 'index'])->name('applications.index');
-            Route::get('applications/{application}', [App\Http\Controllers\Admin\ApplicationController::class, 'show'])->name('applications.show');
-            Route::post('applications/{application}/status', [App\Http\Controllers\Admin\ApplicationController::class, 'updateStatus'])->name('applications.update-status');
-            Route::get('applications/files/{document}/download', [App\Http\Controllers\Admin\ApplicationController::class, 'downloadDocument'])->name('applications.download-document');
-            Route::post('applications/{application}/prequalify', [App\Http\Controllers\Admin\ApplicationController::class, 'prequalify'])->name('applications.prequalify');
-            Route::post('applications/{application}/interview', [App\Http\Controllers\Admin\ApplicationController::class, 'interview'])->name('applications.interview');
-            Route::post('applications/{application}/approve', [App\Http\Controllers\Admin\ApplicationController::class, 'approve'])->name('applications.approve');
-            Route::post('applications/{application}/reject', [App\Http\Controllers\Admin\ApplicationController::class, 'reject'])->name('applications.reject');
+            Route::get('applications', [ApplicationController::class, 'index'])->name('applications.index');
+            Route::get('applications/{application}', [ApplicationController::class, 'show'])->name('applications.show');
+            Route::post('applications/{application}/status', [ApplicationController::class, 'updateStatus'])->name('applications.update-status');
+            Route::get('applications/files/{document}/download', [ApplicationController::class, 'downloadDocument'])->name('applications.download-document');
+            Route::post('applications/{application}/prequalify', [ApplicationController::class, 'prequalify'])->name('applications.prequalify');
+            Route::post('applications/{application}/interview', [ApplicationController::class, 'interview'])->name('applications.interview');
+            Route::post('applications/{application}/approve', [ApplicationController::class, 'approve'])->name('applications.approve');
+            Route::post('applications/{application}/reject', [ApplicationController::class, 'reject'])->name('applications.reject');
         });
 
     // Trucks management (admin, fleet)
@@ -118,12 +120,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('maintenance/attachment/{attachment}', [App\Http\Controllers\MaintenanceLogController::class, 'downloadAttachment'])->name('maintenance.attachment.download');
             Route::post('maintenance/{maintenanceLog}/attachment', [App\Http\Controllers\MaintenanceLogController::class, 'uploadAttachment'])->name('maintenance.attachment.upload');
             // Deployments (PHASE D)
-            Route::post('trucks/{truck}/deployments/schedule', [App\Http\Controllers\BO\TruckDeploymentController::class, 'schedule'])->name('deployments.schedule');
-            Route::post('deployments/{deployment}/open', [App\Http\Controllers\BO\TruckDeploymentController::class, 'open'])->name('deployments.open');
-            Route::post('deployments/{deployment}/close', [App\Http\Controllers\BO\TruckDeploymentController::class, 'close'])->name('deployments.close');
-            Route::post('deployments/{deployment}/cancel', [App\Http\Controllers\BO\TruckDeploymentController::class, 'cancel'])->name('deployments.cancel');
-            Route::post('deployments/{deployment}/reschedule', [App\Http\Controllers\BO\TruckDeploymentController::class, 'reschedule'])->name('deployments.reschedule');
-            Route::get('deployments/export', [App\Http\Controllers\BO\TruckDeploymentController::class, 'export'])->name('deployments.export');
+            Route::post('trucks/{truck}/deployments/schedule', [TruckDeploymentController::class, 'schedule'])->name('deployments.schedule');
+            Route::post('deployments/{deployment}/open', [TruckDeploymentController::class, 'open'])->name('deployments.open');
+            Route::post('deployments/{deployment}/close', [TruckDeploymentController::class, 'close'])->name('deployments.close');
+            Route::post('deployments/{deployment}/cancel', [TruckDeploymentController::class, 'cancel'])->name('deployments.cancel');
+            Route::post('deployments/{deployment}/reschedule', [TruckDeploymentController::class, 'reschedule'])->name('deployments.reschedule');
+            Route::get('deployments/export', [TruckDeploymentController::class, 'export'])->name('deployments.export');
             Route::patch('trucks/{truck}/status', [TruckController::class, 'updateStatus'])->name('trucks.update-status');
             Route::get('trucks/reports/utilization', [TruckController::class, 'utilizationReport'])->name('trucks.utilization-report');
             // Secure document download (BO-only)
@@ -138,8 +140,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('reports/monthly/generate', [BOReportController::class, 'generate'])->name('reports.monthly.generate');
             Route::get('reports/{id}/download', [BOReportController::class, 'download'])->name('reports.download');
 
+            // Warehouses, Stock Items and Inventory
             Route::resource('warehouses', WarehouseController::class)->except(['show']);
+            Route::get('warehouses/inventory', [App\Http\Controllers\BO\WarehouseInventoryController::class, 'index'])->name('warehouses.inventory');
+            Route::get('warehouses/{warehouse}/inventory', [App\Http\Controllers\BO\WarehouseInventoryController::class, 'show'])->name('warehouses.inventory.show');
             Route::resource('stock-items', StockItemController::class)->except(['show']);
+            Route::resource('stock-movements', App\Http\Controllers\BO\StockMovementController::class)->only(['create', 'store']);
 
             Route::resource('purchase-orders', PurchaseOrderController::class)->only(['index', 'show', 'store', 'create']);
             Route::post('purchase-orders/{id}/validate-compliance', [PurchaseOrderController::class, 'validateCompliance'])->name('purchase-orders.validate-compliance');

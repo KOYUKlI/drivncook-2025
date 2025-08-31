@@ -28,8 +28,6 @@ class TruckDeployment extends Model
         'truck_id',
         'franchisee_id',
         'location_text',
-        'geo_lat',
-        'geo_lng',
         'planned_start_at',
         'planned_end_at',
         'actual_start_at',
@@ -44,8 +42,6 @@ class TruckDeployment extends Model
         'planned_end_at' => 'datetime',
         'actual_start_at' => 'datetime',
         'actual_end_at' => 'datetime',
-        'geo_lat' => 'decimal:7',
-        'geo_lng' => 'decimal:7',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -74,7 +70,7 @@ class TruckDeployment extends Model
     /**
      * Check if there's a conflict with other deployments for the same truck
      */
-    public static function hasConflict(int $truckId, Carbon $startAt, Carbon $endAt, ?string $excludeId = null): bool
+    public static function hasConflict(string $truckId, Carbon $startAt, Carbon $endAt, ?string $excludeId = null): bool
     {
         $query = self::query()
             ->where('truck_id', $truckId)
@@ -106,7 +102,7 @@ class TruckDeployment extends Model
     /**
      * Get conflicting deployments for the same truck
      */
-    public static function getConflicts(int $truckId, Carbon $startAt, Carbon $endAt, ?string $excludeId = null)
+    public static function getConflicts(string $truckId, Carbon $startAt, Carbon $endAt, ?string $excludeId = null)
     {
         $query = self::query()
             ->where('truck_id', $truckId)
@@ -138,7 +134,7 @@ class TruckDeployment extends Model
     /**
      * Calculate truck utilization for the last 30 days
      */
-    public static function calculateUtilization(int $truckId, int $days = 30): float
+    public static function calculateUtilization(string $truckId, int $days = 30): float
     {
         $startDate = now()->subDays($days);
         $endDate = now();

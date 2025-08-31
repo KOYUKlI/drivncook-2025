@@ -26,9 +26,75 @@ class TruckController extends Controller
     {
         $this->authorize('create', Truck::class);
 
-        $franchisees = Franchisee::select('id', 'name')->orderBy('name')->get();
+        $franchisees = \App\Models\Franchisee::select('id', 'name')->orderBy('name')->get();
 
         return view('bo.trucks.create', compact('franchisees'));
+    }
+    
+    /**
+     * Store a newly created truck in storage.
+     */
+    public function store(StoreTruckRequest $request)
+    {
+        $this->authorize('create', Truck::class);
+
+        $data = $request->validated();
+        
+        // Create truck with ULID
+        $truck = new Truck();
+        $truck->id = (string) Str::ulid();
+        
+        // Generate code (TRK- followed by last 4 chars of ULID)
+        $lastPart = substr($truck->id, -4);
+        $truck->code = "TRK-{$lastPart}";
+        
+        // Map UI fields to DB columns
+        $truck->name = $data['name'];
+        $truck->plate = $data['plate_number'];
+        $truck->vin = $data['vin'] ?? null;
+        $truck->make = $data['make'] ?? null;
+        $truck->model = $data['model'] ?? null;
+        $truck->year = $data['year'] ?? null;
+        $truck->mileage_km = $data['mileage_km'] ?? null;
+        $truck->franchisee_id = $data['franchisee_id'] ?? null;
+        $truck->notes = $data['notes'] ?? null;
+        
+        // Map UI status to enum
+        $statusMap = [
+            'draft' => 'Draft',
+            'active' => 'Active',
+            'in_maintenance' => 'InMaintenance',
+            'retired' => 'Retired',
+        ];
+        $truck->status = $statusMap[$data['status']] ?? 'Draft';
+        
+        // Set dates if provided
+        if (!empty($data['acquired_at'])) {
+            $truck->acquired_at = $data['acquired_at'];
+        }
+        
+        if (!empty($data['commissioned_at'])) {
+            $truck->service_start = $data['commissioned_at'];
+        }
+        
+        $truck->save();
+        
+        // Handle document uploads
+        if ($request->hasFile('registration_doc')) {
+            $path = $request->file('registration_doc')->store('private/trucks/' . $truck->id);
+            $truck->registration_doc_path = $path;
+            $truck->save();
+        }
+        
+        if ($request->hasFile('insurance_doc')) {
+            $path = $request->file('insurance_doc')->store('private/trucks/' . $truck->id);
+            $truck->insurance_doc_path = $path;
+            $truck->save();
+        }
+
+        return redirect()
+            ->route('bo.trucks.show', $truck->id)
+            ->with('success', __('ui.flash.created'));
     }
 
     /**
@@ -39,7 +105,7 @@ class TruckController extends Controller
         $truck = Truck::findOrFail($id);
         $this->authorize('update', $truck);
 
-        $franchisees = Franchisee::select('id', 'name')->orderBy('name')->get();
+        $franchisees = \App\Models\Franchisee::select('id', 'name')->orderBy('name')->get();
 
         return view('bo.trucks.edit', compact('truck', 'franchisees'));
     }
@@ -107,6 +173,20 @@ class TruckController extends Controller
             ->route('bo.trucks.show', $truck->id)
             ->with('success', __('ui.flash.updated'));
     }
+    /**
+     * Calculate statistics
+     */
+    private function calculateStatistics()
+    {
+        $allTrucks = Truck::all();
+        return [
+            'total' => $allTrucks->count(),
+            'active' => $allTrucks->where('status', 'Active')->count(),
+            'maintenance' => $allTrucks->where('status', 'InMaintenance')->count(),
+            'inactive' => $allTrucks->where('status', 'Retired')->count(),
+        ];
+    }
+
     /**
      * Display a listing of trucks with status filtering.
      */
@@ -182,13 +262,7 @@ class TruckController extends Controller
         $franchisees = \App\Models\Franchisee::select('id', 'name')->get();
 
         // Calculate statistics
-        $allTrucks = Truck::all();
-        $stats = [
-            'total' => $allTrucks->count(),
-            'active' => $allTrucks->where('status', 'Active')->count(),
-            'maintenance' => $allTrucks->where('status', 'InMaintenance')->count(),
-            'inactive' => $allTrucks->where('status', 'Retired')->count(),
-        ];
+        $stats = $this->calculateStatistics();
 
         return view('bo.trucks.index', compact('trucks', 'stats', 'status', 'franchisees', 'franchiseeId', 'search'));
     }
