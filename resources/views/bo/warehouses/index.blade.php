@@ -48,7 +48,7 @@
         <form action="{{ route('bo.warehouses.index') }}" method="GET" class="space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                    <label for="status" class="block text-sm font-medium text-gray-700">{{ __('ui.status') }}</label>
+                    <label for="status" class="block text-sm font-medium text-gray-700">{{ __('ui.labels.status') }}</label>
                     <select id="status" name="status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
                         <option value="">{{ __('ui.misc.all_statuses') }}</option>
                         <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>{{ __('ui.status.active') }}</option>
@@ -132,6 +132,9 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <div class="flex justify-end space-x-2">
+                                <a href="{{ route('bo.warehouses.dashboard', $warehouse) }}" class="text-green-600 hover:text-green-900">
+                                    {{ __('warehouse_dashboard.inventory.dashboard.menu_title') }}
+                                </a>
                                 <a href="{{ route('bo.warehouses.inventory.show', $warehouse) }}" class="text-blue-600 hover:text-blue-900">
                                     {{ __('ui.inventory.title') }}
                                 </a>

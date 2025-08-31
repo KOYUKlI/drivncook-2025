@@ -37,4 +37,9 @@ class StockItem extends Model
     {
         return $this->hasMany(SaleLine::class);
     }
+    
+    public function warehouseInventory(): HasMany
+    {
+        return $this->hasMany(WarehouseInventory::class);
+    }
 }

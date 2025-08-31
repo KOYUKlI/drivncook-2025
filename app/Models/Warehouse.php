@@ -30,4 +30,21 @@ class Warehouse extends Model
     {
         return $this->hasMany(PurchaseOrder::class);
     }
+    
+    public function inventory(): HasMany
+    {
+        return $this->hasMany(WarehouseInventory::class);
+    }
+    
+    public function getLowStockCountAttribute(): int
+    {
+        return $this->inventory()
+            ->whereRaw('qty_on_hand <= min_qty')
+            ->count();
+    }
+    
+    public function getStockItemsCountAttribute(): int
+    {
+        return $this->inventory()->count();
+    }
 }

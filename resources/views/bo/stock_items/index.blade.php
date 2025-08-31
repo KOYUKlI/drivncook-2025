@@ -45,7 +45,7 @@
         <form action="{{ route('bo.stock-items.index') }}" method="GET" class="space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
-                    <label for="status" class="block text-sm font-medium text-gray-700">{{ __('ui.status') }}</label>
+                    <label for="status" class="block text-sm font-medium text-gray-700">{{ __('ui.labels.status') }}</label>
                     <select id="status" name="status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
                         <option value="">{{ __('ui.misc.all_statuses') }}</option>
                         <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>{{ __('ui.status.active') }}</option>
@@ -106,7 +106,7 @@
                             {{ __('ui.bo.stock_items.table.type') }}
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            {{ __('ui.status') }}
+                            {{ __('ui.labels.status') }}
                         </th>
                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                             {{ __('ui.bo.stock_items.table.actions') }}

@@ -13,7 +13,11 @@ class DatabaseSeeder extends Seeder
         
         $this->call([
             RolesAndUsersSeeder::class,
-            DemoDomainSeeder::class,
+            // Domain seeders for inventory system
+            WarehouseSeeder::class,
+            StockItemSeeder::class,
+            WarehouseInventorySeeder::class,
+            FranchiseSeeder::class,
             $useTestData ? TestTruckOperationsSeeder::class : TruckOperationsDemoSeeder::class,
             SalesBackfillSeeder::class,
             ApplicationsDemoSeeder::class,

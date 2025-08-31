@@ -12,11 +12,10 @@ class WarehouseInventory extends Model
     use HasFactory, SoftDeletes;
 
     protected $keyType = 'string';
-
     public $incrementing = false;
 
     protected $fillable = [
-        'id', 'warehouse_id', 'stock_item_id', 'qty_on_hand', 'min_qty', 'max_qty'
+    'id', 'warehouse_id', 'stock_item_id', 'qty_on_hand', 'min_qty', 'max_qty'
     ];
 
     protected $casts = [

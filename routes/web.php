@@ -144,6 +144,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::resource('warehouses', WarehouseController::class)->except(['show']);
             Route::get('warehouses/inventory', [App\Http\Controllers\BO\WarehouseInventoryController::class, 'index'])->name('warehouses.inventory');
             Route::get('warehouses/{warehouse}/inventory', [App\Http\Controllers\BO\WarehouseInventoryController::class, 'show'])->name('warehouses.inventory.show');
+            Route::get('warehouses/{id}/dashboard', [App\Http\Controllers\BO\WarehouseDashboardController::class, 'show'])->name('warehouses.dashboard');
+            Route::get('warehouses/{id}/dashboard/export', [App\Http\Controllers\BO\WarehouseDashboardController::class, 'exportMovements'])->name('warehouses.dashboard.export');
             Route::resource('stock-items', StockItemController::class)->except(['show']);
             Route::resource('stock-movements', App\Http\Controllers\BO\StockMovementController::class)->only(['create', 'store']);
 
@@ -153,6 +155,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('purchase-orders/{id}/recalculate', [PurchaseOrderController::class, 'recalculate'])->name('purchase-orders.recalculate');
             Route::post('purchase-orders/{id}/status', [PurchaseOrderController::class, 'updateStatus'])->name('purchase-orders.update-status');
             Route::get('purchase-orders/reports/compliance', [PurchaseOrderController::class, 'complianceReport'])->name('purchase-orders.compliance-report');
+            // New process routes for warehouse PO reception workflow
+            Route::post('purchase-orders/{id}/process/{action}', [PurchaseOrderController::class, 'processPurchaseOrder'])
+                ->where('action', 'prepare|ready|ship|receive')
+                ->name('purchase-orders.process');
         });
     });
 

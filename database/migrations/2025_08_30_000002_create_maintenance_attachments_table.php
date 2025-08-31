@@ -12,24 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('maintenance_attachments', function (Blueprint $table) {
-            $table->string('id', 26)->primary();
-            $table->string('maintenance_log_id', 26);
+            $table->ulid('id')->primary();
+            $table->foreignUlid('maintenance_log_id')->constrained('maintenance_logs')->cascadeOnDelete();
             $table->string('label')->nullable();
             $table->string('path');
             $table->string('mime_type');
             $table->integer('size_bytes');
-            $table->string('uploaded_by', 26)->nullable();
+            $table->foreignId('uploaded_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
-            
-            $table->foreign('maintenance_log_id')
-                  ->references('id')
-                  ->on('maintenance_logs')
-                  ->onDelete('cascade');
-                  
-            $table->foreign('uploaded_by')
-                  ->references('id')
-                  ->on('users')
-                  ->onDelete('set null');
         });
     }
 

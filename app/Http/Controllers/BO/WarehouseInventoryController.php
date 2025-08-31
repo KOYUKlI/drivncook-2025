@@ -13,37 +13,77 @@ use Illuminate\Support\Str;
 
 class WarehouseInventoryController extends Controller
 {
+    public function index(Request $request)
+    {
+        $this->authorize('viewAny', Warehouse::class);
+
+        // If a specific warehouse is requested, show detailed inventory list; otherwise show summary index
+        $warehouseId = $request->input('warehouse_id');
+
+        if ($warehouseId) {
+            $warehouse = Warehouse::findOrFail($warehouseId);
+
+            $stockItems = StockItem::orderBy('name')->get(['id','name']);
+
+            $inventoryQuery = WarehouseInventory::with(['warehouse','stockItem'])
+                ->where('warehouse_id', $warehouse->id);
+
+            if ($request->boolean('low_stock')) {
+                $inventoryQuery->whereNotNull('min_qty')->whereRaw('qty_on_hand <= min_qty');
+            }
+            if ($request->filled('stock_item_id')) {
+                $inventoryQuery->where('stock_item_id', $request->string('stock_item_id'));
+            }
+
+            $inventoryItems = $inventoryQuery->paginate(15)->withQueryString();
+
+            // Also pass all warehouses for the filter dropdown
+            $warehouses = Warehouse::orderBy('name')->get(['id','name']);
+
+            return view('bo.warehouses.inventory', compact('warehouse', 'stockItems', 'inventoryItems', 'warehouses'));
+        }
+
+        $warehouses = Warehouse::withCount(['inventory as items_count' => function($query) {
+                $query->where('qty_on_hand', '>', 0);
+            }])
+            ->withCount(['inventory as low_stock_count' => function($query) {
+                $query->whereRaw('qty_on_hand <= min_qty')
+                     ->whereNotNull('min_qty');
+            }])
+            ->orderBy('name')
+            ->get();
+
+        return view('bo.warehouses.inventory_index', compact('warehouses'));
+    }
     public function show(Request $request, Warehouse $warehouse)
     {
         $this->authorize('view', $warehouse);
-        
-        $query = WarehouseInventory::with(['stockItem'])
+
+        $stockItems = StockItem::orderBy('name')->get(['id','name']);
+
+        $query = WarehouseInventory::with(['warehouse','stockItem'])
             ->where('warehouse_id', $warehouse->id);
-        
-        // Apply search filter if provided
-        if ($request->has('search') && !empty($request->search)) {
-            $search = $request->search;
+
+        if ($request->filled('search')) {
+            $search = $request->string('search');
             $query->whereHas('stockItem', function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('sku', 'like', "%{$search}%");
             });
         }
-        
-        // Apply low stock filter if requested
-        if ($request->has('low_stock') && $request->low_stock) {
-            $query->whereNotNull('min_qty')
-                  ->whereRaw('qty_on_hand <= min_qty');
+
+        if ($request->boolean('low_stock')) {
+            $query->whereNotNull('min_qty')->whereRaw('qty_on_hand <= min_qty');
         }
-        
-        $inventory = $query->paginate(15);
-        
-        // Get recent movements for this warehouse
-        $recentMovements = StockMovement::with(['stockItem', 'user'])
-            ->where('warehouse_id', $warehouse->id)
-            ->orderBy('created_at', 'desc')
-            ->limit(10)
-            ->get();
-        
-        return view('bo.warehouses.inventory', compact('warehouse', 'inventory', 'recentMovements'));
+        if ($request->filled('stock_item_id')) {
+            $query->where('stock_item_id', $request->string('stock_item_id'));
+        }
+
+        $inventoryItems = $query->paginate(15)->withQueryString();
+
+        // For filters
+        $warehouses = Warehouse::orderBy('name')->get(['id','name']);
+
+        return view('bo.warehouses.inventory', compact('warehouse', 'stockItems', 'inventoryItems', 'warehouses'));
     }
 }

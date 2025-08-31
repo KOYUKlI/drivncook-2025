@@ -1,6 +1,8 @@
-@extends('layouts.app')
+@extends('layouts.app-shell')
 
-@section('title', __('ui.inventory.title'))
+@section('sidebar')
+    @include('layouts.partials.sidebar')
+@endsection
 
 @section('content')
     <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -15,6 +17,11 @@
                 </h2>
             </div>
             <div class="mt-4 flex md:mt-0 md:ml-4 space-x-3">
+                @if(isset($warehouse))
+                <a href="{{ route('bo.warehouses.dashboard', $warehouse->id) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500">
+                    {{ __('warehouse_dashboard.inventory.dashboard.menu_title') }}
+                </a>
+                @endif
                 <a href="{{ route('bo.warehouses.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500">
                     {{ __('ui.common.back') }}
                 </a>
@@ -145,14 +152,7 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    @if($item->lastMovement)
-                                        <span title="{{ $item->lastMovement->created_at }}">
-                                            {{ $item->lastMovement->created_at->diffForHumans() }}
-                                            ({{ __('ui.inventory.movement_types.' . $item->lastMovement->type) }})
-                                        </span>
-                                    @else
-                                        -
-                                    @endif
+                                    -
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <a href="{{ route('bo.stock-movements.create') }}" class="text-amber-600 hover:text-amber-900">

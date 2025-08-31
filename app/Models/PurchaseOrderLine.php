@@ -17,11 +17,12 @@ class PurchaseOrderLine extends Model
     public $incrementing = false;
 
     protected $fillable = [
-        'id', 'purchase_order_id', 'stock_item_id', 'qty', 'unit_price_cents',
+        'id', 'purchase_order_id', 'stock_item_id', 'qty', 'unit_price_cents', 'received_qty',
     ];
 
     protected $casts = [
         'qty' => 'integer',
+        'received_qty' => 'integer',
         'unit_price_cents' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',

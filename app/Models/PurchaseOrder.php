@@ -21,12 +21,19 @@ class PurchaseOrder extends Model
         'franchisee_id',
         'status',
         'corp_ratio_cached',
+        'shipping_date',
+        'tracking_number',
+        'carrier',
+        'preparation_notes',
+        'shipping_notes',
+        'reception_notes',
     ];
 
     protected $casts = [
         'corp_ratio_cached' => 'decimal:2',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'shipping_date' => 'datetime',
     ];
 
     /**
