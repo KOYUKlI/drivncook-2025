@@ -22,7 +22,7 @@ class WarehouseInventorySeeder extends Seeder
                 // Rule: central items exist everywhere; local items only in Paris (PAR) and one other site
                 $isLocal = ! $item->is_central;
                 if ($isLocal) {
-                    $allow = in_array($wh->code, ['WH-PAR', 'WH-NTR']);
+                    $allow = in_array($wh->code, ['WH-PAR', 'WH-OUEST']);
                     if (! $allow) { continue; }
                 }
 
@@ -36,10 +36,10 @@ class WarehouseInventorySeeder extends Seeder
 
                 // qty_on_hand: vary per warehouse to showcase low-stock
                 $base = $min + random_int(0, $min * 2);
-                if ($wh->code === 'WH-CRL' && str_starts_with($item->sku, 'MEAT')) {
+                if ($wh->code === 'WH-SUD' && str_starts_with($item->sku, 'MEAT')) {
                     $base = max(0, (int) floor($min * 0.5)); // force low stock for demo
                 }
-                if ($wh->code === 'WH-SDN' && str_starts_with($item->sku, 'OIL')) {
+                if ($wh->code === 'WH-NE' && str_starts_with($item->sku, 'OIL')) {
                     $base = max(0, (int) floor($min * 0.4));
                 }
 

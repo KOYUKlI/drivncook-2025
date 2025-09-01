@@ -93,10 +93,10 @@
                                         {{ __('ui.inventory.stock_item') }} *
                                     </label>
                                     <div class="mt-1">
-                                        <select id="stock_item_id" name="stock_item_id" class="shadow-sm focus:ring-amber-500 focus:border-amber-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                    <select id="stock_item_id" name="stock_item_id" class="shadow-sm focus:ring-amber-500 focus:border-amber-500 block w-full sm:text-sm border-gray-300 rounded-md">
                                             <option value="">{{ __('ui.common.select_option') }}</option>
                                             @foreach($stockItems as $stockItem)
-                                                <option value="{{ $stockItem->id }}" {{ old('stock_item_id') == $stockItem->id ? 'selected' : '' }}>
+                                                <option value="{{ $stockItem->id }}" data-name="{{ $stockItem->name }}" data-unit="{{ $stockItem->unit ?? '' }}" {{ old('stock_item_id') == $stockItem->id ? 'selected' : '' }}>
                                                     {{ $stockItem->name }}
                                                 </option>
                                             @endforeach
@@ -109,7 +109,10 @@
                                         {{ __('ui.inventory.quantity') }} *
                                     </label>
                                     <div class="mt-1">
-                                        <input type="number" min="1" id="quantity" name="quantity" value="{{ old('quantity') }}" class="shadow-sm focus:ring-amber-500 focus:border-amber-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                                        <div class="flex items-center gap-2">
+                                            <input type="number" min="1" id="quantity" name="quantity" value="{{ old('quantity') }}" class="shadow-sm focus:ring-amber-500 focus:border-amber-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                                            <span id="receipt_unit" class="text-sm text-gray-500"></span>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -164,7 +167,7 @@
                                         <select id="withdrawal_stock_item_id" name="stock_item_id" class="shadow-sm focus:ring-amber-500 focus:border-amber-500 block w-full sm:text-sm border-gray-300 rounded-md">
                                             <option value="">{{ __('ui.common.select_option') }}</option>
                                             @foreach($stockItems as $stockItem)
-                                                <option value="{{ $stockItem->id }}" {{ old('stock_item_id') == $stockItem->id ? 'selected' : '' }}>
+                                                <option value="{{ $stockItem->id }}" data-unit="{{ $stockItem->unit ?? '' }}" data-name="{{ $stockItem->name }}" {{ old('stock_item_id') == $stockItem->id ? 'selected' : '' }}>
                                                     {{ $stockItem->name }}
                                                 </option>
                                             @endforeach
@@ -177,7 +180,10 @@
                                         {{ __('ui.inventory.quantity') }} *
                                     </label>
                                     <div class="mt-1">
-                                        <input type="number" min="1" id="withdrawal_quantity" name="quantity" value="{{ old('quantity') }}" class="shadow-sm focus:ring-amber-500 focus:border-amber-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                                        <div class="flex items-center gap-2">
+                                            <input type="number" min="1" id="withdrawal_quantity" name="quantity" value="{{ old('quantity') }}" class="shadow-sm focus:ring-amber-500 focus:border-amber-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                                            <span id="withdrawal_unit" class="text-sm text-gray-500"></span>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -229,10 +235,10 @@
                                         {{ __('ui.inventory.stock_item') }} *
                                     </label>
                                     <div class="mt-1">
-                                        <select id="adjustment_stock_item_id" name="stock_item_id" class="shadow-sm focus:ring-amber-500 focus:border-amber-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                    <select id="adjustment_stock_item_id" name="stock_item_id" class="shadow-sm focus:ring-amber-500 focus:border-amber-500 block w-full sm:text-sm border-gray-300 rounded-md">
                                             <option value="">{{ __('ui.common.select_option') }}</option>
                                             @foreach($stockItems as $stockItem)
-                                                <option value="{{ $stockItem->id }}" {{ old('stock_item_id') == $stockItem->id ? 'selected' : '' }}>
+                                                <option value="{{ $stockItem->id }}" data-name="{{ $stockItem->name }}" data-unit="{{ $stockItem->unit ?? '' }}" {{ old('stock_item_id') == $stockItem->id ? 'selected' : '' }}>
                                                     {{ $stockItem->name }}
                                                 </option>
                                             @endforeach
@@ -257,7 +263,10 @@
                                         {{ __('ui.inventory.quantity') }} *
                                     </label>
                                     <div class="mt-1">
-                                        <input type="number" min="1" id="adjustment_quantity" name="quantity" value="{{ old('quantity') }}" class="shadow-sm focus:ring-amber-500 focus:border-amber-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                                        <div class="flex items-center gap-2">
+                                            <input type="number" min="1" id="adjustment_quantity" name="quantity" value="{{ old('quantity') }}" class="shadow-sm focus:ring-amber-500 focus:border-amber-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                                            <span id="adjustment_unit" class="text-sm text-gray-500"></span>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -328,7 +337,7 @@
                                         <select id="transfer_stock_item_id" name="stock_item_id" class="shadow-sm focus:ring-amber-500 focus:border-amber-500 block w-full sm:text-sm border-gray-300 rounded-md">
                                             <option value="">{{ __('ui.common.select_option') }}</option>
                                             @foreach($stockItems as $stockItem)
-                                                <option value="{{ $stockItem->id }}" {{ old('stock_item_id') == $stockItem->id ? 'selected' : '' }}>
+                                                <option value="{{ $stockItem->id }}" data-unit="{{ $stockItem->unit ?? '' }}" data-name="{{ $stockItem->name }}" {{ old('stock_item_id') == $stockItem->id ? 'selected' : '' }}>
                                                     {{ $stockItem->name }}
                                                 </option>
                                             @endforeach
@@ -341,7 +350,10 @@
                                         {{ __('ui.inventory.quantity') }} *
                                     </label>
                                     <div class="mt-1">
-                                        <input type="number" min="1" id="transfer_quantity" name="quantity" value="{{ old('quantity') }}" class="shadow-sm focus:ring-amber-500 focus:border-amber-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                                        <div class="flex items-center gap-2">
+                                            <input type="number" min="1" id="transfer_quantity" name="quantity" value="{{ old('quantity') }}" class="shadow-sm focus:ring-amber-500 focus:border-amber-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                                            <span id="transfer_unit" class="text-sm text-gray-500"></span>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -376,7 +388,6 @@
             tabButtons.forEach(button => {
                 button.addEventListener('click', () => {
                     const tabName = button.dataset.tab;
-                    
                     // Update button states
                     tabButtons.forEach(btn => {
                         if (btn.dataset.tab === tabName) {
@@ -387,7 +398,6 @@
                             btn.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
                         }
                     });
-
                     // Show the correct tab content
                     tabContents.forEach(content => {
                         if (content.id === `${tabName}-tab`) {
@@ -398,6 +408,97 @@
                     });
                 });
             });
+
+            // Units display per selected stock item
+            const unitBindings = [
+                { selectId: 'stock_item_id', spanId: 'receipt_unit' },
+                { selectId: 'withdrawal_stock_item_id', spanId: 'withdrawal_unit' },
+                { selectId: 'adjustment_stock_item_id', spanId: 'adjustment_unit' },
+                { selectId: 'transfer_stock_item_id', spanId: 'transfer_unit' },
+            ];
+
+            function updateUnit(selectEl, spanEl) {
+                if (!selectEl || !spanEl) return;
+                const opt = selectEl.options[selectEl.selectedIndex];
+                const unit = opt ? (opt.getAttribute('data-unit') || '') : '';
+                spanEl.textContent = unit;
+            }
+
+            unitBindings.forEach(({ selectId, spanId }) => {
+                const sel = document.getElementById(selectId);
+                const span = document.getElementById(spanId);
+                if (sel) {
+                    // Initial
+                    updateUnit(sel, span);
+                    // On change
+                    sel.addEventListener('change', () => updateUnit(sel, span));
+                }
+            });
+
+            // Filter withdrawal items by selected warehouse and show qty
+            const inventoriesByWarehouse = @json($warehouseInventories ?? []);
+
+            function formatOption(optionEl, qty) {
+                const name = optionEl.getAttribute('data-name') || optionEl.textContent.trim();
+                const unit = optionEl.getAttribute('data-unit') || '';
+                const baseLabel = unit ? `${name} (${unit})` : name;
+                optionEl.textContent = (qty !== null && qty !== undefined) ? `${baseLabel} — ${qty}` : baseLabel;
+            }
+
+            function formatAllOptions(selectId) {
+                const sel = document.getElementById(selectId);
+                if (!sel) return;
+                Array.from(sel.options).forEach(opt => {
+                    if (!opt.value) return; // skip placeholder
+                    formatOption(opt);
+                });
+            }
+
+            function filterItemsFor(selectWarehouseId, itemsSelectId) {
+                const whSel = document.getElementById(selectWarehouseId);
+                const itemsSel = document.getElementById(itemsSelectId);
+                if (!whSel || !itemsSel) return;
+                const warehouseId = whSel.value;
+                const inventory = inventoriesByWarehouse[warehouseId] || [];
+                const qtyMap = Object.fromEntries(inventory.map(i => [i.id, i.qty_on_hand]));
+
+                // Reset visibility and labels
+                Array.from(itemsSel.options).forEach(opt => {
+                    if (!opt.value) return; // skip placeholder
+                    const qty = qtyMap[opt.value];
+                    if (qty === undefined || qty <= 0) {
+                        opt.hidden = true;
+                    } else {
+                        opt.hidden = false;
+                        formatOption(opt, qty);
+                    }
+                });
+
+                // If current selection is hidden, reset to placeholder
+                const current = itemsSel.options[itemsSel.selectedIndex];
+                if (current && current.hidden) {
+                    itemsSel.selectedIndex = 0;
+                    const event = new Event('change');
+                    itemsSel.dispatchEvent(event);
+                }
+            }
+
+            // Initial label formatting with units
+            ['stock_item_id', 'withdrawal_stock_item_id', 'adjustment_stock_item_id', 'transfer_stock_item_id'].forEach(formatAllOptions);
+
+            // Wire for Withdrawal
+            filterItemsFor('withdrawal_warehouse_id', 'withdrawal_stock_item_id');
+            const withdrawalWarehouse = document.getElementById('withdrawal_warehouse_id');
+            if (withdrawalWarehouse) {
+                withdrawalWarehouse.addEventListener('change', () => filterItemsFor('withdrawal_warehouse_id', 'withdrawal_stock_item_id'));
+            }
+
+            // Wire for Transfer (source warehouse)
+            filterItemsFor('source_warehouse_id', 'transfer_stock_item_id');
+            const sourceWarehouse = document.getElementById('source_warehouse_id');
+            if (sourceWarehouse) {
+                sourceWarehouse.addEventListener('change', () => filterItemsFor('source_warehouse_id', 'transfer_stock_item_id'));
+            }
         });
     </script>
     @endpush

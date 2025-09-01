@@ -83,6 +83,12 @@
                             <div>
                                 <label for="low_stock" class="font-medium text-sm text-gray-700">{{ __('ui.inventory.show_low_stock') }}</label>
                             </div>
+                            <div class="flex items-center h-5 ml-6">
+                                <input id="include_out_of_stock" name="include_out_of_stock" type="checkbox" value="1" {{ request('include_out_of_stock') ? 'checked' : '' }} class="focus:ring-amber-500 h-4 w-4 text-amber-600 border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label for="include_out_of_stock" class="font-medium text-sm text-gray-700">{{ __('ui.inventory.show_out_of_stock') }}</label>
+                            </div>
                         </div>
 
                         <div class="w-full md:w-auto">
@@ -141,7 +147,11 @@
                                     {{ $item->stockItem->low_stock_threshold }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    @if($item->isLowStock())
+                                    @if(($item->qty_on_hand ?? 0) <= 0)
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-800">
+                                            {{ __('ui.inventory.no_stock') }}
+                                        </span>
+                                    @elseif($item->isLowStock())
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
                                             {{ __('ui.inventory.low_stock') }}
                                         </span>

@@ -105,6 +105,31 @@ You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you
 
 If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
 
+## Mission 1 demo data (seeders)
+
+This project includes a complete, idempotent Mission 1 dataset. It uses ULIDs for IDs, money in cents, UTC timestamps, and Spatie roles/permissions.
+
+- Warehouses: WH-PAR, WH-NE, WH-SUD, WH-OUEST
+- Users/Roles: admin, warehouse, fleet, franchisee
+- Franchisees, trucks, deployments, maintenance, replenishment orders, sales, and monthly report indices
+
+How to recreate the database and seed:
+
+```
+php artisan migrate:fresh --seed
+```
+
+Demo logins (password: `password`):
+
+- admin@drivncook.test (admin)
+- warehouse@drivncook.test (warehouse)
+- fleet@drivncook.test (fleet)
+- fr1@dc.test, fr2@dc.test, fr3@dc.test (franchisee)
+
+Notes:
+
+- Seeders are idempotent; you can run seeding multiple times safely.
+- Legacy seeders are deprecated and no-op; DatabaseSeeder orchestrates the current flow.
 ## Laravel Sponsors
 
 We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).

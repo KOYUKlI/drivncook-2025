@@ -20,8 +20,23 @@ class StockMovementController extends Controller
         
         $warehouses = Warehouse::where('is_active', true)->orderBy('name')->get();
         $stockItems = StockItem::where('is_active', true)->orderBy('name')->get();
-        
-        return view('bo.stock_movements.create', compact('warehouses', 'stockItems'));
+        // Map inventories by warehouse for client-side filtering in the form
+        $warehouseInventories = WarehouseInventory::with(['stockItem:id,name,unit'])
+            ->select('warehouse_id', 'stock_item_id', 'qty_on_hand')
+            ->get()
+            ->groupBy('warehouse_id')
+            ->map(function ($group) {
+                return $group->map(function ($inv) {
+                    return [
+                        'id' => $inv->stock_item_id,
+                        'name' => optional($inv->stockItem)->name ?? '',
+                        'unit' => optional($inv->stockItem)->unit ?? '',
+                        'qty_on_hand' => (int) ($inv->qty_on_hand ?? 0),
+                    ];
+                })->values();
+            });
+
+        return view('bo.stock_movements.create', compact('warehouses', 'stockItems', 'warehouseInventories'));
     }
 
     public function store(Request $request)
@@ -163,28 +178,26 @@ class StockMovementController extends Controller
         $destInventory->save();
         
         // Create movement records for both source and destination
-        $transferOutId = (string) Str::ulid();
-        $transferInId = (string) Str::ulid();
-        
-        // Create transfer out record
-        $this->createMovement([
-            'id' => $transferOutId,
+        // 1) Create transfer OUT first, without relation (to satisfy FK)
+        $transferOut = $this->createMovement([
             'warehouse_id' => $data['warehouse_id'],
             'stock_item_id' => $data['stock_item_id'],
             'quantity' => $data['quantity'],
             'reason' => $data['reason'] ?? __('ui.inventory.transfer_to', ['warehouse' => Warehouse::find($data['destination_warehouse_id'])->name]),
-            'related_movement_id' => $transferInId,
         ], StockMovement::TYPE_TRANSFER_OUT);
-        
-        // Create transfer in record
-        $this->createMovement([
-            'id' => $transferInId,
+
+        // 2) Create transfer IN referencing the OUT movement
+        $transferIn = $this->createMovement([
             'warehouse_id' => $data['destination_warehouse_id'],
             'stock_item_id' => $data['stock_item_id'],
             'quantity' => $data['quantity'],
             'reason' => $data['reason'] ?? __('ui.inventory.transfer_from', ['warehouse' => Warehouse::find($data['warehouse_id'])->name]),
-            'related_movement_id' => $transferOutId,
+            'related_movement_id' => $transferOut->id,
         ], StockMovement::TYPE_TRANSFER_IN);
+
+        // 3) Backfill the OUT movement relation to the IN
+        $transferOut->related_movement_id = $transferIn->id;
+        $transferOut->save();
     }
     
     private function findOrCreateInventory(string $warehouseId, string $stockItemId): WarehouseInventory

@@ -13,6 +13,8 @@ return [
     'maintenance_opened' => 'Maintenance programmée - {truck}',
     'maintenance_closed' => 'Fin de maintenance - {truck}',
     'monthly_sales_ready' => 'Rapport mensuel disponible - {month}',
+    'replenishment_shipped_subject' => 'Votre réappro :number a été expédié',
+    'replenishment_delivered_subject' => 'Votre réappro :number a été livré',
     'email_verification' => 'Vérifiez votre adresse email',
     'password_reset' => 'Réinitialisation de votre mot de passe',
     'new_application_admin' => 'Nouvelle candidature franchisé',
@@ -118,4 +120,8 @@ return [
     'monthly_report_intro' => 'Votre rapport mensuel de ventes est maintenant disponible.',
     'report_period' => 'Période',
     'report_secure_link' => 'Lien de téléchargement sécurisé (valide 48h)',
+
+    // Reappro
+    'replenishment_shipped_intro' => 'Votre commande de réapprovisionnement a été expédiée.',
+    'replenishment_delivered_intro' => 'Votre commande de réapprovisionnement a été livrée.',
 ];

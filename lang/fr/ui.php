@@ -1,6 +1,42 @@
 <?php
 
 return array (
+  'pdf' => 
+  array (
+    'common' => 
+    array (
+      'page' => 'Page',
+    ),
+    'monthly' => 
+    array (
+      'title' => 'Rapport mensuel de ventes',
+      'period' => 'Période',
+      'generated_at' => 'Généré le',
+      'daily_sales' => 'Ventes quotidiennes',
+      'per_truck' => 'Par camion',
+      'top_products' => 'Meilleurs produits',
+      'observations' => 'Observations',
+      'kpis' => 
+      array (
+        'total_sales' => 'Ventes totales',
+        'transactions' => 'Transactions',
+        'avg_ticket' => 'Ticket moyen',
+        'active_days' => 'Jours actifs',
+      ),
+      'headers' => 
+      array (
+        'date' => 'Date',
+        'transactions' => 'Transactions',
+        'total' => 'Total',
+        'avg' => 'Ticket moyen',
+        'truck' => 'Camion',
+        'sales' => 'Ventes',
+        'share' => 'Part',
+        'product' => 'Produit',
+        'qty' => 'Qté',
+      ),
+    ),
+  ),
   'all_rights_reserved' => 'Tous droits réservés',
   'applicant_information' => 'Informations du candidat',
   'application' => 'Candidature',
@@ -32,6 +68,7 @@ return array (
     'filter_by_warehouse' => 'Filtrer par Entrepôt',
     'filter_by_stock_item' => 'Filtrer par Article de Stock',
     'show_low_stock' => 'Afficher Uniquement les Articles à Faible Stock',
+    'show_out_of_stock' => 'Afficher les Ruptures de Stock',
     'title_for_warehouse' => 'Inventaire :warehouse',
     'quantity' => 'Quantité',
     'threshold' => 'Seuil de Stock Faible',
@@ -74,6 +111,24 @@ return array (
     ),
     'transfer_to' => 'Transfert vers :warehouse',
     'transfer_from' => 'Transfert depuis :warehouse',
+    'adjustment_type' => 'Type d\'ajustement',
+    'increase' => 'Augmentation',
+    'decrease' => 'Diminution',
+    'source_warehouse' => 'Entrepôt source',
+    'destination_warehouse' => 'Entrepôt de destination',
+    'stock_movements' => 
+    array (
+      'create_title' => 'Créer un mouvement de stock',
+      'receipt' => 'Réception',
+      'withdrawal' => 'Retrait',
+      'adjustment' => 'Ajustement',
+      'transfer' => 'Transfert',
+      'adjustment_type' => 'Type d\'ajustement',
+      'increase' => 'Augmentation',
+      'decrease' => 'Diminution',
+      'source_warehouse' => 'Entrepôt source',
+      'destination_warehouse' => 'Entrepôt de destination',
+    ),
   ),
   'create' => 'Créer',
   'dashboard' => 'Tableau de bord',
@@ -242,6 +297,14 @@ return array (
     'profile' => 'Profil',
     'login' => 'Connexion',
   ),
+  'audit' => 
+  array (
+    'title' => 'Journaux d’audit',
+    'route' => 'Route',
+    'action' => 'Action',
+    'resource' => 'Ressource',
+    'agent' => 'Agent Utilisateur',
+  ),
   'action_types' => 
   array (
     'create' => 'Créer',
@@ -309,8 +372,8 @@ return array (
     'active' => 'Actif',
     'inactive' => 'Inactif',
     'pending' => 'En attente',
-  'completed' => 'Terminée',
-  'cancelled' => 'Annulée',
+    'completed' => 'Terminée',
+    'cancelled' => 'Annulée',
     'approved' => 'Approuvé',
     'rejected' => 'Rejeté',
     'draft' => 'Brouillon',
@@ -328,6 +391,7 @@ return array (
   array (
     'name' => 'Nom',
     'email' => 'Email',
+    'user' => 'Utilisateur',
     'phone' => 'Téléphone',
     'address' => 'Adresse',
     'city' => 'Ville',
@@ -337,6 +401,8 @@ return array (
     'date' => 'Date',
     'created_at' => 'Créé le',
     'updated_at' => 'Modifié le',
+    'shipped_at' => 'Expédié le',
+    'delivered_at' => 'Livré le',
     'amount' => 'Montant',
     'quantity' => 'Quantité',
     'price' => 'Prix',
@@ -535,10 +601,31 @@ return array (
     'all_stock_items' => 'Tous les articles',
     'filter' => 'Filtrer',
     'back' => 'Retour',
+    'cancel' => 'Annuler',
     'create' => 'Créer',
     'actions' => 'Actions',
     'no_records' => 'Aucun enregistrement trouvé',
     'error_message' => 'Erreur lors de l\'opération',
+    'select_option' => 'Sélectionner une option',
+    'warehouse' => 'Entrepôt',
+    'franchisee' => 'Franchisé',
+    'status' => 'Statut',
+    'date' => 'Date',
+    'view' => 'Voir',
+    'lines' => 'Lignes',
+    'add_line' => 'Ajouter une ligne',
+    'remove_line' => 'Supprimer la ligne',
+    'qty' => 'Qté',
+    'item' => 'Article',
+    'shipped' => 'Expédié',
+    'delivered' => 'Livré',
+    'to_ship' => 'À expédier',
+    'to_receive' => 'À réceptionner',
+    'approve' => 'Approuver',
+    'prepare' => 'Préparer',
+    'ship' => 'Expédier',
+    'receive' => 'Réceptionner',
+    'created_at' => 'Créé le',
   ),
   'deployment' => 
   array (
@@ -1044,13 +1131,26 @@ return array (
     ),
     'reports' => 
     array (
-      'monthly_sales' => 
+      'compliance' => 
+      array (
+        'stats' => 
+        array (
+          'total_orders' => 'Total Commandes',
+          'compliant_orders' => 'Commandes Conformes',
+          'non_compliant_orders' => 'Commandes Non Conformes',
+          'compliance_rate' => 'Taux de Conformité',
+        ),
+      ),
+      'monthly' => 
       array (
         'title' => 'Rapports Mensuels de Ventes',
-        'subtitle' => 'Générer et consulter les rapports de ventes',
+        'subtitle' => 'Visualiser et générer des rapports mensuels de ventes',
         'all_franchisees' => 'Tous les Franchisés',
-        'already_exists' => 'Le rapport existe déjà',
+        'create_success' => 'Rapport créé avec succès',
+        'already_exists' => 'Le rapport existe déjà pour cette période',
         'file_not_found' => 'Fichier non trouvé',
+        'generated_success' => 'Rapport généré pour :franchisee — :month :year',
+        'no_franchisee_selected' => 'Aucun franchisé sélectionné',
         'filters' => 
         array (
           'title' => 'Filtres',
@@ -1074,7 +1174,7 @@ return array (
         ),
         'generate' => 
         array (
-          'title' => 'Générer un Rapport',
+          'title' => 'Générer un Nouveau Rapport',
           'button' => 'Générer',
           'franchisee' => 'Franchisé',
           'month' => 'Mois',
@@ -1232,6 +1332,7 @@ return array (
         'year' => 'Année',
         'month' => 'Mois',
         'all_months' => 'Tous les mois',
+  'all_franchisees' => 'Tous les franchisés',
         'apply' => 'Appliquer',
         'reset' => 'Réinitialiser',
       ),
@@ -1384,6 +1485,75 @@ return array (
     'emails_sent' => 'Emails envoyés avec succès.',
     'email_send_failed' => 'Échec de l\'envoi de l\'email.',
   ),
+  'replenishments' => 
+  array (
+    'title' => 'Commandes Franchisé',
+    'create' => 'Nouvelle commande franchisé',
+    'none' => 'Aucune commande franchisé',
+    'created' => 'Commande franchisé créée',
+    'show_title' => 'Commande franchisé :ref',
+    'status_updated' => 'Statut mis à jour',
+    'invalid_transition' => 'Transition invalide',
+    'ship_reason' => 'Expédition commande :id',
+    'status' => 
+    array (
+      'draft' => 'Brouillon',
+      'approved' => 'Approuvée',
+      'picked' => 'Préparée',
+      'shipped' => 'Expédiée',
+      'delivered' => 'Livrée',
+      'closed' => 'Clôturée',
+      'cancelled' => 'Annulée',
+    ),
+    'errors' => 
+    array (
+      'insufficient_stock' => 'Stock insuffisant pour l\'expédition',
+      'ship_exceeds_order' => 'La quantité à expédier dépasse la quantité commandée',
+      'deliver_exceeds_shipped' => 'La quantité à réceptionner dépasse la quantité expédiée',
+    ),
+    'summary' => 
+    array (
+      'ordered_total' => 'Total commandé',
+      'shipped_total' => 'Total expédié',
+      'delivered_total' => 'Total livré',
+      'to_ship' => 'à expédier',
+      'to_deliver' => 'à réceptionner',
+      'partials' => 'Lignes partielles',
+      'lines_partial' => ':shipped en expédition partielle · :delivered en réception partielle',
+    ),
+    'filters' => 
+    array (
+      'reference' => 'Référence',
+      'reference_placeholder' => 'REP-… ou extrait de référence',
+    ),
+    'csv' => 
+    array (
+      'reference' => 'Référence',
+      'franchisee' => 'Franchisé',
+      'warehouse' => 'Entrepôt',
+      'status' => 'Statut',
+      'total' => 'Total (€)',
+      'ratio8020' => 'Ratio 80/20 (%)',
+      'created_at' => 'Créé le',
+      'shipped_at' => 'Expédié le',
+      'delivered_at' => 'Livré le',
+    ),
+    'pdf' => 
+    array (
+      'picking_title' => 'Bon de préparation',
+      'delivery_note_title' => 'Bon de livraison',
+      'download_picking' => 'Télécharger le bon de préparation',
+      'download_delivery_note' => 'Télécharger le bon de livraison',
+    ),
+    'actions' => 
+    array (
+      'approve_title' => 'Approuver cette commande',
+      'cancel_title' => 'Annuler cette commande',
+      'prepare_title' => 'Marquer comme préparée et générer le bon',
+      'ship_title' => 'Expédier les quantités et générer le BL',
+      'receive_title' => 'Confirmer les quantités livrées',
+    ),
+  ),
   'po' => 
   array (
     'warehouse' => 
@@ -1423,5 +1593,11 @@ return array (
       'invalid_status_for_receive' => 'Seules les commandes expédiées peuvent être réceptionnées',
     ),
     'receipt_reason' => 'Réception de commande : :reference',
+  ),
+  'sidebar' => 
+  array (
+    'reports' => 'Rapports',
+    'monthly_reports' => 'Rapports Mensuels',
+    'compliance_reports' => 'Rapports de Conformité',
   ),
 );

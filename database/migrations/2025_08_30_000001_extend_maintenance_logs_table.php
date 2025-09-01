@@ -13,6 +13,10 @@ return new class extends Migration
     {
         if (Schema::hasTable('maintenance_logs')) {
             Schema::table('maintenance_logs', function (Blueprint $table) {
+                // Add status enum to align with model if missing
+                if (!Schema::hasColumn('maintenance_logs', 'status')) {
+                    $table->enum('status', ['planned', 'open', 'paused', 'closed', 'cancelled'])->default('planned')->after('kind');
+                }
                 // Add severity and priority enums (place at end to avoid missing after-columns)
                 if (!Schema::hasColumn('maintenance_logs', 'severity')) {
                     $table->enum('severity', ['low', 'medium', 'high'])->nullable();

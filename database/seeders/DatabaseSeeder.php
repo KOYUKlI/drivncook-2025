@@ -3,24 +3,29 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Check if we should use the test seeder instead of demo
-        $useTestData = env('SEED_TEST_DATA', false);
-        
+        // Reproducible seeding
+        fake()->seed(20250831);
+
+        // Orchestration per Mission 1
         $this->call([
-            RolesAndUsersSeeder::class,
-            // Domain seeders for inventory system
+            RoleAndUserSeeder::class,
             WarehouseSeeder::class,
             StockItemSeeder::class,
             WarehouseInventorySeeder::class,
-            FranchiseSeeder::class,
-            $useTestData ? TestTruckOperationsSeeder::class : TruckOperationsDemoSeeder::class,
-            SalesBackfillSeeder::class,
-            ApplicationsDemoSeeder::class,
+            FranchiseeSeeder::class,
+            TruckSeeder::class,
+            MaintenanceSeeder::class,
+            DeploymentSeeder::class,
+            ReplenishmentSeeder::class,
+            SaleSeeder::class,
+            ReportPdfSeeder::class,
         ]);
     }
 }

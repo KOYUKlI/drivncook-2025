@@ -2,11 +2,12 @@
 
 use App\Http\Controllers\BO\DashboardController as BODashboardController;
 use App\Http\Controllers\BO\FranchiseeController;
-use App\Http\Controllers\BO\PurchaseOrderController;
+use App\Http\Controllers\BO\Reports\ComplianceController as BOComplianceController;
 use App\Http\Controllers\BO\ReportController as BOReportController;
 use App\Http\Controllers\BO\StockItemController;
 use App\Http\Controllers\BO\TruckController;
 use App\Http\Controllers\BO\WarehouseController;
+use App\Http\Controllers\BO\AuditLogController;
 use App\Http\Controllers\FO\DashboardController as FODashboardController;
 use App\Http\Controllers\FO\ReportController;
 use App\Http\Controllers\FO\SaleController;
@@ -75,6 +76,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Franchisees management (admin only)
         Route::middleware('role:admin')->group(function () {
             Route::resource('franchisees', FranchiseeController::class);
+            // Audit logs viewer (admin only)
+            Route::get('audit', [AuditLogController::class, 'index'])->name('audit.index');
+            // Explicit alias path for audit/index
+            Route::get('audit/index', [AuditLogController::class, 'index'])->name('audit.index.alias');
             Route::get('applications', [ApplicationController::class, 'index'])->name('applications.index');
             Route::get('applications/{application}', [ApplicationController::class, 'show'])->name('applications.show');
             Route::post('applications/{application}/status', [ApplicationController::class, 'updateStatus'])->name('applications.update-status');
@@ -139,6 +144,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('reports/monthly', [BOReportController::class, 'monthly'])->name('reports.monthly');
             Route::post('reports/monthly/generate', [BOReportController::class, 'generate'])->name('reports.monthly.generate');
             Route::get('reports/{id}/download', [BOReportController::class, 'download'])->name('reports.download');
+            // 80/20 Compliance report (moved under reports)
+            Route::get('reports/compliance', [BOComplianceController::class, 'index'])->name('reports.compliance');
 
             // Warehouses, Stock Items and Inventory
             Route::resource('warehouses', WarehouseController::class)->except(['show']);
@@ -148,17 +155,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('warehouses/{id}/dashboard/export', [App\Http\Controllers\BO\WarehouseDashboardController::class, 'exportMovements'])->name('warehouses.dashboard.export');
             Route::resource('stock-items', StockItemController::class)->except(['show']);
             Route::resource('stock-movements', App\Http\Controllers\BO\StockMovementController::class)->only(['create', 'store']);
+            // Replenishments
+            Route::get('replenishments', [App\Http\Controllers\BO\ReplenishmentController::class, 'index'])->name('replenishments.index');
+            Route::get('replenishments/export', [App\Http\Controllers\BO\ReplenishmentController::class, 'export'])->name('replenishments.export');
+            Route::get('replenishments/create', [App\Http\Controllers\BO\ReplenishmentController::class, 'create'])->name('replenishments.create');
+            Route::post('replenishments', [App\Http\Controllers\BO\ReplenishmentController::class, 'store'])->name('replenishments.store');
+            Route::get('replenishments/{id}', [App\Http\Controllers\BO\ReplenishmentController::class, 'show'])->name('replenishments.show');
+            Route::post('replenishments/{id}/status', [App\Http\Controllers\BO\ReplenishmentController::class, 'updateStatus'])->name('replenishments.update-status');
+            // BO-only PDF downloads
+            Route::get('replenishments/{id}/picking.pdf', [App\Http\Controllers\BO\ReplenishmentController::class, 'downloadPicking'])->name('replenishments.download-picking');
+            Route::get('replenishments/{id}/delivery-note.pdf', [App\Http\Controllers\BO\ReplenishmentController::class, 'downloadDeliveryNote'])->name('replenishments.download-delivery-note');
 
-            Route::resource('purchase-orders', PurchaseOrderController::class)->only(['index', 'show', 'store', 'create']);
-            Route::post('purchase-orders/{id}/validate-compliance', [PurchaseOrderController::class, 'validateCompliance'])->name('purchase-orders.validate-compliance');
-            Route::post('purchase-orders/{id}/update-ratio', [PurchaseOrderController::class, 'updateRatio'])->name('purchase-orders.update-ratio');
-            Route::post('purchase-orders/{id}/recalculate', [PurchaseOrderController::class, 'recalculate'])->name('purchase-orders.recalculate');
-            Route::post('purchase-orders/{id}/status', [PurchaseOrderController::class, 'updateStatus'])->name('purchase-orders.update-status');
-            Route::get('purchase-orders/reports/compliance', [PurchaseOrderController::class, 'complianceReport'])->name('purchase-orders.compliance-report');
-            // New process routes for warehouse PO reception workflow
-            Route::post('purchase-orders/{id}/process/{action}', [PurchaseOrderController::class, 'processPurchaseOrder'])
-                ->where('action', 'prepare|ready|ship|receive')
-                ->name('purchase-orders.process');
+            // Temporary legacy redirects from deprecated Supplier Purchase Orders module to Replenishments
+            Route::redirect('purchase-orders', 'replenishments', 302);
+            Route::any('purchase-orders/{any}', function () {
+                return redirect()->route('bo.replenishments.index');
+            })->where('any', '.*');
         });
     });
 

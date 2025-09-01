@@ -23,10 +23,25 @@ class WarehouseInventoryController extends Controller
         if ($warehouseId) {
             $warehouse = Warehouse::findOrFail($warehouseId);
 
-            $stockItems = StockItem::orderBy('name')->get(['id','name']);
+            $includeOut = $request->boolean('include_out_of_stock');
+
+            // Stock items list respects the include_out_of_stock filter
+            $stockItems = StockItem::whereIn('id', function ($q) use ($warehouse, $includeOut) {
+                    $q->select('stock_item_id')
+                      ->from((new WarehouseInventory())->getTable())
+                      ->where('warehouse_id', $warehouse->id);
+                    if (!$includeOut) {
+                        $q->where('qty_on_hand', '>', 0);
+                    }
+                })
+                ->orderBy('name')
+                ->get(['id','name']);
 
             $inventoryQuery = WarehouseInventory::with(['warehouse','stockItem'])
                 ->where('warehouse_id', $warehouse->id);
+            if (!$includeOut) {
+                $inventoryQuery->where('qty_on_hand', '>', 0);
+            }
 
             if ($request->boolean('low_stock')) {
                 $inventoryQuery->whereNotNull('min_qty')->whereRaw('qty_on_hand <= min_qty');
@@ -59,10 +74,25 @@ class WarehouseInventoryController extends Controller
     {
         $this->authorize('view', $warehouse);
 
-        $stockItems = StockItem::orderBy('name')->get(['id','name']);
+        $includeOut = $request->boolean('include_out_of_stock');
+
+        // Stock items list respects the include_out_of_stock filter
+        $stockItems = StockItem::whereIn('id', function ($q) use ($warehouse, $includeOut) {
+                $q->select('stock_item_id')
+                  ->from((new WarehouseInventory())->getTable())
+                  ->where('warehouse_id', $warehouse->id);
+                if (!$includeOut) {
+                    $q->where('qty_on_hand', '>', 0);
+                }
+            })
+            ->orderBy('name')
+            ->get(['id','name']);
 
         $query = WarehouseInventory::with(['warehouse','stockItem'])
             ->where('warehouse_id', $warehouse->id);
+        if (!$includeOut) {
+            $query->where('qty_on_hand', '>', 0);
+        }
 
         if ($request->filled('search')) {
             $search = $request->string('search');

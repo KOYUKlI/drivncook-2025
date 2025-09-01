@@ -7,6 +7,13 @@ use App\Models\StockItem;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Compute and summarize 80/20 corporate-vs-free purchase share.
+ * Notes:
+ * - Scope decision: Report targets Replenishments only in controllers, but service supports any kind.
+ * - Replenishment semantics: line unit_price_cents already equals line total; qty is treated as 1 for totals/ratio.
+ * - Ignore cancelled/empty lines: qty<=0 or unit_price_cents<=0 are excluded from sums (treated as cancelled).
+ */
 class PurchaseComplianceService
 {
     /**
@@ -21,33 +28,36 @@ class PurchaseComplianceService
             return 0.00;
         }
 
-        $totalValue = 0;
-        $corporateValue = 0;
+        // Build central flag map in one query (acts like a join)
+        $stockItemIds = array_unique(array_column($lines, 'stock_item_id'));
+        $isCentralById = empty($stockItemIds)
+            ? []
+            : StockItem::whereIn('id', $stockItemIds)->pluck('is_central', 'id')->toArray();
 
-        // Get all stock items for the lines
-        $stockItemIds = array_column($lines, 'stock_item_id');
-        $stockItems = StockItem::whereIn('id', $stockItemIds)
-            ->pluck('is_central', 'id')
-            ->toArray();
+        $totalCents = 0;
+        $centralCents = 0;
 
-        foreach ($lines as $line) {
-            $lineValue = $line['qty'] * $line['unit_price_cents'];
-            $totalValue += $lineValue;
+        foreach ($lines as $l) {
+            $qty = max(0, (int)($l['qty'] ?? 0));
+            $priceCents = max(0, (int)($l['unit_price_cents'] ?? 0));
+            // Ignore cancelled/empty lines (qty<=0 or price<=0)
+            if ($qty === 0 || $priceCents === 0) {
+                continue;
+            }
 
-            // Check if this stock item is corporate mandated
-            $isCorporate = $stockItems[$line['stock_item_id']] ?? false;
-            if ($isCorporate) {
-                $corporateValue += $lineValue;
+            $lineCents = $qty * $priceCents;
+            $totalCents += $lineCents;
+
+            if (!empty($l['stock_item_id']) && ($isCentralById[$l['stock_item_id']] ?? false)) {
+                $centralCents += $lineCents;
             }
         }
 
-        if ($totalValue === 0) {
-            return 0.00;
+        if ($totalCents === 0) {
+            return 0.00; // Explicit: total=0 → ratio=0, no warnings
         }
 
-        $ratio = ($corporateValue / $totalValue) * 100;
-
-        return round($ratio, 2);
+        return round(($centralCents / $totalCents) * 100, 2);
     }
     
     /**
@@ -59,14 +69,17 @@ class PurchaseComplianceService
      */
     public function getRatio(PurchaseOrder $purchaseOrder): float
     {
-        $lines = $purchaseOrder->lines->map(function($line) {
+        // Normalize lines: for Replenishments, unit_price_cents already represents the line total
+        // so we set qty=1 to avoid multiplying. For other kinds, use qty * unit_price_cents.
+        $lines = $purchaseOrder->lines->map(function ($line) use ($purchaseOrder) {
+            $isRepl = ($purchaseOrder->kind === 'Replenishment');
             return [
                 'stock_item_id' => $line->stock_item_id,
-                'qty' => $line->quantity,
-                'unit_price_cents' => $line->unit_price_cents
+                'qty' => $isRepl ? 1 : (int)($line->qty ?? 0),
+                'unit_price_cents' => (int) ($line->unit_price_cents ?? 0),
             ];
         })->toArray();
-        
+
         return $this->ratio8020($lines);
     }
     
@@ -89,42 +102,28 @@ class PurchaseComplianceService
      */
     public function getComplianceData(Collection $purchaseOrders): array
     {
-        $data = [];
         $compliantCount = 0;
-        $totalRatio = 0;
-        
+        $totalRatio = 0.0;
+
         foreach ($purchaseOrders as $order) {
             $ratio = $this->getRatio($order);
-            $isCompliant = $ratio >= 80;
-            
-            if ($isCompliant) {
+            if ($ratio >= 80.0) {
                 $compliantCount++;
             }
-            
             $totalRatio += $ratio;
-            
-            $data[] = [
-                'order_id' => $order->id,
-                'order_number' => $order->number,
-                'franchisee' => $order->franchisee->name ?? 'Admin Order',
-                'date' => $order->order_date,
-                'total' => $order->total_cents,
-                'ratio' => $ratio,
-                'is_compliant' => $isCompliant,
-            ];
         }
-        
-        $count = $purchaseOrders->count();
-        
+
+        $count = max(0, $purchaseOrders->count());
+
         return [
-            'orders' => $data,
+            'orders' => [], // Not used by consumers; list is provided separately
             'metrics' => [
                 'total_count' => $count,
                 'compliant_count' => $compliantCount,
-                'non_compliant_count' => $count - $compliantCount,
-                'compliance_rate' => $count > 0 ? round(($compliantCount / $count) * 100, 2) : 0,
-                'average_ratio' => $count > 0 ? round($totalRatio / $count, 2) : 0,
-            ]
+                'non_compliant_count' => max(0, $count - $compliantCount),
+                'compliance_rate' => $count > 0 ? round(($compliantCount / $count) * 100, 2) : 0.0,
+                'average_ratio' => $count > 0 ? round($totalRatio / $count, 2) : 0.0,
+            ],
         ];
     }
     
@@ -136,43 +135,49 @@ class PurchaseComplianceService
      */
     public function getComplianceByFranchisee(Collection $purchaseOrders): array
     {
-        $franchiseeData = [];
-        
+        $by = [];
+
         foreach ($purchaseOrders as $order) {
-            $franchiseeId = $order->franchisee_id ?? 'admin';
-            $franchiseeName = $order->franchisee->name ?? 'Admin Orders';
-            
-            if (!isset($franchiseeData[$franchiseeId])) {
-                $franchiseeData[$franchiseeId] = [
-                    'name' => $franchiseeName,
-                    'orders_count' => 0,
-                    'compliant_count' => 0,
-                    'total_ratio' => 0,
-                ];
-            }
-            
+            $fid = $order->franchisee_id ?? 'admin';
+            $fname = $order->franchisee->name ?? 'Admin Orders';
+
+            $rec = $by[$fid] ?? ['name' => $fname, 'orders_count' => 0, 'compliant_count' => 0, 'total_ratio' => 0.0];
             $ratio = $this->getRatio($order);
-            $franchiseeData[$franchiseeId]['orders_count']++;
-            $franchiseeData[$franchiseeId]['total_ratio'] += $ratio;
-            
-            if ($ratio >= 80) {
-                $franchiseeData[$franchiseeId]['compliant_count']++;
-            }
+            $rec['orders_count']++;
+            $rec['total_ratio'] += $ratio;
+            if ($ratio >= 80.0) { $rec['compliant_count']++; }
+            $by[$fid] = $rec;
         }
-        
-        // Calculate averages
-        foreach ($franchiseeData as &$data) {
-            $data['avg_ratio'] = $data['orders_count'] > 0 
-                ? round($data['total_ratio'] / $data['orders_count'], 2) 
-                : 0;
-                
-            $data['compliance_rate'] = $data['orders_count'] > 0 
-                ? round(($data['compliant_count'] / $data['orders_count']) * 100, 2) 
-                : 0;
-                
-            $data['is_compliant'] = $data['avg_ratio'] >= 80;
+
+        return collect($by)->map(function ($d) {
+            $orders = max(0, (int)$d['orders_count']);
+            $avg = $orders > 0 ? round($d['total_ratio'] / $orders, 2) : 0.0;
+            return [
+                'name' => $d['name'],
+                'orders_count' => $orders,
+                'compliant_count' => (int) $d['compliant_count'],
+                'avg_ratio' => $avg,
+                'compliance_rate' => $orders > 0 ? round(($d['compliant_count'] / $orders) * 100, 2) : 0.0,
+                'is_compliant' => $avg >= 80.0,
+            ];
+        })->values()->all();
+    }
+
+    /**
+     * Compute total amount of an order in cents, respecting semantics:
+     * - Replenishment: unit_price_cents already represents the line total.
+     * - Other kinds: qty * unit_price_cents.
+     */
+    public function getOrderTotalCents(PurchaseOrder $order): int
+    {
+        $isRepl = ($order->kind === 'Replenishment');
+        $sum = 0;
+        foreach ($order->lines as $l) {
+            $qty = $isRepl ? 1 : max(0, (int)($l->qty ?? 0));
+            $price = max(0, (int)($l->unit_price_cents ?? 0));
+            if ($qty === 0 || $price === 0) { continue; }
+            $sum += $qty * $price;
         }
-        
-        return array_values($franchiseeData);
+        return (int) $sum;
     }
 }

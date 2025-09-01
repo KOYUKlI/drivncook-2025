@@ -13,6 +13,8 @@ return [
     'maintenance_opened' => 'Scheduled maintenance - {truck}',
     'maintenance_closed' => 'Maintenance completed - {truck}',
     'monthly_sales_ready' => 'Monthly report available - {month}',
+    'replenishment_shipped_subject' => 'Your replenishment :number has been shipped',
+    'replenishment_delivered_subject' => 'Your replenishment :number has been delivered',
     'email_verification' => 'Verify your email address',
     'password_reset' => 'Reset your password',
     'new_application_admin' => 'New franchise application',
@@ -118,4 +120,8 @@ return [
     'monthly_report_intro' => 'Your monthly sales report is now available.',
     'report_period' => 'Period',
     'report_secure_link' => 'Secure download link (valid for 48h)',
+
+    // Replenishments
+    'replenishment_shipped_intro' => 'Your replenishment order has been shipped.',
+    'replenishment_delivered_intro' => 'Your replenishment order has been delivered.',
 ];

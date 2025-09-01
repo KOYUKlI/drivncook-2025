@@ -832,7 +832,6 @@
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                </svg>
                             </div>
                             <input type="text" name="description" value="{{ old('description') }}" placeholder="{{ __('ui.maintenance.placeholder.description') }}" class="pl-10 w-full rounded-lg border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500" />
                         </div>
@@ -871,65 +870,66 @@
             </div>
             @endcan
 
+            <!-- KPI + Filters + Export -->
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4 mb-4">
+                <div class="flex flex-wrap items-end justify-between gap-4">
+                    <div class="grid grid-cols-3 gap-4">
+                        <div>
+                            <div class="text-xs text-gray-500 mb-1">{{ __('maintenance.total_cost') }} 30j</div>
+                            <div class="text-lg font-semibold text-amber-700">€ {{ number_format(($maintenanceKpis['30d'] ?? 0)/100, 2, ',', ' ') }}</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500 mb-1">{{ __('maintenance.total_cost') }} 60j</div>
+                            <div class="text-lg font-semibold text-amber-700">€ {{ number_format(($maintenanceKpis['60d'] ?? 0)/100, 2, ',', ' ') }}</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500 mb-1">{{ __('maintenance.total_cost') }} 12m</div>
+                            <div class="text-lg font-semibold text-amber-700">€ {{ number_format(($maintenanceKpis['365d'] ?? 0)/100, 2, ',', ' ') }}</div>
+                        </div>
+                    </div>
+                    <form method="GET" action="{{ route('bo.maintenance.export', ['truck' => $truck['id']]) }}" class="flex items-end gap-2">
+                        <div>
+                            <label class="block text-xs text-gray-500">{{ __('maintenance.status') }}</label>
+                            <select name="status" class="rounded border-gray-300 text-sm">
+                                <option value="all">{{ __('ui.labels.all') }}</option>
+                                <option value="planned">{{ __('ui.maintenance.status.planned') }}</option>
+                                <option value="open">{{ __('ui.maintenance.status.open') }}</option>
+                                <option value="paused">{{ __('ui.maintenance.status.paused') }}</option>
+                                <option value="closed">{{ __('ui.maintenance.status.closed') }}</option>
+                                <option value="cancelled">{{ __('ui.maintenance.status.cancelled') }}</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-500">{{ __('maintenance.severity') }}</label>
+                            <select name="severity" class="rounded border-gray-300 text-sm">
+                                <option value="all">{{ __('ui.labels.all') }}</option>
+                                <option value="low">{{ __('maintenance.severity_low') }}</option>
+                                <option value="medium">{{ __('maintenance.severity_medium') }}</option>
+                                <option value="high">{{ __('maintenance.severity_high') }}</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-500">{{ __('ui.filters.from') }}</label>
+                            <input type="date" name="from" class="rounded border-gray-300 text-sm" />
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-500">{{ __('ui.filters.to') }}</label>
+                            <input type="date" name="to" class="rounded border-gray-300 text-sm" />
+                        </div>
+                        <button type="submit" class="inline-flex items-center gap-2 px-3 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            CSV
+                        </button>
+                    </form>
+                </div>
+            </div>
+
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                 <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <div class="p-2 bg-amber-100 rounded-lg">
                                 <svg class="h-5 w-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                </svg>
-                            </div>
-                            <h3 class="text-lg font-semibold text-gray-900">{{ __('ui.maintenance.history') }}</h3>
-                            <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                                {{ count($truck['maintenance'] ?? []) }} {{ __('ui.labels.total') }}
-                            </span>
-                        </div>
-                        <div class="text-sm text-gray-600">
-                            {{ __('ui.maintenance.status.open') }}: <span class="font-bold text-amber-600">{{ count(array_filter($truck['maintenance'] ?? [], fn($m) => ($m['status'] ?? 'open') === 'open')) }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div x-data="{ 
-                        activeMaintenances: {{ Illuminate\Support\Js::from(array_filter(($truck['maintenance'] ?? []), fn($m) => ($m['status'] ?? 'open') === 'open')) }},
-                        closedMaintenances: {{ Illuminate\Support\Js::from(array_filter(($truck['maintenance'] ?? []), fn($m) => ($m['status'] ?? 'open') === 'closed')) }},
-                        view: 'active'
-                     }" class="p-4">
-                    
-                    <div class="flex items-center justify-between mb-6">
-                        <div class="flex space-x-2">
-                            <button 
-                                @click="view = 'active'" 
-                                :class="view === 'active' ? 'bg-amber-100 text-amber-800 border-amber-200' : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'"
-                                class="px-4 py-2 text-sm font-medium rounded-lg border transition-colors flex items-center gap-2">
-                                <span class="inline-block w-2 h-2 rounded-full bg-yellow-500"></span>
-                                {{ __('ui.maintenance.status.open') }} 
-                                <span class="ml-1 px-2 py-0.5 bg-white bg-opacity-50 rounded-full text-xs">
-                                    <span x-text="activeMaintenances.length"></span>
-                                </span>
-                            </button>
-                            <button 
-                                @click="view = 'closed'" 
-                                :class="view === 'closed' ? 'bg-green-100 text-green-800 border-green-200' : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'"
-                                class="px-4 py-2 text-sm font-medium rounded-lg border transition-colors flex items-center gap-2">
-                                <span class="inline-block w-2 h-2 rounded-full bg-green-500"></span>
-                                {{ __('ui.maintenance.status.closed') }}
-                                <span class="ml-1 px-2 py-0.5 bg-white bg-opacity-50 rounded-full text-xs">
-                                    <span x-text="closedMaintenances.length"></span>
-                                </span>
-                            </button>
-                        </div>
-                        
-                        <div>
-                            <span class="text-sm text-gray-500">
-                                {{ __('ui.maintenance.total_cost') }}: <span class="font-semibold text-amber-600">€
-                                {{ number_format(array_reduce(($truck['maintenance'] ?? []), function($carry, $item) {
-                                    return $carry + ($item['cost'] ?? 0);
-                                }, 0) / 100, 2, ',', ' ') }}
-                                </span>
-                            </span>
                         </div>
                     </div>
 

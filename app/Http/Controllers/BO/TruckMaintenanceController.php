@@ -11,6 +11,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Schema;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 
 class TruckMaintenanceController extends Controller
 {
@@ -107,5 +110,102 @@ class TruckMaintenanceController extends Controller
         }
 
         return response()->download(Storage::disk('local')->path($logModel->attachment_path));
+    }
+
+    /**
+     * Export maintenance logs for a truck as CSV (UTF-8 BOM, ISO dates), with optional filters.
+     */
+    public function export(Truck $truck, Request $request): StreamedResponse
+    {
+        $this->authorize('view', $truck);
+
+        $query = MaintenanceLog::query()->where('truck_id', $truck->id);
+
+        // Filters: status, severity, from, to (by opened_at/started_at), default all
+        if ($status = $request->string('status')->toString()) {
+            if (Schema::hasColumn('maintenance_logs', 'status') && $status !== 'all') {
+                $query->where('status', $status);
+            }
+        }
+        if ($severity = $request->string('severity')->toString()) {
+            if (Schema::hasColumn('maintenance_logs', 'severity') && $severity !== 'all') {
+                $query->where('severity', $severity);
+            }
+        }
+        $from = $request->date('from');
+        $to = $request->date('to');
+        if ($from || $to) {
+            $dateCol = Schema::hasColumn('maintenance_logs', 'opened_at') ? 'opened_at' : (Schema::hasColumn('maintenance_logs', 'started_at') ? 'started_at' : null);
+            if ($dateCol) {
+                if ($from) {
+                    $query->whereDate($dateCol, '>=', $from->format('Y-m-d'));
+                }
+                if ($to) {
+                    $query->whereDate($dateCol, '<=', $to->format('Y-m-d'));
+                }
+            }
+        }
+
+        $logs = $query->orderByDesc(Schema::hasColumn('maintenance_logs', 'opened_at') ? 'opened_at' : (Schema::hasColumn('maintenance_logs', 'started_at') ? 'started_at' : 'created_at'))
+            ->get();
+
+        $filename = 'maintenance-'.$truck->id.'-'.now()->format('Ymd_His').'.csv';
+
+        return response()->streamDownload(function () use ($logs) {
+            $out = fopen('php://output', 'w');
+            // UTF-8 BOM
+            echo "\xEF\xBB\xBF";
+            // Headers
+            fputcsv($out, [
+                'id','truck_id','type','status','severity','priority','opened_at','started_at','closed_at','due_at','cost_cents','description','resolution'
+            ]);
+            foreach ($logs as $log) {
+                fputcsv($out, [
+                    $log->id,
+                    $log->truck_id,
+                    $log->type ?? $log->kind ?? null,
+                    $log->status ?? (empty($log->closed_at) ? 'open' : 'closed'),
+                    $log->severity ?? null,
+                    $log->priority ?? null,
+                    optional($log->opened_at)->format('c'),
+                    optional($log->started_at)->format('c'),
+                    optional($log->closed_at)->format('c'),
+                    optional($log->due_at)->format('c'),
+                    $log->cost_cents ?? null,
+                    $log->description,
+                    $log->resolution ?? null,
+                ]);
+            }
+            fclose($out);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
+    }
+
+    /**
+     * Generate a maintenance intervention PDF for a maintenance log (BO only).
+     */
+    public function interventionPdf(string $log)
+    {
+        $logModel = MaintenanceLog::with('truck')->findOrFail($log);
+        $this->authorize('view', $logModel);
+
+        $data = ['log' => $logModel];
+        $html = view('pdfs.maintenance.intervention', $data)->render();
+
+        $opts = new Options();
+        $opts->set('isRemoteEnabled', true);
+        $opts->set('isPhpEnabled', true);
+        $opts->set('defaultFont', 'DejaVu Sans');
+        $dompdf = new Dompdf($opts);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        $filename = 'maintenance-'.$logModel->id.'.pdf';
+        return response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="'.$filename.'"',
+        ]);
     }
 }

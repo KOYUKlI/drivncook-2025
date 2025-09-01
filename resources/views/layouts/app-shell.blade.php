@@ -89,5 +89,7 @@
 
         <!-- Footer pleine largeur en dehors du flex -->
         @include('layouts.partials.footer')
+
+    @stack('scripts')
     </body>
 </html>

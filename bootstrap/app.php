@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
         ]);
+        $middleware->appendToGroup('web', [\App\Http\Middleware\AuditLogMiddleware::class]);
     })
     ->withSchedule(function (Schedule $schedule): void {
         // Mission 1: monthly sales PDFs generator (runs every 1st of the month at 02:00)

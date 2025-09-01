@@ -4,7 +4,7 @@
         openAdmin: {{ request()->routeIs('bo.franchisees.*') || request()->routeIs('bo.applications.*') ? 'true' : 'false' }},
         openFleet: {{ request()->routeIs('bo.trucks.*') ? 'true' : 'false' }},
         openWarehouse: {{ request()->routeIs('bo.warehouses.*') || request()->routeIs('bo.stock-items.*') || request()->routeIs('bo.stock-movements.*') || request()->routeIs('bo.warehouses.inventory*') ? 'true' : 'false' }},
-        openPurchasing: {{ request()->routeIs('bo.purchase-orders.*') ? 'true' : 'false' }},
+    openPurchasing: {{ (request()->routeIs('bo.replenishments.*')) ? 'true' : 'false' }},
         openReports: {{ request()->routeIs('bo.reports.*') ? 'true' : 'false' }},
     }">
         @role('admin|warehouse|fleet|tech')
@@ -33,6 +33,10 @@
                                 <x-nav.link :href="route('bo.applications.index')" :active="request()->routeIs('bo.applications.*')" class="group flex items-center py-2">
                                     <svg class="mr-2 h-4 w-4 text-gray-400 group-hover:text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                     <span class="text-sm">{{ __('ui.applications') }}</span>
+                                </x-nav.link>
+                                <x-nav.link :href="route('bo.audit.index')" :active="request()->routeIs('bo.audit.*')" class="group flex items-center py-2">
+                                    <svg class="mr-2 h-4 w-4 text-gray-400 group-hover:text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                                    <span class="text-sm">{{ __('audit.title') }}</span>
                                 </x-nav.link>
                             </div>
                         </div>
@@ -95,18 +99,11 @@
                         </button>
                         <div x-show="openPurchasing" x-collapse>
                             <div class="pl-2 space-y-0.5">
-                                <x-nav.link :href="route('bo.purchase-orders.index')" :active="request()->routeIs('bo.purchase-orders.index')" class="group flex items-center py-2">
-                                    <svg class="mr-2 h-4 w-4 text-gray-400 group-hover:text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2"/></svg>
-                                    <span class="text-sm">{{ __('ui.bo.purchase_orders.title') }}</span>
-                                </x-nav.link>
-                                <x-nav.link :href="route('bo.purchase-orders.create')" :active="request()->routeIs('bo.purchase-orders.create')" class="group flex items-center py-2">
-                                    <svg class="mr-2 h-4 w-4 text-gray-400 group-hover:text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-                                    <span class="text-sm">{{ __('ui.bo.purchase_orders.create') }}</span>
-                                </x-nav.link>
-                                <x-nav.link :href="route('bo.purchase-orders.compliance-report')" :active="request()->routeIs('bo.purchase-orders.compliance-report')" class="group flex items-center py-2">
-                                    <svg class="mr-2 h-4 w-4 text-gray-400 group-hover:text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2"/></svg>
-                                    <span class="text-sm">{{ __('ui.bo.purchase_orders.compliance_report.title') }}</span>
-                                </x-nav.link>
+                                
+                                    <x-nav.link :href="route('bo.replenishments.index')" :active="request()->routeIs('bo.replenishments.*')" class="group flex items-center py-2">
+                                        <svg class="mr-2 h-4 w-4 text-gray-400 group-hover:text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18"/></svg>
+                                        <span class="text-sm">{{ __('ui.replenishments.title') }}</span>
+                                    </x-nav.link>
                             </div>
                         </div>
                     </div>
@@ -121,6 +118,10 @@
                                 <x-nav.link :href="route('bo.reports.monthly')" :active="request()->routeIs('bo.reports.monthly*')" class="group flex items-center py-2">
                                     <svg class="mr-2 h-4 w-4 text-gray-400 group-hover:text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/></svg>
                                     <span class="text-sm">{{ __('ui.monthly_sales_reports') }}</span>
+                                </x-nav.link>
+                                <x-nav.link :href="route('bo.reports.compliance')" :active="request()->routeIs('bo.reports.compliance')" class="group flex items-center py-2">
+                                    <svg class="mr-2 h-4 w-4 text-gray-400 group-hover:text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2"/></svg>
+                                    <span class="text-sm">{{ __('ui.nav.reports_compliance') }}</span>
                                 </x-nav.link>
                             </div>
                         </div>
@@ -222,7 +223,7 @@
                 openAdminM: {{ request()->routeIs('bo.franchisees.*') || request()->routeIs('bo.applications.*') ? 'true' : 'false' }},
                 openFleetM: {{ request()->routeIs('bo.trucks.*') ? 'true' : 'false' }},
                 openWarehouseM: {{ request()->routeIs('bo.warehouses.*') || request()->routeIs('bo.stock-items.*') || request()->routeIs('bo.stock-movements.*') || request()->routeIs('bo.warehouses.inventory*') ? 'true' : 'false' }},
-                openPurchasingM: {{ request()->routeIs('bo.purchase-orders.*') ? 'true' : 'false' }},
+                openPurchasingM: {{ (request()->routeIs('bo.replenishments.*')) ? 'true' : 'false' }},
                 openReportsM: {{ request()->routeIs('bo.reports.*') ? 'true' : 'false' }},
                 openFoSalesM: {{ request()->routeIs('fo.sales.*') ? 'true' : 'false' }},
                 openFoReportsM: {{ request()->routeIs('fo.reports.*') ? 'true' : 'false' }},
@@ -243,6 +244,9 @@
                             </x-nav.link>
                             <x-nav.link :href="route('bo.applications.index')" :active="request()->routeIs('bo.applications.*')" mobile>
                                 {{ __('ui.applications') }}
+                            </x-nav.link>
+                            <x-nav.link :href="route('bo.audit.index')" :active="request()->routeIs('bo.audit.*')" mobile>
+                                {{ __('audit.title') }}
                             </x-nav.link>
                         </div>
                     @endrole
@@ -287,15 +291,10 @@
                             <svg class="h-4 w-4 transform transition-transform" :class="{ 'rotate-90': openPurchasingM }" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                         </button>
                         <div x-show="openPurchasingM" x-collapse class="pl-2">
-                            <x-nav.link :href="route('bo.purchase-orders.index')" :active="request()->routeIs('bo.purchase-orders.index')" mobile>
-                                {{ __('ui.bo.purchase_orders.title') }}
-                            </x-nav.link>
-                            <x-nav.link :href="route('bo.purchase-orders.create')" :active="request()->routeIs('bo.purchase-orders.create')" mobile>
-                                {{ __('ui.bo.purchase_orders.create') }}
-                            </x-nav.link>
-                            <x-nav.link :href="route('bo.purchase-orders.compliance-report')" :active="request()->routeIs('bo.purchase-orders.compliance-report')" mobile>
-                                {{ __('ui.bo.purchase_orders.compliance_report.title') }}
-                            </x-nav.link>
+                            
+                                <x-nav.link :href="route('bo.replenishments.index')" :active="request()->routeIs('bo.replenishments.*')" mobile>
+                                    {{ __('ui.replenishments.title') }}
+                                </x-nav.link>
                         </div>
 
                         <button type="button" @click="openReportsM = !openReportsM" class="w-full flex items-center justify-between text-left text-xs font-semibold uppercase tracking-wider text-gray-500 px-1 py-2">
@@ -305,6 +304,9 @@
                         <div x-show="openReportsM" x-collapse class="pl-2">
                             <x-nav.link :href="route('bo.reports.monthly')" :active="request()->routeIs('bo.reports.monthly*')" mobile>
                                 {{ __('ui.monthly_sales_reports') }}
+                            </x-nav.link>
+                            <x-nav.link :href="route('bo.reports.compliance')" :active="request()->routeIs('bo.reports.compliance')" mobile>
+                                {{ __('ui.nav.reports_compliance') }}
                             </x-nav.link>
                         </div>
                     @endrole
