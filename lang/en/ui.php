@@ -57,6 +57,8 @@ return array (
     'fo_sales_create' => 'Record Sale',
     'fo_reports' => 'Reports',
     'fo_truck' => 'My Truck',
+  'fo_orders' => 'My Orders',
+  'fo_maintenance' => 'Maintenance',
     'login' => 'Login',
     'logout' => 'Logout',
     'profile' => 'My Profile',
@@ -281,6 +283,14 @@ return array (
     'deployments' => 'Deployments',
     'search' => 'Search',
   ),
+  'status' =>
+  array (
+    'active' => 'Active',
+    'in_maintenance' => 'In maintenance',
+    'retired' => 'Retired',
+    'inactive' => 'Inactive',
+    'draft' => 'Draft',
+  ),
   'flash' => 
   array (
     'saved' => 'Saved successfully',
@@ -352,7 +362,8 @@ return array (
     'stock_item_edit' => 'Edit Stock Item',
     'purchase_orders' => 'Order Management',
     'purchase_order_create' => 'New Order',
-    'purchase_order_show' => 'Order Details',
+  'purchase_order_show' => 'Order Details',
+  'purchase_orders' => 'Orders',
     'reports_monthly' => 'Monthly Reports',
     'reports_compliance' => 'Compliance Report',
   'fo_dashboard' => 'My Dashboard',
@@ -982,6 +993,111 @@ return array (
         ),
       ),
     ),
+    'orders_request' => array(
+      'index' => array(
+        'title' => 'My Order Requests',
+      ),
+      'create' => array(
+        'title' => 'New Order Request',
+        'ref_preview' => 'Reference (will be assigned at save):',
+      ),
+      'edit' => array(
+        'title' => 'Edit Order Request :ref',
+      ),
+      'show' => array(
+        'title' => 'Order Request :ref',
+      ),
+      'actions' => array(
+        'new' => 'New request',
+        'submit' => 'Submit request',
+      ),
+      'flash' => array(
+        'created' => 'Order request created.',
+        'updated' => 'Order request updated.',
+        'submitted' => 'Order request submitted.',
+      ),
+      'errors' => array(
+        'invalid_transition' => 'Invalid status transition',
+      ),
+      'ratio_warning_hint' => 'Ratio 80/20 is computed server-side; a warning will appear if below 80%.',
+      'back_to_list' => 'Back to requests',
+    ),
+    'fo_orders' => array(
+      'index' => array(
+        'title' => 'Franchisee Requests',
+      ),
+      'show' => array(
+        'title' => 'Request :ref',
+      ),
+      'actions' => array(
+        'approve' => 'Approve',
+        'pick' => 'Pick',
+        'ship' => 'Ship',
+        'deliver' => 'Deliver',
+        'close' => 'Close',
+        'cancel' => 'Cancel',
+      ),
+      'flash' => array(
+        'approved' => 'Order approved',
+        'picked' => 'Order picked',
+        'shipped' => 'Order shipped',
+        'delivered' => 'Order delivered',
+        'closed' => 'Order closed',
+        'cancelled' => 'Order cancelled',
+      ),
+      'errors' => array(
+        'invalid_transition' => 'Invalid status transition',
+        'insufficient_stock' => 'Insufficient stock for this shipment',
+        'ship_exceeds_order' => 'Quantity to ship exceeds ordered quantity',
+        'deliver_exceeds_shipped' => 'Quantity to deliver exceeds shipped quantity',
+        'warehouse_required' => 'Warehouse is required to ship',
+      ),
+      'csv' => array(
+        'reference' => 'Reference',
+      ),
+    ),
+  ),
+  'fo' => array(
+    'orders_request' => array(
+      'index' => array(
+        'title' => 'My Order Requests',
+      ),
+      'create' => array(
+        'title' => 'New Order Request',
+        'ref_preview' => 'Reference (will be assigned at save):',
+      ),
+      'edit' => array(
+        'title' => 'Edit Order Request :ref',
+      ),
+      'show' => array(
+        'title' => 'Order Request :ref',
+      ),
+      'actions' => array(
+        'new' => 'New request',
+        'submit' => 'Submit request',
+      ),
+      'flash' => array(
+        'created' => 'Order request created.',
+        'updated' => 'Order request updated.',
+        'submitted' => 'Order request submitted.',
+      ),
+      'errors' => array(
+        'invalid_transition' => 'Invalid status transition',
+      ),
+      'ratio_warning_hint' => '80/20 ratio is computed server-side; a warning will show if below 80%.',
+      'back_to_list' => 'Back to requests',
+      'export_csv' => 'Export CSV',
+      'filters' => array(
+        'title' => 'Filters',
+        'status' => 'Status',
+        'from' => 'From',
+        'to' => 'To',
+      ),
+      'statuses' => array(
+        'draft' => 'Draft',
+        'submitted' => 'Submitted',
+      ),
+    ),
   ),
   'fo' => 
   array (
@@ -997,6 +1113,24 @@ return array (
       'sidebar' => 'Sidebar Navigation',
     ),
     'dashboard' => 'My Dashboard',
+    'dashboard_page' =>
+    array (
+      'title' => 'My Dashboard',
+      'subtitle' => 'Overview of your activity',
+    ),
+    'dashboard' =>
+    array (
+      'welcome' => 'Welcome, :name',
+      'monthly_sales' => 'Sales this month',
+      'thirty_days_sales' => 'Sales last 30 days',
+      'view_details' => 'View details',
+      'quick_actions' => 'Quick actions',
+      'quick_actions_description' => 'Record a new sale or view your history.',
+      'new_sale' => 'Record a sale',
+      'recent_sales' => 'Recent sales',
+      'no_recent_sales' => 'No recent sales yet',
+      'view_all_sales' => 'View all sales',
+    ),
     'errors' => 
     array (
       'no_franchisee_association' => 'Your account is not linked to a franchisee yet. Please complete your profile or contact support.',

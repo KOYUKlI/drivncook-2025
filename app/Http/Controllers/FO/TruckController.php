@@ -96,15 +96,16 @@ class TruckController extends Controller
         // Handle file upload if provided
         if ($request->hasFile('attachment')) {
             $file = $request->file('attachment');
-            $path = $file->store('maintenance/' . $maintenanceLog->id, 'private');
-            
-            $attachment = new \App\Models\MaintenanceAttachment();
-            $attachment->maintenance_log_id = $maintenanceLog->id;
-            $attachment->file_path = $path;
-            $attachment->file_name = $file->getClientOriginalName();
-            $attachment->file_size = $file->getSize();
-            $attachment->file_type = $file->getMimeType();
-            $attachment->save();
+            $storedPath = $file->store('maintenance/' . $maintenanceLog->id, 'private');
+
+            \App\Models\MaintenanceAttachment::create([
+                'maintenance_log_id' => $maintenanceLog->id,
+                'label' => $file->getClientOriginalName(),
+                'path' => $storedPath,
+                'mime_type' => $file->getMimeType() ?: 'application/octet-stream',
+                'size_bytes' => $file->getSize(),
+                'uploaded_by' => Auth::id(),
+            ]);
         }
 
         return redirect()->route('fo.truck.show')

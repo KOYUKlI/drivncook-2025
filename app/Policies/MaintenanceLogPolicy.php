@@ -4,17 +4,30 @@ namespace App\Policies;
 
 use App\Models\MaintenanceLog;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class MaintenanceLogPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'fleet']);
+    // BO roles can view all; franchisees can view their own via controller scoping
+    return $user->hasAnyRole(['admin', 'fleet', 'franchisee']);
     }
 
     public function view(User $user, MaintenanceLog $log): bool
     {
-        return $user->hasAnyRole(['admin', 'fleet']);
+        if ($user->hasAnyRole(['admin', 'fleet'])) {
+            return true;
+        }
+
+        // Franchisee: only if the maintenance log belongs to their assigned truck
+        if ($user->hasRole('franchisee') && $user->franchisee) {
+            $truck = $log->truck;
+            return $truck && ($truck->franchisee_id === $user->franchisee->id
+                || $truck->ownerships()->whereNull('ended_at')->where('franchisee_id', $user->franchisee->id)->exists());
+        }
+
+        return false;
     }
 
     public function create(User $user): bool
@@ -121,7 +134,7 @@ class MaintenanceLogPolicy
      */
     public function viewAttachment(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'fleet']);
+    return $user->hasAnyRole(['admin', 'fleet', 'franchisee']);
     }
 
     /**
@@ -129,6 +142,6 @@ class MaintenanceLogPolicy
      */
     public function downloadAttachment(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'fleet']);
+    return $user->hasAnyRole(['admin', 'fleet', 'franchisee']);
     }
 }

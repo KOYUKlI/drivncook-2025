@@ -7,82 +7,60 @@
 @section('title', __('ui.fo.sales.create.title'))
 
 @section('content')
-<div class="container py-6">
-    <div class="flex justify-between mb-4">
-        <h1 class="text-2xl font-bold">{{ __('ui.fo.sales.create.title') }}</h1>
-        <a href="{{ route('fo.sales.index') }}" class="btn btn-ghost">
-            {{ __('ui.fo.sales.create.back_to_list') }}
-        </a>
+<div class="py-6">
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-bold text-gray-900">{{ __('ui.fo.sales.create.title') }}</h1>
+        <a href="{{ route('fo.sales.index') }}" class="btn-secondary">{{ __('ui.fo.sales.create.back_to_list') }}</a>
     </div>
 
     <form action="{{ route('fo.sales.store') }}" method="POST" id="sale-form">
         @csrf
         
-        <div class="card bg-base-100 shadow-xl mb-6">
-            <div class="card-body">
-                <h2 class="card-title">{{ __('ui.fo.sales.create.sale_info') }}</h2>
-                
-                <div class="form-control w-full max-w-xs">
-                    <label class="label" for="sale_date">
-                        <span class="label-text">{{ __('ui.fo.sales.create.sale_date') }}</span>
-                    </label>
-                    <input 
-                        type="date" 
-                        id="sale_date" 
-                        name="sale_date" 
-                        value="{{ old('sale_date', now()->format('Y-m-d')) }}"
-                        class="input input-bordered w-full max-w-xs @error('sale_date') input-error @enderror" 
-                        required
-                    />
+        <div class="bg-white border border-gray-200 rounded-lg shadow-sm mb-6">
+            <div class="p-4 md:p-6">
+                <h2 class="text-base font-semibold text-gray-900 mb-4">{{ __('ui.fo.sales.create.sale_info') }}</h2>
+                <div>
+                    <label class="block text-sm text-gray-700 mb-1" for="sale_date">{{ __('ui.fo.sales.create.sale_date') }}</label>
+                    <input type="date" id="sale_date" name="sale_date" value="{{ old('sale_date', now()->format('Y-m-d')) }}" class="form-input w-56 @error('sale_date') border-red-500 ring-red-500 @enderror" required />
                     @error('sale_date')
-                        <label class="label">
-                            <span class="label-text-alt text-error">{{ $message }}</span>
-                        </label>
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
             </div>
         </div>
 
-        <div class="card bg-base-100 shadow-xl mb-6">
-            <div class="card-body">
-                <div class="flex justify-between">
-                    <h2 class="card-title">{{ __('ui.fo.sales.create.sale_lines') }}</h2>
-                    <button type="button" id="add-line" class="btn btn-sm btn-primary">
-                        {{ __('ui.fo.sales.create.add_line') }}
-                    </button>
+        <div class="bg-white border border-gray-200 rounded-lg shadow-sm mb-6">
+            <div class="p-4 md:p-6">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-base font-semibold text-gray-900">{{ __('ui.fo.sales.create.sale_lines') }}</h2>
+                    <button type="button" id="add-line" class="btn-primary">{{ __('ui.fo.sales.create.add_line') }}</button>
                 </div>
-                
+
                 @error('lines')
-                    <div class="alert alert-error shadow-lg mt-4">
-                        <div>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            <span>{{ $message }}</span>
-                        </div>
+                    <div class="mt-4 rounded-md border border-red-300 bg-red-50 text-red-800 p-3 text-sm">
+                        {{ $message }}
                     </div>
                 @enderror
-                
-                <div class="overflow-x-auto">
-                    <table class="table w-full" id="lines-table">
+
+                <div class="overflow-x-auto mt-4">
+                    <table class="min-w-full divide-y divide-gray-200" id="lines-table">
                         <thead>
-                            <tr>
-                                <th>{{ __('ui.fo.sales.create.table.item') }}</th>
-                                <th>{{ __('ui.fo.sales.create.table.quantity') }}</th>
-                                <th>{{ __('ui.fo.sales.create.table.price') }}</th>
-                                <th>{{ __('ui.fo.sales.create.table.subtotal') }}</th>
-                                <th></th>
+                            <tr class="bg-gray-50">
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('ui.fo.sales.create.table.item') }}</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('ui.fo.sales.create.table.quantity') }}</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('ui.fo.sales.create.table.price') }}</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('ui.fo.sales.create.table.subtotal') }}</th>
+                                <th class="px-4 py-2"></th>
                             </tr>
                         </thead>
-                        <tbody id="lines-container">
+                        <tbody id="lines-container" class="divide-y divide-gray-200">
                             <!-- Sale lines will be added here dynamically -->
                             @if(old('lines'))
                                 @foreach(old('lines') as $index => $line)
                                     <tr class="sale-line" data-index="{{ $index }}">
                                         <td>
-                                            <div class="form-control">
-                                                <select 
-                                                    name="lines[{{ $index }}][stock_item_id]" 
-                                                    class="select select-bordered stock-item-select @error('lines.'.$index.'.stock_item_id') select-error @enderror"
-                                                >
+                                            <div>
+                                                <select name="lines[{{ $index }}][stock_item_id]" class="form-select stock-item-select @error('lines.'.$index.'.stock_item_id') border-red-500 ring-red-500 @enderror">
                                                     <option value="">{{ __('ui.fo.sales.create.custom_item') }}</option>
                                                     @foreach($stockItems as $item)
                                                         <option 
@@ -95,14 +73,7 @@
                                                     @endforeach
                                                 </select>
                                                 
-                                                <input 
-                                                    type="text" 
-                                                    name="lines[{{ $index }}][item_label]" 
-                                                    placeholder="{{ __('ui.fo.sales.create.custom_item_placeholder') }}"
-                                                    value="{{ $line['item_label'] ?? '' }}"
-                                                    class="input input-bordered mt-2 custom-label @error('lines.'.$index.'.item_label') input-error @enderror"
-                                                    @if(!empty($line['stock_item_id'])) style="display: none;" @endif
-                                                />
+                                                <input type="text" name="lines[{{ $index }}][item_label]" placeholder="{{ __('ui.fo.sales.create.custom_item_placeholder') }}" value="{{ $line['item_label'] ?? '' }}" class="form-input mt-2 custom-label @error('lines.'.$index.'.item_label') border-red-500 ring-red-500 @enderror" @if(!empty($line['stock_item_id'])) style="display: none;" @endif />
                                                 
                                                 @error('lines.'.$index.'.stock_item_id')
                                                     <label class="label">
@@ -117,16 +88,8 @@
                                             </div>
                                         </td>
                                         <td>
-                                            <div class="form-control">
-                                                <input 
-                                                    type="number" 
-                                                    name="lines[{{ $index }}][qty]" 
-                                                    value="{{ $line['qty'] ?? 1 }}"
-                                                    step="0.01"
-                                                    min="0.01"
-                                                    class="input input-bordered w-24 line-qty @error('lines.'.$index.'.qty') input-error @enderror"
-                                                    required
-                                                />
+                                            <div>
+                                                <input type="number" name="lines[{{ $index }}][qty]" value="{{ $line['qty'] ?? 1 }}" step="0.01" min="0.01" class="form-input w-24 line-qty @error('lines.'.$index.'.qty') border-red-500 ring-red-500 @enderror" required />
                                                 @error('lines.'.$index.'.qty')
                                                     <label class="label">
                                                         <span class="label-text-alt text-error">{{ $message }}</span>
@@ -135,17 +98,10 @@
                                             </div>
                                         </td>
                                         <td>
-                                            <div class="form-control">
-                                                <div class="input-group">
-                                                    <input 
-                                                        type="number" 
-                                                        name="lines[{{ $index }}][unit_price_cents]" 
-                                                        value="{{ $line['unit_price_cents'] ?? 0 }}"
-                                                        min="1"
-                                                        class="input input-bordered w-24 line-price @error('lines.'.$index.'.unit_price_cents') input-error @enderror"
-                                                        required
-                                                    />
-                                                    <span class="btn btn-disabled">¢</span>
+                                            <div>
+                                                <div class="flex items-center gap-2">
+                                                    <input type="number" name="lines[{{ $index }}][unit_price_cents]" value="{{ $line['unit_price_cents'] ?? 0 }}" min="1" class="form-input w-28 line-price @error('lines.'.$index.'.unit_price_cents') border-red-500 ring-red-500 @enderror" required />
+                                                    <span class="text-sm text-gray-500">¢</span>
                                                 </div>
                                                 @error('lines.'.$index.'.unit_price_cents')
                                                     <label class="label">
@@ -160,7 +116,7 @@
                                             </div>
                                         </td>
                                         <td>
-                                            <button type="button" class="btn btn-sm btn-ghost text-error remove-line">
+                                            <button type="button" class="text-red-600 hover:text-red-800 remove-line inline-flex items-center p-2"
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                 </svg>
@@ -170,31 +126,24 @@
                                 @endforeach
                             @endif
                         </tbody>
-                        <tfoot>
+                        <tfoot class="bg-gray-50">
                             <tr>
-                                <th colspan="3" class="text-right">{{ __('ui.fo.sales.create.table.total') }}</th>
-                                <th id="total-amount">0.00 €</th>
-                                <th></th>
+                                <th colspan="3" class="px-4 py-2 text-right text-sm font-medium text-gray-700">{{ __('ui.fo.sales.create.table.total') }}</th>
+                                <th class="px-4 py-2 text-left" id="total-amount">0.00 €</th>
+                                <th class="px-4 py-2"></th>
                             </tr>
                         </tfoot>
                     </table>
                 </div>
                 
-                <div class="mt-4">
-                    <div class="alert alert-info shadow-lg" id="no-lines-alert" @if(old('lines')) style="display: none;" @endif>
-                        <div>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current flex-shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            <span>{{ __('ui.fo.sales.create.no_lines_yet') }}</span>
-                        </div>
-                    </div>
+                <div class="mt-4" id="no-lines-alert" @if(old('lines')) style="display: none;" @endif>
+                    <div class="rounded-md border border-blue-300 bg-blue-50 text-blue-800 p-3 text-sm">{{ __('ui.fo.sales.create.no_lines_yet') }}</div>
                 </div>
             </div>
         </div>
         
         <div class="flex justify-end">
-            <button type="submit" class="btn btn-primary">
-                {{ __('ui.fo.sales.create.submit') }}
-            </button>
+            <button type="submit" class="btn-primary">{{ __('ui.fo.sales.create.submit') }}</button>
         </div>
     </form>
 </div>
@@ -202,11 +151,8 @@
 <template id="line-template">
     <tr class="sale-line" data-index="{index}">
         <td>
-            <div class="form-control">
-                <select 
-                    name="lines[{index}][stock_item_id]" 
-                    class="select select-bordered stock-item-select"
-                >
+            <div>
+                <select name="lines[{index}][stock_item_id]" class="form-select stock-item-select">
                     <option value="">{{ __('ui.fo.sales.create.custom_item') }}</option>
                     @foreach($stockItems as $item)
                         <option 
@@ -218,40 +164,19 @@
                     @endforeach
                 </select>
                 
-                <input 
-                    type="text" 
-                    name="lines[{index}][item_label]" 
-                    placeholder="{{ __('ui.fo.sales.create.custom_item_placeholder') }}"
-                    class="input input-bordered mt-2 custom-label"
-                    style="display: none;"
-                />
+                <input type="text" name="lines[{index}][item_label]" placeholder="{{ __('ui.fo.sales.create.custom_item_placeholder') }}" class="form-input mt-2 custom-label" style="display: none;" />
             </div>
         </td>
         <td>
-            <div class="form-control">
-                <input 
-                    type="number" 
-                    name="lines[{index}][qty]" 
-                    value="1"
-                    step="0.01"
-                    min="0.01"
-                    class="input input-bordered w-24 line-qty"
-                    required
-                />
+            <div>
+                <input type="number" name="lines[{index}][qty]" value="1" step="0.01" min="0.01" class="form-input w-24 line-qty" required />
             </div>
         </td>
         <td>
-            <div class="form-control">
-                <div class="input-group">
-                    <input 
-                        type="number" 
-                        name="lines[{index}][unit_price_cents]" 
-                        value="0"
-                        min="1"
-                        class="input input-bordered w-24 line-price"
-                        required
-                    />
-                    <span class="btn btn-disabled">¢</span>
+            <div>
+                <div class="flex items-center gap-2">
+                    <input type="number" name="lines[{index}][unit_price_cents]" value="0" min="1" class="form-input w-28 line-price" required />
+                    <span class="text-sm text-gray-500">¢</span>
                 </div>
             </div>
         </td>
@@ -259,7 +184,7 @@
             <div class="line-subtotal">0.00 €</div>
         </td>
         <td>
-            <button type="button" class="btn btn-sm btn-ghost text-error remove-line">
+            <button type="button" class="text-red-600 hover:text-red-800 remove-line inline-flex items-center p-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>

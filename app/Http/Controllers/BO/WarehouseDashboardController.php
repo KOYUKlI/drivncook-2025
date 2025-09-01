@@ -116,28 +116,37 @@ class WarehouseDashboardController extends Controller
             __('warehouse_dashboard.inventory.dashboard.export.user'),
             __('warehouse_dashboard.inventory.dashboard.export.reason')
         ];
-        
-        $callback = function() use ($movements, $headers) {
+
+        $delimiter = app()->getLocale() === 'fr' ? ';' : ',';
+
+        $callback = function() use ($movements, $headers, $delimiter) {
             $file = fopen('php://output', 'w');
             
             // Add BOM for UTF-8
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
-            
+            $sanitize = function ($value) {
+                $str = (string) ($value ?? '');
+                if ($str !== '' && preg_match('/^[=+\-@]/', $str)) {
+                    return "'".$str;
+                }
+                return $str;
+            };
+
             // Add headers
-            fputcsv($file, $headers);
+            fputcsv($file, $headers, $delimiter);
             
             // Add data
             foreach ($movements as $movement) {
                 $row = [
                     $movement->created_at->format('Y-m-d H:i:s'),
                     __('warehouse_dashboard.inventory.movement_types.' . $movement->type),
-                    $movement->stockItem->name,
+                    $sanitize($movement->stockItem->name),
                     $movement->quantity,
-                    $movement->user ? $movement->user->name : 'N/A',
-                    $movement->reason
+                    $sanitize($movement->user ? $movement->user->name : 'N/A'),
+                    $sanitize($movement->reason)
                 ];
-                
-                fputcsv($file, $row);
+
+                fputcsv($file, $row, $delimiter);
             }
             
             fclose($file);

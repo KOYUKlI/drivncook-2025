@@ -179,6 +179,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::any('purchase-orders/{any}', function () {
                 return redirect()->route('bo.replenishments.index');
             })->where('any', '.*');
+
+            // Franchisee Orders (FO requests) workflow
+            Route::get('fo-orders', [App\Http\Controllers\BO\FranchiseeOrderController::class, 'index'])->name('fo-orders.index');
+            Route::get('fo-orders/export', [App\Http\Controllers\BO\FranchiseeOrderController::class, 'export'])->name('fo-orders.export');
+            Route::get('fo-orders/{order}', [App\Http\Controllers\BO\FranchiseeOrderController::class, 'show'])->name('fo-orders.show');
+            Route::post('fo-orders/{order}/approve', [App\Http\Controllers\BO\FranchiseeOrderController::class, 'approve'])->name('fo-orders.approve');
+            Route::post('fo-orders/{order}/pick', [App\Http\Controllers\BO\FranchiseeOrderController::class, 'pick'])->name('fo-orders.pick');
+            Route::post('fo-orders/{order}/ship', [App\Http\Controllers\BO\FranchiseeOrderController::class, 'ship'])->name('fo-orders.ship');
+            Route::post('fo-orders/{order}/deliver', [App\Http\Controllers\BO\FranchiseeOrderController::class, 'deliver'])->name('fo-orders.deliver');
+            Route::post('fo-orders/{order}/close', [App\Http\Controllers\BO\FranchiseeOrderController::class, 'close'])->name('fo-orders.close');
+            Route::post('fo-orders/{order}/cancel', [App\Http\Controllers\BO\FranchiseeOrderController::class, 'cancel'])->name('fo-orders.cancel');
         });
     });
 
@@ -190,6 +201,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/sales/create', [App\Http\Controllers\FO\SaleController::class, 'create'])->name('sales.create');
         Route::post('/sales', [App\Http\Controllers\FO\SaleController::class, 'store'])->name('sales.store');
         Route::get('/sales/{sale}', [App\Http\Controllers\FO\SaleController::class, 'show'])->name('sales.show');
+    // Franchisee Order Requests (index/show/create/edit/submit)
+    Route::get('/orders', [App\Http\Controllers\FO\OrderRequestController::class, 'index'])->name('orders.index');
+    Route::get('/orders/new', [App\Http\Controllers\FO\OrderRequestController::class, 'create'])->name('orders.new');
+    Route::post('/orders', [App\Http\Controllers\FO\OrderRequestController::class, 'store'])->name('orders.store');
+    Route::get('/orders/{order}', [App\Http\Controllers\FO\OrderRequestController::class, 'show'])->name('orders.show');
+    Route::get('/orders/{order}/edit', [App\Http\Controllers\FO\OrderRequestController::class, 'edit'])->name('orders.edit');
+    Route::match(['put','patch'], '/orders/{order}', [App\Http\Controllers\FO\OrderRequestController::class, 'update'])->name('orders.update');
+    Route::post('/orders/{order}/submit', [App\Http\Controllers\FO\OrderRequestController::class, 'submit'])->name('orders.submit');
+
+    // Replenishments read-only moved under dedicated path to preserve legacy access
+    Route::get('/replenishments', [App\Http\Controllers\FO\OrderController::class, 'index'])->name('replenishments.index');
+    Route::get('/replenishments/{id}', [App\Http\Controllers\FO\OrderController::class, 'show'])->name('replenishments.show');
+    Route::get('/replenishments/{id}/delivery-note', [App\Http\Controllers\FO\OrderController::class, 'downloadDeliveryNote'])->name('replenishments.delivery-note');
         // Reports module
         Route::get('/reports', [App\Http\Controllers\FO\ReportController::class, 'index'])->name('reports.index');
         Route::get('/reports/{reportPdf}/download', [App\Http\Controllers\FO\ReportController::class, 'download'])->name('reports.download');
@@ -197,6 +221,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/truck', [App\Http\Controllers\FO\TruckController::class, 'show'])->name('truck.show');
         Route::post('/truck/maintenance-request', [App\Http\Controllers\FO\TruckController::class, 'requestMaintenance'])
             ->name('truck.maintenance-request');
+
+    // Maintenance module (read-only list/show + secure attachment download)
+    Route::get('/maintenance', [App\Http\Controllers\FO\MaintenanceController::class, 'index'])->name('maintenance.index');
+    Route::get('/maintenance/{maintenanceLog}', [App\Http\Controllers\FO\MaintenanceController::class, 'show'])->name('maintenance.show');
+    Route::get('/maintenance/{maintenanceLog}/attachments/{attachment}', [App\Http\Controllers\FO\MaintenanceController::class, 'download'])->name('maintenance.attachment');
             
         // Account module
         Route::get('/account', [App\Http\Controllers\FO\AccountController::class, 'edit'])->name('account.edit');

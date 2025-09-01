@@ -145,36 +145,48 @@ class SaleController extends Controller
     protected function exportCsv($query, $fromDate, $toDate)
     {
         $filename = 'sales_' . $fromDate->format('Ymd') . '_' . $toDate->format('Ymd') . '.csv';
-        
+
         $headers = [
             'Content-Type' => 'text/csv; charset=UTF-8',
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ];
-        
-        return new StreamedResponse(function() use ($query) {
+
+        $delimiter = app()->getLocale() === 'fr' ? ';' : ',';
+        $decimal = app()->getLocale() === 'fr' ? ',' : '.';
+
+        return new StreamedResponse(function() use ($query, $delimiter, $decimal) {
             $handle = fopen('php://output', 'w');
-            
+
             // Add UTF-8 BOM
             fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
-            
+
+            // Prevent CSV injection
+            $sanitize = function ($value) {
+                $str = (string) ($value ?? '');
+                if ($str !== '' && preg_match('/^[=+\-@]/', $str)) {
+                    return "'".$str;
+                }
+                return $str;
+            };
+
             // Add headers
             fputcsv($handle, [
                 __('ui.fo.sales.export.date'),
                 __('ui.fo.sales.export.items_count'),
                 __('ui.fo.sales.export.total')
-            ]);
-            
+            ], $delimiter);
+
             // Get all sales for export
-            $query->chunk(100, function ($sales) use ($handle) {
+            $query->chunk(200, function ($sales) use ($handle, $delimiter, $decimal, $sanitize) {
                 foreach ($sales as $sale) {
                     fputcsv($handle, [
-                        $sale->sale_date->format('Y-m-d'),
+                        $sanitize($sale->sale_date->format('Y-m-d')),
                         $sale->lines()->count(),
-                        number_format($sale->total_cents / 100, 2)
-                    ]);
+                        number_format($sale->total_cents / 100, 2, $decimal, '')
+                    ], $delimiter);
                 }
             });
-            
+
             fclose($handle);
         }, 200, $headers);
     }

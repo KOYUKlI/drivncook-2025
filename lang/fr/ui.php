@@ -295,6 +295,7 @@ return array (
     'fo_sales_create' => 'Nouvelle vente',
     'fo_reports' => 'Mes rapports',
     'fo_truck' => 'Mon camion',
+  'fo_orders' => 'Mes commandes',
     'logout' => 'Déconnexion',
     'profile' => 'Profil',
     'login' => 'Connexion',
@@ -475,6 +476,7 @@ return array (
     'stock_item_edit' => 'Modifier l\'article',
     'purchase_order_create' => 'Créer une commande',
     'purchase_order_show' => 'Détails de la commande',
+  'purchase_orders' => 'Commandes',
     'reports_monthly' => 'Rapports mensuels',
     'reports_compliance' => 'Rapports de conformité',
     'fo_dashboard' => 'Tableau de bord franchisé',
@@ -1251,6 +1253,24 @@ return array (
       'sidebar' => 'Navigation latérale',
     ),
     'dashboard' => 'Tableau de bord',
+    'dashboard_page' => 
+    array (
+      'title' => 'Mon tableau de bord',
+      'subtitle' => "Vue d'ensemble de votre activité",
+    ),
+    'dashboard' =>
+    array (
+      'welcome' => 'Bienvenue, :name',
+      'monthly_sales' => 'Ventes du mois',
+      'thirty_days_sales' => 'Ventes des 30 derniers jours',
+      'view_details' => 'Voir les détails',
+      'quick_actions' => 'Actions rapides',
+      'quick_actions_description' => 'Enregistrer une nouvelle vente ou consulter votre historique.',
+      'new_sale' => 'Enregistrer une vente',
+      'recent_sales' => 'Ventes récentes',
+      'no_recent_sales' => 'Aucune vente récente',
+      'view_all_sales' => 'Voir toutes les ventes',
+    ),
     'account' => 
     array (
       'title' => 'Mon Compte',
@@ -1712,6 +1732,85 @@ return array (
       'prepare_title' => 'Marquer comme préparée et générer le bon',
       'ship_title' => 'Expédier les quantités et générer le BL',
       'receive_title' => 'Confirmer les quantités livrées',
+    ),
+  ),
+  'bo' =>
+  array(
+    'fo_orders' => array(
+      'index' => array(
+        'title' => 'Demandes franchisés',
+      ),
+      'show' => array(
+        'title' => 'Demande :ref',
+      ),
+      'actions' => array(
+        'approve' => 'Approuver',
+        'pick' => 'Préparer',
+        'ship' => 'Expédier',
+        'deliver' => 'Livrer',
+        'close' => 'Clôturer',
+        'cancel' => 'Annuler',
+      ),
+      'flash' => array(
+        'approved' => 'Commande approuvée',
+        'picked' => 'Commande préparée',
+        'shipped' => 'Commande expédiée',
+        'delivered' => 'Commande livrée',
+        'closed' => 'Commande clôturée',
+        'cancelled' => 'Commande annulée',
+      ),
+      'errors' => array(
+        'invalid_transition' => 'Transition de statut invalide',
+        'insufficient_stock' => 'Stock insuffisant pour cette expédition',
+        'ship_exceeds_order' => 'La quantité à expédier dépasse la quantité commandée',
+        'deliver_exceeds_shipped' => 'La quantité à réceptionner dépasse la quantité expédiée',
+        'warehouse_required' => 'Un entrepôt est requis pour expédier',
+      ),
+      'csv' => array(
+        'reference' => 'Référence',
+      ),
+    ),
+  ),
+  'fo' => array(
+    'orders_request' => array(
+      'index' => array(
+        'title' => 'Mes demandes d’approvisionnement',
+      ),
+      'create' => array(
+        'title' => 'Nouvelle demande',
+        'ref_preview' => 'Référence (attribuée à l’enregistrement) :',
+      ),
+      'edit' => array(
+        'title' => 'Modifier la demande :ref',
+      ),
+      'show' => array(
+        'title' => 'Demande :ref',
+      ),
+      'actions' => array(
+        'new' => 'Nouvelle demande',
+        'submit' => 'Soumettre',
+      ),
+      'flash' => array(
+        'created' => 'Demande créée.',
+        'updated' => 'Demande mise à jour.',
+        'submitted' => 'Demande soumise.',
+      ),
+      'errors' => array(
+        'invalid_transition' => 'Transition de statut invalide',
+      ),
+      'ratio_warning_hint' => 'Le ratio 80/20 est calculé côté serveur; un avertissement apparaîtra s’il est inférieur à 80%.',
+      'back_to_list' => 'Retour aux demandes',
+      'export_csv' => 'Exporter CSV',
+      'filters' => array(
+        'title' => 'Filtres',
+        'status' => 'Statut',
+        'from' => 'Du',
+        'to' => 'Au',
+      ),
+      'statuses' => array(
+        'draft' => 'Brouillon',
+        'submitted' => 'Soumis',
+      ),
     ),
   ),
   'po' => 

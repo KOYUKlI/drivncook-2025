@@ -85,13 +85,26 @@ class AuditLogController extends Controller
         
         if ($format === 'csv') {
             $headers = [
-                'Content-Type' => 'text/csv',
+                'Content-Type' => 'text/csv; charset=UTF-8',
                 'Content-Disposition' => 'attachment; filename="' . $filename . '"',
             ];
-            
-            $callback = function() use ($logs) {
+
+            $delimiter = app()->getLocale() === 'fr' ? ';' : ',';
+
+            $callback = function() use ($logs, $delimiter) {
                 $handle = fopen('php://output', 'w');
-                
+
+                // UTF-8 BOM for Excel
+                fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+
+                $sanitize = function ($value) {
+                    $str = (string) ($value ?? '');
+                    if ($str !== '' && preg_match('/^[=+\-@]/', $str)) {
+                        return "'".$str;
+                    }
+                    return $str;
+                };
+
                 // CSV header
                 fputcsv($handle, [
                     __('audit.timestamp'),
@@ -101,24 +114,24 @@ class AuditLogController extends Controller
                     __('audit.resource'),
                     __('audit.ip'),
                     __('audit.user_agent'),
-                ]);
-                
+                ], $delimiter);
+
                 // CSV rows
                 foreach ($logs as $log) {
                     fputcsv($handle, [
-                        $log->created_at,
-                        optional($log->user)->name,
+                        optional($log->created_at)->format('Y-m-d H:i:s'),
+                        $sanitize(optional($log->user)->name),
                         $log->method,
-                        $log->route,
-                        $log->subject_type ? Str::afterLast($log->subject_type, '\\') . ' #' . $log->subject_id : '',
+                        $sanitize($log->route),
+                        $sanitize($log->subject_type ? Str::afterLast($log->subject_type, '\\') . ' #' . $log->subject_id : ''),
                         $log->ip,
-                        $log->user_agent,
-                    ]);
+                        $sanitize($log->user_agent),
+                    ], $delimiter);
                 }
-                
+
                 fclose($handle);
             };
-            
+
             return response()->stream($callback, Response::HTTP_OK, $headers);
         }
         

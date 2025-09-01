@@ -80,7 +80,10 @@ class ReplenishmentController extends Controller
             'Content-Disposition' => "attachment; filename=\"$filename\"",
         ];
 
-    return response()->streamDownload(function () use ($orders) {
+        $delimiter = app()->getLocale() === 'fr' ? ';' : ',';
+        $decimal = app()->getLocale() === 'fr' ? ',' : '.';
+
+    return response()->streamDownload(function () use ($orders, $delimiter, $decimal) {
             $out = fopen('php://output', 'w');
             // UTF-8 BOM
             echo "\xEF\xBB\xBF";
@@ -95,24 +98,31 @@ class ReplenishmentController extends Controller
                 __('ui.replenishments.csv.shipped_at'),
                 __('ui.replenishments.csv.delivered_at'),
             ];
-            fputcsv($out, $cols);
+            fputcsv($out, $cols, $delimiter);
+            $sanitize = function ($value) {
+                $str = (string) ($value ?? '');
+                if ($str !== '' && preg_match('/^[=+\-@]/', $str)) {
+                    $str = "'".$str;
+                }
+                return $str;
+            };
             foreach ($orders as $po) {
                 // For replenishments, treat unit_price_cents as line totals (no qty multiplication)
                 $totalCents = $po->lines->sum(fn($l) => ($l->unit_price_cents ?? 0));
-                $total = number_format($totalCents / 100, 2, '.', '');
+                $total = number_format($totalCents / 100, 2, $decimal, '');
                 $shippedAt = optional($po->shipped_at)->toISOString();
                 $deliveredAt = optional($po->delivered_at)->toISOString();
                 fputcsv($out, [
-                    $po->reference ?? $po->id,
-                    $po->franchisee->name ?? '',
-                    $po->warehouse->name ?? '',
+                    $sanitize($po->reference ?? $po->id),
+                    $sanitize($po->franchisee->name ?? ''),
+                    $sanitize($po->warehouse->name ?? ''),
                     __('ui.replenishments.status.'.strtolower($po->status)),
                     $total,
-                    $po->corp_ratio_cached !== null ? number_format((float)$po->corp_ratio_cached, 2, '.', '') : '',
+                    $po->corp_ratio_cached !== null ? number_format((float)$po->corp_ratio_cached, 2, $decimal, '') : '',
                     optional($po->created_at)->toISOString(),
                     $shippedAt,
                     $deliveredAt,
-                ]);
+                ], $delimiter);
             }
             fclose($out);
         }, $filename, $headers);

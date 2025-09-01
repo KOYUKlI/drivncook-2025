@@ -24,6 +24,7 @@ class PurchaseOrder extends Model
     'status',
     'kind',
     'corp_ratio_cached',
+    'total_cents',
     'shipping_date',
     'tracking_number',
     'carrier',
@@ -32,6 +33,8 @@ class PurchaseOrder extends Model
     'reception_notes',
     'status_updated_at',
     'status_updated_by',
+    'submitted_at',
+    'approved_at',
     'shipped_at',
     'delivered_at',
     ];
@@ -42,6 +45,8 @@ class PurchaseOrder extends Model
         'updated_at' => 'datetime',
     'shipping_date' => 'datetime',
     'status_updated_at' => 'datetime',
+    'submitted_at' => 'datetime',
+    'approved_at' => 'datetime',
     'shipped_at' => 'datetime',
     'delivered_at' => 'datetime',
     ];
@@ -75,9 +80,31 @@ class PurchaseOrder extends Model
         return $q->where('kind', 'Replenishment');
     }
 
+    public function scopeFranchiseePo($q)
+    {
+        return $q->where('kind', 'franchisee_po');
+    }
+
+    public function scopeForFranchisee($q, $franchiseeId)
+    {
+        return $q->where('franchisee_id', $franchiseeId);
+    }
+
     public static function nextReference(): string
     {
         $prefix = 'REP-'.now()->format('Ym').'-';
+        $seq = 1;
+        do {
+            $candidate = $prefix.str_pad((string)$seq, 4, '0', STR_PAD_LEFT);
+            $exists = static::where('reference', $candidate)->exists();
+            $seq++;
+        } while ($exists && $seq < 10000);
+        return $candidate;
+    }
+
+    public static function nextFpoReference(): string
+    {
+        $prefix = 'FPO-'.now()->format('Ym').'-';
         $seq = 1;
         do {
             $candidate = $prefix.str_pad((string)$seq, 4, '0', STR_PAD_LEFT);

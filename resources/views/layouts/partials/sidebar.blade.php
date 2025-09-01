@@ -4,7 +4,7 @@
         openAdmin: {{ request()->routeIs('bo.franchisees.*') || request()->routeIs('bo.applications.*') ? 'true' : 'false' }},
         openFleet: {{ request()->routeIs('bo.trucks.*') ? 'true' : 'false' }},
         openWarehouse: {{ request()->routeIs('bo.warehouses.*') || request()->routeIs('bo.stock-items.*') || request()->routeIs('bo.stock-movements.*') || request()->routeIs('bo.warehouses.inventory*') ? 'true' : 'false' }},
-    openPurchasing: {{ (request()->routeIs('bo.replenishments.*')) ? 'true' : 'false' }},
+    openPurchasing: {{ (request()->routeIs('bo.replenishments.*') || request()->routeIs('bo.fo-orders.*')) ? 'true' : 'false' }},
         openReports: {{ request()->routeIs('bo.reports.*') ? 'true' : 'false' }},
     }">
         @role('admin|warehouse|fleet|tech')
@@ -99,11 +99,14 @@
                         </button>
                         <div x-show="openPurchasing" x-collapse>
                             <div class="pl-2 space-y-0.5">
-                                
-                                    <x-nav.link :href="route('bo.replenishments.index')" :active="request()->routeIs('bo.replenishments.*')" class="group flex items-center py-2">
-                                        <svg class="mr-2 h-4 w-4 text-gray-400 group-hover:text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18"/></svg>
-                                        <span class="text-sm">{{ __('ui.replenishments.title') }}</span>
-                                    </x-nav.link>
+                                <x-nav.link :href="route('bo.replenishments.index')" :active="request()->routeIs('bo.replenishments.*')" class="group flex items-center py-2">
+                                    <svg class="mr-2 h-4 w-4 text-gray-400 group-hover:text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18"/></svg>
+                                    <span class="text-sm">{{ __('ui.replenishments.title') }}</span>
+                                </x-nav.link>
+                                <x-nav.link :href="route('bo.fo-orders.index')" :active="request()->routeIs('bo.fo-orders.*')" class="group flex items-center py-2">
+                                    <svg class="mr-2 h-4 w-4 text-gray-400 group-hover:text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h10"/></svg>
+                                    <span class="text-sm">{{ __('ui.bo.fo_orders.index.title') }}</span>
+                                </x-nav.link>
                             </div>
                         </div>
                     </div>
@@ -184,7 +187,7 @@
                 openAdminM: {{ request()->routeIs('bo.franchisees.*') || request()->routeIs('bo.applications.*') ? 'true' : 'false' }},
                 openFleetM: {{ request()->routeIs('bo.trucks.*') ? 'true' : 'false' }},
                 openWarehouseM: {{ request()->routeIs('bo.warehouses.*') || request()->routeIs('bo.stock-items.*') || request()->routeIs('bo.stock-movements.*') || request()->routeIs('bo.warehouses.inventory*') ? 'true' : 'false' }},
-                openPurchasingM: {{ (request()->routeIs('bo.replenishments.*')) ? 'true' : 'false' }},
+                openPurchasingM: {{ (request()->routeIs('bo.replenishments.*') || request()->routeIs('bo.fo-orders.*')) ? 'true' : 'false' }},
                 openReportsM: {{ request()->routeIs('bo.reports.*') ? 'true' : 'false' }},
                 openFoSalesM: {{ request()->routeIs('fo.sales.*') ? 'true' : 'false' }},
                 openFoReportsM: {{ request()->routeIs('fo.reports.*') ? 'true' : 'false' }},
@@ -252,10 +255,12 @@
                             <svg class="h-4 w-4 transform transition-transform" :class="{ 'rotate-90': openPurchasingM }" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                         </button>
                         <div x-show="openPurchasingM" x-collapse class="pl-2">
-                            
-                                <x-nav.link :href="route('bo.replenishments.index')" :active="request()->routeIs('bo.replenishments.*')" mobile>
-                                    {{ __('ui.replenishments.title') }}
-                                </x-nav.link>
+                            <x-nav.link :href="route('bo.replenishments.index')" :active="request()->routeIs('bo.replenishments.*')" mobile>
+                                {{ __('ui.replenishments.title') }}
+                            </x-nav.link>
+                            <x-nav.link :href="route('bo.fo-orders.index')" :active="request()->routeIs('bo.fo-orders.*')" mobile>
+                                {{ __('ui.bo.fo_orders.index.title') }}
+                            </x-nav.link>
                         </div>
 
                         <button type="button" @click="openReportsM = !openReportsM" class="w-full flex items-center justify-between text-left text-xs font-semibold uppercase tracking-wider text-gray-500 px-1 py-2">

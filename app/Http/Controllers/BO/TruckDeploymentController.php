@@ -254,10 +254,10 @@ class TruckDeploymentController extends Controller
             $query->where('planned_end_at', '<=', $request->end_date);
         }
         
-        $deployments = $query->get();
+    $deployments = $query->get();
         
         $headers = [
-            'Content-Type' => 'text/csv',
+            'Content-Type' => 'text/csv; charset=UTF-8',
             'Content-Disposition' => 'attachment; filename="deployments.csv"',
         ];
         
@@ -267,9 +267,12 @@ class TruckDeploymentController extends Controller
             'Notes', 'Cancel Reason', 'Created At'
         ];
         
-        $callback = function() use ($deployments, $columns) {
+        $delimiter = app()->getLocale() === 'fr' ? ';' : ',';
+        $callback = function() use ($deployments, $columns, $delimiter) {
             $file = fopen('php://output', 'w');
-            fputcsv($file, $columns);
+            // BOM for UTF-8
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+            fputcsv($file, $columns, $delimiter);
             
             foreach ($deployments as $deployment) {
                 fputcsv($file, [
@@ -285,7 +288,7 @@ class TruckDeploymentController extends Controller
                     $deployment->notes,
                     $deployment->cancel_reason,
                     $deployment->created_at->format('Y-m-d H:i'),
-                ]);
+                ], $delimiter);
             }
             
             fclose($file);

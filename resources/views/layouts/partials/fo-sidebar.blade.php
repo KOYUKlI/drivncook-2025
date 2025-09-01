@@ -2,6 +2,7 @@
 <nav class="flex flex-col h-full py-3">
     <div class="flex-1 space-y-1 px-2" x-data="{
         openSales: {{ request()->routeIs('fo.sales.*') ? 'true' : 'false' }},
+    openOrders: {{ (request()->routeIs('fo.orders.*') || request()->routeIs('fo.replenishments.*')) ? 'true' : 'false' }},
         openReports: {{ request()->routeIs('fo.reports.*') ? 'true' : 'false' }}
     }">
         {{-- Franchisee Office --}}
@@ -50,6 +51,41 @@
                     </x-nav.link>
                     <x-nav.link :href="route('fo.sales.create')" :active="request()->routeIs('fo.sales.create')" class="block py-2 text-sm">
                         {{ __('ui.fo.nav.new_sale') }}
+                    </x-nav.link>
+                </div>
+            </div>
+
+            {{-- Orders Section --}}
+            <div>
+                <button type="button" 
+                        @click="openOrders = !openOrders"
+                        class="w-full flex items-center justify-between text-left text-sm text-gray-600 hover:text-gray-900 px-2 py-2 group hover:bg-gray-50 rounded-md transition-colors duration-150"
+                        aria-expanded="openOrders"
+                        aria-controls="orders-menu">
+                    <div class="flex items-center">
+                        <svg class="mr-2 h-4 w-4 text-gray-400 group-hover:text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18" />
+                        </svg>
+                        <span>{{ __('ui.nav.purchase_orders') }}</span>
+                    </div>
+                    <svg class="h-4 w-4 transform transition-transform duration-200" 
+                         :class="{'rotate-90': openOrders, 'rotate-0': !openOrders}"
+                         viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+                <div x-show="openOrders" 
+                    x-collapse
+                    class="mt-1 pl-7 space-y-1"
+                    id="orders-menu">
+                    <x-nav.link :href="route('fo.orders.index')" :active="request()->routeIs('fo.orders.*')" class="block py-2 text-sm">
+                        {{ __('ui.fo.orders_request.index.title') }}
+                    </x-nav.link>
+                    <x-nav.link :href="route('fo.orders.new')" :active="request()->routeIs('fo.orders.new')" class="block py-2 text-sm">
+                        {{ __('ui.fo.orders_request.actions.new') }}
+                    </x-nav.link>
+                    <x-nav.link :href="route('fo.replenishments.index')" :active="request()->routeIs('fo.replenishments.*')" class="block py-2 text-sm">
+                        {{ __('ui.replenishments.title') }}
                     </x-nav.link>
                 </div>
             </div>
