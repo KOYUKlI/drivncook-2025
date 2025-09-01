@@ -6,27 +6,50 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
 
 class PurchaseOrder extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUlids;
 
     protected $keyType = 'string';
 
     public $incrementing = false;
 
     protected $fillable = [
-        'id',
-        'warehouse_id',
-        'franchisee_id',
-        'status',
-        'corp_ratio_cached',
+    'id',
+    'reference',
+    'warehouse_id',
+    'franchisee_id',
+    'placed_by',
+    'status',
+    'kind',
+    'corp_ratio_cached',
+    'total_cents',
+    'shipping_date',
+    'tracking_number',
+    'carrier',
+    'preparation_notes',
+    'shipping_notes',
+    'reception_notes',
+    'status_updated_at',
+    'status_updated_by',
+    'submitted_at',
+    'approved_at',
+    'shipped_at',
+    'delivered_at',
     ];
 
     protected $casts = [
         'corp_ratio_cached' => 'decimal:2',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+    'shipping_date' => 'datetime',
+    'status_updated_at' => 'datetime',
+    'submitted_at' => 'datetime',
+    'approved_at' => 'datetime',
+    'shipped_at' => 'datetime',
+    'delivered_at' => 'datetime',
     ];
 
     /**
@@ -51,5 +74,44 @@ class PurchaseOrder extends Model
     public function lines(): HasMany
     {
         return $this->hasMany(PurchaseOrderLine::class);
+    }
+
+    public function scopeReplenishments($q)
+    {
+        return $q->where('kind', 'Replenishment');
+    }
+
+    public function scopeFranchiseePo($q)
+    {
+        return $q->where('kind', 'franchisee_po');
+    }
+
+    public function scopeForFranchisee($q, $franchiseeId)
+    {
+        return $q->where('franchisee_id', $franchiseeId);
+    }
+
+    public static function nextReference(): string
+    {
+        $prefix = 'REP-'.now()->format('Ym').'-';
+        $seq = 1;
+        do {
+            $candidate = $prefix.str_pad((string)$seq, 4, '0', STR_PAD_LEFT);
+            $exists = static::where('reference', $candidate)->exists();
+            $seq++;
+        } while ($exists && $seq < 10000);
+        return $candidate;
+    }
+
+    public static function nextFpoReference(): string
+    {
+        $prefix = 'FPO-'.now()->format('Ym').'-';
+        $seq = 1;
+        do {
+            $candidate = $prefix.str_pad((string)$seq, 4, '0', STR_PAD_LEFT);
+            $exists = static::where('reference', $candidate)->exists();
+            $seq++;
+        } while ($exists && $seq < 10000);
+        return $candidate;
     }
 }

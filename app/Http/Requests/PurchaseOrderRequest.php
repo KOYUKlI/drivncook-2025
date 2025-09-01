@@ -21,23 +21,8 @@ class PurchaseOrderRequest extends FormRequest
      */
     public function rules(): array
     {
-        $route = $this->route()->getName();
-
-        return match ($route) {
-            'bo.purchase-orders.validate-compliance' => [
-                'action' => 'required|in:approve,flag,reject',
-                'message' => 'nullable|string|max:500',
-                'override_reason' => 'required_if:action,approve|string|max:500',
-            ],
-            'bo.purchase-orders.update-ratio' => [
-                'central_ratio' => 'nullable|numeric|between:0,100',
-                'reason' => 'required|string|max:500',
-            ],
-            'bo.purchase-orders.recalculate' => [
-                'force_recalculation' => 'boolean',
-            ],
-            default => []
-        };
+    // Legacy purchase-orders routes removed; keep no rules here.
+    return [];
     }
 
     /**

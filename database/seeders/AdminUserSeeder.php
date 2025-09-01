@@ -14,22 +14,6 @@ class AdminUserSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create admin role if it doesn't exist
-        $adminRole = Role::firstOrCreate(['name' => 'admin']);
-
-        // Create admin user
-        $admin = User::firstOrCreate(
-            ['email' => 'admin@drivncook.com'],
-            [
-                'name' => 'Admin User',
-                'password' => Hash::make('password'),
-                'email_verified_at' => now(),
-            ]
-        );
-
-        // Assign admin role
-        if (! $admin->hasRole('admin')) {
-            $admin->assignRole('admin');
-        }
+        $this->command?->warn('AdminUserSeeder is deprecated and a no-op. Use RoleAndUserSeeder instead.');
     }
 }

@@ -86,13 +86,20 @@
                             </div>
                             @php
                             $truckStatusColors = [
+                                'Active' => 'bg-green-100 text-green-800',
+                                'InMaintenance' => 'bg-orange-100 text-orange-800',
+                                'Maintenance' => 'bg-orange-100 text-orange-800', // fallback pour compatibility
+                                'Retired' => 'bg-gray-100 text-gray-800',
+                                'Draft' => 'bg-blue-100 text-blue-800',
+                                'Inactive' => 'bg-gray-100 text-gray-800', // fallback pour compatibility
+                                // Versions minuscules pour compatibilité
                                 'active' => 'bg-green-100 text-green-800',
                                 'maintenance' => 'bg-orange-100 text-orange-800',
                                 'inactive' => 'bg-gray-100 text-gray-800'
                             ];
                             @endphp
-                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $truckStatusColors[$truck->status] }}">
-                                {{ __('ui.status.' . $truck->status) }}
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $truckStatusColors[$truck->status] ?? 'bg-gray-100 text-gray-800' }}">
+                                {{ __('ui.status.' . strtolower($truck->status)) }}
                             </span>
                         </div>
                         @endforeach

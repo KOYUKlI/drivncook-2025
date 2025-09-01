@@ -74,11 +74,13 @@
             <!-- Contenu principal -->
             <main class="flex-1 flex flex-col overflow-auto">
                 <div class="flex-1 p-4 md:p-6">
-                    <!-- Flash Messages -->
-                    <x-ui.flash type="success" />
-                    <x-ui.flash type="error" />
-                    <x-ui.flash type="warning" />
-                    <x-ui.flash type="info" />
+                    <!-- Flash Messages - Only shown if app.blade.php is not the parent layout -->
+                    @if(!View::getSection('app_layout_loaded'))
+                        <x-ui.flash type="success" />
+                        <x-ui.flash type="error" />
+                        <x-ui.flash type="warning" />
+                        <x-ui.flash type="info" />
+                    @endif
                     
                     @yield('content')
                 </div>
@@ -87,5 +89,7 @@
 
         <!-- Footer pleine largeur en dehors du flex -->
         @include('layouts.partials.footer')
+
+    @stack('scripts')
     </body>
 </html>

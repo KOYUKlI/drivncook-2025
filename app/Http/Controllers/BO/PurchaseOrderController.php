@@ -3,15 +3,19 @@
 namespace App\Http\Controllers\BO;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ProcessPurchaseOrderRequest;
 use App\Http\Requests\PurchaseOrderRequest;
 use App\Http\Requests\StorePurchaseOrderRequest;
 use App\Http\Requests\UpdatePurchaseOrderStatusRequest;
 use App\Http\Requests\ValidateComplianceRequest;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
+use App\Models\StockMovement;
+use App\Models\WarehouseInventory;
 use App\Services\PurchaseComplianceService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -74,11 +78,19 @@ class PurchaseOrderController extends Controller
             'ratio_80_20' => $purchaseOrder->corp_ratio_cached ?? 0,
             'status' => $purchaseOrder->status,
             'date' => $purchaseOrder->created_at->format('Y-m-d'),
+            'tracking_number' => $purchaseOrder->tracking_number,
+            'carrier' => $purchaseOrder->carrier,
+            'shipping_date' => $purchaseOrder->shipping_date ? $purchaseOrder->shipping_date->format('Y-m-d') : null,
+            'preparation_notes' => $purchaseOrder->preparation_notes,
+            'shipping_notes' => $purchaseOrder->shipping_notes,
+            'reception_notes' => $purchaseOrder->reception_notes,
             'lines' => $purchaseOrder->lines->map(function ($line) {
                 return [
+                    'id' => $line->id,
                     'item' => $line->stockItem->name ?? 'Article inconnu',
                     'category' => 'obligatoire', // TODO: Add category field to stock items
                     'quantity' => $line->qty,
+                    'received_qty' => $line->received_qty ?? 0,
                     'price' => $line->unit_price_cents,
                     'total' => $line->qty * $line->unit_price_cents,
                 ];
@@ -394,6 +406,204 @@ class PurchaseOrderController extends Controller
             'reason' => $reason,
             'user' => Auth::user()?->email,
         ]);
+    }
+
+    /**
+     * Process preparation of a purchase order.
+     */
+    public function processPurchaseOrder(ProcessPurchaseOrderRequest $request, string $id, string $action)
+    {
+        $po = PurchaseOrder::with('lines.stockItem', 'warehouse')->findOrFail($id);
+        $this->authorize('updateStatus', $po);
+        
+        // Begin transaction to ensure data consistency
+        DB::beginTransaction();
+        
+        try {
+            switch ($action) {
+                case 'prepare':
+                    $this->preparePurchaseOrder($po, $request->validated());
+                    $message = __('ui.po.flash.prepared_success');
+                    break;
+                    
+                case 'ready':
+                    $this->markPurchaseOrderReady($po, $request->validated());
+                    $message = __('ui.po.flash.ready_success');
+                    break;
+                    
+                case 'ship':
+                    $this->shipPurchaseOrder($po, $request->validated());
+                    $message = __('ui.po.flash.shipped_success');
+                    break;
+                    
+                case 'receive':
+                    $this->receivePurchaseOrder($po, $request->validated());
+                    $message = __('ui.po.flash.received_success');
+                    break;
+                    
+                default:
+                    throw new \Exception("Invalid action type.");
+            }
+            
+            DB::commit();
+            return redirect()->route('bo.purchase-orders.show', $po->id)->with('success', $message);
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withInput()->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+    
+    /**
+     * Mark purchase order as being prepared.
+     */
+    private function preparePurchaseOrder(PurchaseOrder $po, array $data)
+    {
+        if ($po->status !== 'Approved') {
+            throw new \Exception(__('ui.po.errors.invalid_status_for_prepare'));
+        }
+        
+        $po->status = 'Prepared';
+        $po->preparation_notes = $data['notes'] ?? null;
+        $po->status_updated_at = now();
+        $po->status_updated_by = Auth::id();
+        $po->save();
+        
+        Log::info("Purchase Order {$po->id} marked as prepared", [
+            'user' => Auth::user()?->email,
+            'timestamp' => now(),
+            'notes' => $data['notes'] ?? null
+        ]);
+    }
+    
+    /**
+     * Mark purchase order as ready for shipping.
+     */
+    private function markPurchaseOrderReady(PurchaseOrder $po, array $data)
+    {
+        if ($po->status !== 'Prepared') {
+            throw new \Exception(__('ui.po.errors.invalid_status_for_ready'));
+        }
+        
+        $po->status = 'Ready';
+        $po->shipping_date = $data['shipping_date'] ?? null;
+        $po->status_updated_at = now();
+        $po->status_updated_by = Auth::id();
+        $po->save();
+        
+        Log::info("Purchase Order {$po->id} marked as ready for shipping", [
+            'user' => Auth::user()?->email,
+            'timestamp' => now(),
+            'shipping_date' => $data['shipping_date'] ?? null
+        ]);
+    }
+    
+    /**
+     * Mark purchase order as shipped.
+     */
+    private function shipPurchaseOrder(PurchaseOrder $po, array $data)
+    {
+        // We allow both 'Prepared' and 'Ready' statuses to be able to ship
+        if (!in_array($po->status, ['Prepared', 'Ready'])) {
+            throw new \Exception(__('ui.po.errors.invalid_status_for_ship'));
+        }
+        
+        $po->status = 'Shipped';
+        $po->tracking_number = $data['tracking_number'] ?? null;
+        $po->carrier = $data['carrier'] ?? null;
+        $po->shipping_notes = $data['notes'] ?? null;
+        $po->status_updated_at = now();
+        $po->status_updated_by = Auth::id();
+        $po->save();
+        
+        Log::info("Purchase Order {$po->id} marked as shipped", [
+            'user' => Auth::user()?->email,
+            'timestamp' => now(),
+            'tracking' => $po->tracking_number,
+            'carrier' => $po->carrier,
+            'notes' => $data['notes'] ?? null
+        ]);
+    }
+    
+    /**
+     * Mark purchase order as received and create stock movements.
+     */
+    private function receivePurchaseOrder(PurchaseOrder $po, array $data)
+    {
+        if ($po->status !== 'Shipped') {
+            throw new \Exception(__('ui.po.errors.invalid_status_for_receive'));
+        }
+        
+        // Process received lines and create stock movements
+        $receivedLines = collect($data['received_lines']);
+        
+        foreach ($po->lines as $line) {
+            $receivedLineData = $receivedLines->firstWhere('line_id', $line->id);
+            
+            if ($receivedLineData) {
+                $receivedQty = (int) $receivedLineData['received_qty'];
+                
+                // Update the line's received quantity
+                $line->received_qty = $receivedQty;
+                $line->save();
+                
+                // Create stock movement if quantity > 0
+                if ($receivedQty > 0) {
+                    // Create receipt movement
+                    $movement = new StockMovement([
+                        'id' => (string) Str::ulid(),
+                        'warehouse_id' => $po->warehouse_id,
+                        'stock_item_id' => $line->stock_item_id,
+                        'type' => StockMovement::TYPE_RECEIPT,
+                        'quantity' => $receivedQty,
+                        'reason' => __('ui.po.receipt_reason', ['reference' => "PO-{$po->created_at->format('Y')}-".str_pad($po->id, 3, '0', STR_PAD_LEFT)]),
+                        'ref_type' => 'purchase_order',
+                        'ref_id' => $po->id,
+                        'user_id' => Auth::id(),
+                    ]);
+                    $movement->save();
+                    
+                    // Update warehouse inventory
+                    $inventory = $this->findOrCreateInventory($po->warehouse_id, $line->stock_item_id);
+                    $inventory->qty_on_hand += $receivedQty;
+                    $inventory->save();
+                }
+            }
+        }
+        
+        // Update PO status
+        $po->status = 'Received';
+        $po->reception_notes = $data['notes'] ?? null;
+        $po->status_updated_at = now();
+        $po->status_updated_by = Auth::id();
+        $po->save();
+        
+        Log::info("Purchase Order {$po->id} marked as received", [
+            'user' => Auth::user()?->email,
+            'timestamp' => now(),
+            'notes' => $data['notes'] ?? null
+        ]);
+    }
+    
+    /**
+     * Find or create inventory record.
+     */
+    private function findOrCreateInventory(string $warehouseId, string $stockItemId): WarehouseInventory
+    {
+        $inventory = WarehouseInventory::where('warehouse_id', $warehouseId)
+            ->where('stock_item_id', $stockItemId)
+            ->first();
+            
+        if (!$inventory) {
+            $inventory = new WarehouseInventory([
+                'id' => (string) Str::ulid(),
+                'warehouse_id' => $warehouseId,
+                'stock_item_id' => $stockItemId,
+                'qty_on_hand' => 0,
+            ]);
+        }
+        
+        return $inventory;
     }
 
     /**

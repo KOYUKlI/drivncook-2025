@@ -21,12 +21,21 @@ Laravel is a web application framework with expressive, elegant syntax. We belie
 
 Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
-## Scheduler
+## Scheduler (Laravel 12)
 
-This app defines the task scheduler in `routes/console.php` (no Console Kernel). To run scheduled tasks locally with Sail or PHP, use one of:
+Task scheduling is defined in `bootstrap/app.php` using `->withSchedule(...)` (no Console Kernel). To run scheduled tasks locally:
 
 - Sail: `./vendor/bin/sail artisan schedule:work`
 - PHP: `php artisan schedule:work`
+
+Monthly job: Generate monthly sales PDFs every 1st of the month at 02:00.
+
+After changing scheduling or removing legacy Console Kernel files, run:
+
+```
+composer dump-autoload
+php artisan optimize:clear
+```
 
 Ensure `storage:link` is run once for public files (PDFs, uploads): `php artisan storage:link`.
 
@@ -96,6 +105,83 @@ You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you
 
 If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
 
+## Mission 1 demo data (seeders)
+
+This project includes a complete, idempotent Mission 1 dataset. It uses ULIDs for IDs, money in cents, UTC timestamps, and Spatie roles/permissions.
+
+- Warehouses: WH-PAR, WH-NE, WH-SUD, WH-OUEST
+- Users/Roles: admin, warehouse, fleet, franchisee
+- Franchisees, trucks, deployments, maintenance, replenishment orders, sales, and monthly report indices
+
+How to recreate the database and seed:
+
+```
+php artisan migrate:fresh --seed
+```
+
+Demo logins (password: `password`):
+
+- admin@drivncook.test (admin)
+- warehouse@drivncook.test (warehouse)
+- fleet@drivncook.test (fleet)
+- fr1@dc.test, fr2@dc.test, fr3@dc.test (franchisee)
+
+Notes:
+
+- Seeders are idempotent; you can run seeding multiple times safely.
+- Legacy seeders are deprecated and no-op; DatabaseSeeder orchestrates the current flow.
+
+## Testing the FO (Franchisee Portal)
+
+The project includes a dedicated demo account for testing the Franchisee Portal (FO) features:
+
+```
+URL: http://localhost/fo/dashboard
+Email: demo@drivncook.test
+Password: demodemo
+```
+
+This demo account includes:
+- Pre-configured franchisee with complete profile
+- Assigned truck with details
+- Recent sales data for testing reports and statistics
+- Monthly sales reports from previous months
+
+### Requirements for proper FO testing:
+
+1. Create the storage symlink (required for PDF reports and uploads):
+   ```
+   php artisan storage:link
+   ```
+
+2. Run the scheduler for automatic report generation (in a separate terminal):
+   ```
+   php artisan schedule:work
+   ```
+
+3. Make sure to clear optimization cache after any major changes:
+   ```
+   php artisan optimize:clear
+   ```
+
+4. To verify FO routes are correctly registered:
+   ```
+   php artisan route:list --path=fo
+   ```
+
+### Available FO Features (Laravel 12.26.2)
+
+The FO interface provides franchisees with these core features:
+
+| Feature | Route | Description |
+|---------|-------|-------------|
+| Dashboard | `/fo/dashboard` | Overview with key metrics |
+| My Truck | `/fo/truck` | Truck details, maintenance requests |
+| Sales | `/fo/sales` | List and create sales transactions |
+| Reports | `/fo/reports` | Access monthly reports |
+| Account | `/fo/account` | User profile and preferences |
+
+The dedicated `FODemoSeeder` populates data for all these features to enable immediate testing without manual data entry.
 ## Laravel Sponsors
 
 We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).

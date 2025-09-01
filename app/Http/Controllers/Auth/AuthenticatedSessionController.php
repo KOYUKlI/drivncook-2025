@@ -39,11 +39,16 @@ class AuthenticatedSessionController extends Controller
             'user_agent' => $request->userAgent(),
         ]);
 
-        // Determine welcome message based on user role
+        // Determine redirect route and welcome message based on user role
         $welcomeMessage = __('auth.login_success');
+        $redirectRoute = 'dashboard'; // Default fallback
         
-        // Check if user is a franchisee
-        if ($user->franchisee) {
+        // Check roles in priority order
+        if ($user->hasRole(['admin', 'warehouse', 'fleet', 'tech'])) {
+            $redirectRoute = 'bo.dashboard';
+            $welcomeMessage = __('auth.login_success');
+        } elseif ($user->hasRole('franchisee')) {
+            $redirectRoute = 'fo.dashboard';
             $welcomeMessage = __('auth.franchisee_welcome');
             
             // Check if this is the first login (password just set)
@@ -52,7 +57,8 @@ class AuthenticatedSessionController extends Controller
             }
         }
 
-        return redirect()->intended(route('dashboard', absolute: false))
+        // Force redirect to correct dashboard based on role, ignore intended URL
+        return redirect()->route($redirectRoute)
             ->with('success', $welcomeMessage);
     }
 

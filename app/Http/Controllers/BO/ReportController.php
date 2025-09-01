@@ -4,6 +4,7 @@ namespace App\Http\Controllers\BO;
 
 use App\Http\Controllers\Controller;
 use App\Models\ReportPdf;
+use App\Models\Sale;
 use App\Services\PdfService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -69,25 +70,65 @@ class ReportController extends Controller
         $franchisee = $franchiseeId ? \App\Models\Franchisee::find($franchiseeId) : null;
         $franchiseeName = $franchisee?->name ?? __('ui.bo.reports.monthly_sales.all_franchisees');
 
-        // Generate report data
-        $data = [
-            'franchisee' => ['name' => $franchiseeName],
-            'month' => $month,
-            'year' => $year,
-            'total' => 0, // TODO: Calculate real sales data
-            'lines' => [], // TODO: Get actual sales lines
+        // Build sales dataset for the selected period (and optional franchisee)
+        $salesQuery = Sale::query()
+            ->when($franchiseeId, fn($q) => $q->where('franchisee_id', $franchiseeId))
+            ->whereYear('sale_date', (int) $year)
+            ->whereMonth('sale_date', (int) $month);
+
+        $sales = $salesQuery->get(['id','sale_date','total_cents']);
+        $totalSales = (int) $sales->sum('total_cents');
+        $transactionCount = $sales->count();
+        $avgTransaction = $transactionCount > 0 ? (int) floor($sales->avg('total_cents')) : 0;
+
+        $dailySales = $sales
+            ->groupBy(fn($s) => optional($s->sale_date)->toDateString())
+            ->map(function ($group, $date) {
+                $total = (int) $group->sum('total_cents');
+                $count = $group->count();
+                $avg = $count > 0 ? (int) floor($group->avg('total_cents')) : 0;
+                return [
+                    'date' => $date,
+                    'transactions' => $count,
+                    'total' => $total,
+                    'avg' => $avg,
+                ];
+            })
+            ->sortKeys()
+            ->values()
+            ->all();
+
+        // New normalized path: reports/monthly/{year}/{month}/monthly-{year}-{month}-{ulid}.pdf
+        $ulid = (string) \Illuminate\Support\Str::ulid();
+        $ym = str_pad((string)$month, 2, '0', STR_PAD_LEFT);
+        $filename = "monthly-{$year}-{$ym}-{$ulid}.pdf";
+        $path = "reports/monthly/{$year}/{$ym}/{$filename}";
+
+        // Build view model and delegate to PdfService
+        $viewModel = [
+            'year' => (int) $year,
+            'month' => (int) $month,
+            'generated_at' => now()->toDateTimeString(),
+            'franchisee_name' => $franchiseeName,
+            'kpis' => [
+                'total_cents' => $totalSales,
+                'transactions' => $transactionCount,
+                'avg_ticket_cents' => $avgTransaction,
+                'active_days' => collect($dailySales)->where('total', '>', 0)->count(),
+            ],
+            'daily' => collect($dailySales)->map(fn($d) => [
+                'date' => $d['sale_date'] ?? $d['date'] ?? $d[0] ?? null,
+                'transactions' => $d['transactions'] ?? $d['count'] ?? 0,
+                'total_cents' => $d['total'] ?? $d['total_cents'] ?? 0,
+                'avg_ticket_cents' => $d['avg'] ?? $d['avg_ticket_cents'] ?? 0,
+            ])->values()->all(),
+            'top_products' => [],
+            'observations' => [],
         ];
 
-        $filename = sprintf('monthly-%s-%s-%s.pdf',
-            $year,
-            str_pad((string) $month, 2, '0', STR_PAD_LEFT),
-            $franchiseeId ?: 'all'
-        );
-        $path = "reports/monthly/{$filename}";
+    $pdf->monthlySalesReport($franchiseeId, (int)$year, (int)$month, $path);
 
-        $pdf->monthlySales($data, $path);
-
-        $report = ReportPdf::create([
+    $report = ReportPdf::create([
             'id' => (string) Str::ulid(),
             'franchisee_id' => $franchiseeId,
             'type' => 'monthly_sales',
@@ -103,6 +144,12 @@ class ReportController extends Controller
                 'year' => $year,
                 'franchisee' => $franchiseeName,
             ]));
+    }
+
+    // Alias for clearer routing if needed in the BO
+    public function generateMonthlySales(Request $request, PdfService $pdf)
+    {
+        return $this->generate($request, $pdf);
     }
 
     /**

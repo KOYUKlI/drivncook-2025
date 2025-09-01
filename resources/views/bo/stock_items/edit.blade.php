@@ -54,6 +54,11 @@
                 <p class="ml-2 text-sm text-gray-500">{{ __('ui.bo.stock_items.fields.is_central_help') }}</p>
             </div>
 
+            <div class="flex items-center">
+                <input id="is_active" name="is_active" type="checkbox" value="1" {{ old('is_active', $item->is_active) ? 'checked' : '' }} class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" />
+                <x-input-label for="is_active" :value="__('ui.bo.stock_items.fields.is_active')" class="ml-2" />
+            </div>
+
             <div class="flex items-center justify-end space-x-3 pt-4 border-t border-gray-200">
                 <a href="{{ route('bo.stock-items.index') }}" class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                     {{ __('ui.actions.cancel') }}

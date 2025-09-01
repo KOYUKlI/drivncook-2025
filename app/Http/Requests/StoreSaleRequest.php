@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Models\StockItem;
+use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreSaleRequest extends FormRequest
@@ -20,13 +22,12 @@ class StoreSaleRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'location' => 'required|string|max:255',
-            'coordinates' => 'nullable|string|max:50',
-            'payment_method' => 'required|in:cash,card,mobile',
-            'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|integer',
-            'items.*.quantity' => 'required|integer|min:1',
-            'items.*.unit_price' => 'required|integer|min:0',
+            'sale_date' => 'required|date|before_or_equal:today',
+            'lines' => 'required|array|min:1',
+            'lines.*.stock_item_id' => 'nullable|exists:stock_items,id',
+            'lines.*.item_label' => 'nullable|string|max:255',
+            'lines.*.qty' => 'required|numeric|min:0.01|max:9999.99',
+            'lines.*.unit_price_cents' => 'required|integer|min:1',
         ];
     }
 
@@ -36,22 +37,77 @@ class StoreSaleRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'location.required' => 'La localisation est obligatoire.',
-            'location.max' => 'La localisation ne peut pas dépasser 255 caractères.',
-            'coordinates.max' => 'Les coordonnées ne peuvent pas dépasser 50 caractères.',
-            'payment_method.required' => 'Le mode de paiement est obligatoire.',
-            'payment_method.in' => 'Le mode de paiement sélectionné n\'est pas valide.',
-            'items.required' => 'Au moins un article est obligatoire.',
-            'items.array' => 'Les articles doivent être fournis sous forme de liste.',
-            'items.min' => 'Au moins un article est obligatoire.',
-            'items.*.product_id.required' => 'L\'ID du produit est obligatoire.',
-            'items.*.product_id.integer' => 'L\'ID du produit doit être un nombre entier.',
-            'items.*.quantity.required' => 'La quantité est obligatoire.',
-            'items.*.quantity.integer' => 'La quantité doit être un nombre entier.',
-            'items.*.quantity.min' => 'La quantité doit être d\'au moins 1.',
-            'items.*.unit_price.required' => 'Le prix unitaire est obligatoire.',
-            'items.*.unit_price.integer' => 'Le prix unitaire doit être un nombre entier.',
-            'items.*.unit_price.min' => 'Le prix unitaire ne peut pas être négatif.',
+            'sale_date.required' => 'La date de vente est obligatoire.',
+            'sale_date.date' => 'La date de vente doit être une date valide.',
+            'sale_date.before_or_equal' => 'La date de vente ne peut pas être dans le futur.',
+            'lines.required' => 'Au moins une ligne de vente est obligatoire.',
+            'lines.array' => 'Les lignes de vente doivent être fournies sous forme de liste.',
+            'lines.min' => 'Au moins une ligne de vente est obligatoire.',
+            'lines.*.stock_item_id.exists' => 'L\'article sélectionné n\'existe pas.',
+            'lines.*.item_label.max' => 'Le libellé de l\'article ne peut pas dépasser 255 caractères.',
+            'lines.*.qty.required' => 'La quantité est obligatoire.',
+            'lines.*.qty.numeric' => 'La quantité doit être un nombre.',
+            'lines.*.qty.min' => 'La quantité doit être supérieure à 0.',
+            'lines.*.qty.max' => 'La quantité ne peut pas dépasser 9999.99.',
+            'lines.*.unit_price_cents.required' => 'Le prix unitaire est obligatoire.',
+            'lines.*.unit_price_cents.integer' => 'Le prix unitaire doit être un nombre entier.',
+            'lines.*.unit_price_cents.min' => 'Le prix unitaire doit être supérieur à 0.',
         ];
+    }
+    
+    /**
+     * Configure the validator instance.
+     *
+     * @param \Illuminate\Validation\Validator $validator
+     * @return void
+     */
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            // Check that each line has either a stock_item_id or an item_label
+            foreach ($this->input('lines', []) as $index => $line) {
+                if (empty($line['stock_item_id']) && empty($line['item_label'])) {
+                    $validator->errors()->add(
+                        "lines.{$index}", 
+                        'Chaque ligne doit avoir soit un article du stock, soit un libellé personnalisé.'
+                    );
+                }
+            }
+            
+            // Verify stock items are active
+            $stockItemIds = collect($this->input('lines', []))
+                ->pluck('stock_item_id')
+                ->filter()
+                ->values()
+                ->all();
+            
+            if (!empty($stockItemIds)) {
+                $inactiveItems = StockItem::whereIn('id', $stockItemIds)
+                    ->where('is_active', false)
+                    ->count();
+                    
+                if ($inactiveItems > 0) {
+                    $validator->errors()->add(
+                        'lines',
+                        'Certains articles sélectionnés ne sont plus actifs.'
+                    );
+                }
+            }
+        });
+    }
+    
+    /**
+     * Prepare the data for validation.
+     *
+     * @return void
+     */
+    protected function prepareForValidation()
+    {
+        // Format the sale date if needed
+        if ($this->has('sale_date')) {
+            $this->merge([
+                'sale_date' => Carbon::parse($this->input('sale_date'))->format('Y-m-d')
+            ]);
+        }
     }
 }

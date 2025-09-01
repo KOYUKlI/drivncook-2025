@@ -9,6 +9,7 @@ class SaleLineFactory extends Factory
     public function definition(): array
     {
         return [
+            'id' => (string) \Illuminate\Support\Str::ulid(),
             'sale_id' => null,
             'stock_item_id' => null,
             'qty' => $this->faker->numberBetween(1, 10),

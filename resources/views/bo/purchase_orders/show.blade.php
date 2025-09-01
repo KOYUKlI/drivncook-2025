@@ -135,6 +135,171 @@
             </div>
         </div>
     @endif
+    
+    <!-- Enhanced Warehouse Actions -->
+    @if(in_array($order['status'], ['Approved', 'Prepared', 'Shipped']))
+        <div class="mb-8 bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">{{ __('ui.po.warehouse.title') }}</h3>
+            
+            @if($order['status'] === 'Approved')
+                <form method="POST" action="{{ route('bo.purchase-orders.process', ['id' => $order['id'], 'action' => 'prepare']) }}" class="space-y-4">
+                    @csrf
+                    <div>
+                        <label for="notes" class="block text-sm font-medium text-gray-700">{{ __('ui.po.warehouse.preparation_notes') }}</label>
+                        <textarea id="notes" name="notes" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-sm"></textarea>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md bg-yellow-600 hover:bg-yellow-700 text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+                            {{ __('ui.po.warehouse.prepare_action') }}
+                        </button>
+                    </div>
+                </form>
+            @endif
+            
+            @if($order['status'] === 'Prepared')
+                <form method="POST" action="{{ route('bo.purchase-orders.process', ['id' => $order['id'], 'action' => 'ship']) }}" class="space-y-4">
+                    @csrf
+                    <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                        <div class="sm:col-span-3">
+                            <label for="carrier" class="block text-sm font-medium text-gray-700">{{ __('ui.po.warehouse.carrier') }}</label>
+                            <input type="text" id="carrier" name="carrier" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-sm">
+                        </div>
+                        <div class="sm:col-span-3">
+                            <label for="tracking_number" class="block text-sm font-medium text-gray-700">{{ __('ui.po.warehouse.tracking_number') }}</label>
+                            <input type="text" id="tracking_number" name="tracking_number" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-sm">
+                        </div>
+                        <div class="sm:col-span-6">
+                            <label for="notes" class="block text-sm font-medium text-gray-700">{{ __('ui.po.warehouse.shipping_notes') }}</label>
+                            <textarea id="notes" name="notes" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-sm"></textarea>
+                        </div>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md bg-purple-600 hover:bg-purple-700 text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                            {{ __('ui.po.warehouse.ship_action') }}
+                        </button>
+                    </div>
+                </form>
+            @endif
+            
+            @if($order['status'] === 'Shipped')
+                <form method="POST" action="{{ route('bo.purchase-orders.process', ['id' => $order['id'], 'action' => 'receive']) }}" class="space-y-4">
+                    @csrf
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        {{ __('ui.po.warehouse.item') }}
+                                    </th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        {{ __('ui.po.warehouse.ordered_qty') }}
+                                    </th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        {{ __('ui.po.warehouse.received_qty') }}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @foreach($order['lines'] as $line)
+                                <tr>
+                                    <td class="px-6 py-4 text-sm text-gray-900">
+                                        {{ $line['item'] }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900">
+                                        {{ $line['quantity'] }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right">
+                                        <input type="hidden" name="received_lines[{{ $loop->index }}][line_id]" value="{{ $line['id'] }}">
+                                        <input type="number" name="received_lines[{{ $loop->index }}][received_qty]" value="{{ $line['quantity'] }}" min="0" max="{{ $line['quantity'] }}" class="w-24 rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-sm">
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div>
+                        <label for="notes" class="block text-sm font-medium text-gray-700">{{ __('ui.po.warehouse.reception_notes') }}</label>
+                        <textarea id="notes" name="notes" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-sm"></textarea>
+                    </div>
+                    
+                    <div class="flex justify-end">
+                        <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md bg-green-600 hover:bg-green-700 text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                            {{ __('ui.po.warehouse.receive_action') }}
+                        </button>
+                    </div>
+                </form>
+            @endif
+        </div>
+    @endif
+    
+    <!-- Reception Details (When Received) -->
+    @if($order['status'] === 'Received')
+        <div class="mb-8 bg-white rounded-lg border border-gray-200 shadow-sm">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">{{ __('ui.po.warehouse.reception_details') }}</h3>
+            </div>
+            <div class="p-6">
+                @if($order['reception_notes'])
+                    <div class="mb-4">
+                        <h4 class="text-sm font-medium text-gray-700">{{ __('ui.po.warehouse.reception_notes') }}:</h4>
+                        <p class="mt-1 text-sm text-gray-600">{{ $order['reception_notes'] }}</p>
+                    </div>
+                @endif
+                
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    {{ __('ui.po.warehouse.item') }}
+                                </th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    {{ __('ui.po.warehouse.ordered_qty') }}
+                                </th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    {{ __('ui.po.warehouse.received_qty') }}
+                                </th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    {{ __('ui.po.warehouse.reception_status') }}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @foreach($order['lines'] as $line)
+                            <tr>
+                                <td class="px-6 py-4 text-sm text-gray-900">
+                                    {{ $line['item'] }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900">
+                                    {{ $line['quantity'] }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900">
+                                    {{ $line['received_qty'] }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right">
+                                    @if($line['received_qty'] == $line['quantity'])
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            {{ __('ui.po.warehouse.complete') }}
+                                        </span>
+                                    @elseif($line['received_qty'] == 0)
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                            {{ __('ui.po.warehouse.not_received') }}
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                            {{ __('ui.po.warehouse.partial') }}
+                                        </span>
+                                    @endif
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    @endif
 
     <!-- Order Lines -->
     <div class="bg-white rounded-lg border border-gray-200 shadow-sm">

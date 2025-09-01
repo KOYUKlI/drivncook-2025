@@ -18,19 +18,15 @@ class GenerateMonthlySalesPdfs
         $month = (int) $period->format('m');
 
         Franchisee::query()->each(function (Franchisee $f) use ($year, $month) {
-            $data = [
-                'franchisee' => ['name' => $f->name],
-                'month' => $month,
-                'year' => $year,
-                'total' => 0,
-                'lines' => [],
-            ];
+            $ulid = (string) Str::ulid();
+            $ym = str_pad((string) $month, 2, '0', STR_PAD_LEFT);
+            $filename = "monthly-{$year}-{$ym}-{$ulid}.pdf";
+            $path = "reports/monthly/{$year}/{$ym}/{$filename}";
 
-            $path = "reports/{$f->id}/monthly-{$year}-".str_pad((string) $month, 2, '0', STR_PAD_LEFT).'.pdf';
-            $this->pdf->monthlySales($data, $path);
+            $this->pdf->monthlySalesReport($f->id, $year, $month, $path);
 
             ReportPdf::create([
-                'id' => (string) Str::ulid(),
+                'id' => $ulid,
                 'franchisee_id' => $f->id,
                 'type' => 'monthly_sales',
                 'year' => $year,

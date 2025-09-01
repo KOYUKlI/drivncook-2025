@@ -19,7 +19,25 @@ class PurchaseOrderPolicy
      */
     public function view(User $user, $purchaseOrder): bool
     {
-        return $user->hasAnyRole(['admin', 'warehouse']);
+        if ($user->hasAnyRole(['admin', 'warehouse'])) {
+            return true;
+        }
+        // Franchisee can view own orders
+        if ($user->hasRole('franchisee')) {
+            try {
+                $fr = $user->franchisee; // relation by email
+                if ($fr && $purchaseOrder && (string) $purchaseOrder->franchisee_id === (string) $fr->id) {
+                    // For FO order requests, restrict to Draft/Submitted; other kinds remain viewable
+                    if (isset($purchaseOrder->kind) && $purchaseOrder->kind === 'franchisee_po') {
+                        return in_array($purchaseOrder->status, ['Draft','Submitted']);
+                    }
+                    return true;
+                }
+            } catch (\Throwable $e) {
+                return false;
+            }
+        }
+        return false;
     }
 
     /**
@@ -65,4 +83,41 @@ class PurchaseOrderPolicy
     {
         return $user->hasAnyRole(['admin', 'warehouse']);
     }
+
+    public function update(User $user, $purchaseOrder): bool
+    {
+        if ($user->hasAnyRole(['admin','warehouse'])) { return true; }
+        if ($user->hasRole('franchisee')) {
+            $fr = $user->franchisee;
+            if ($fr && (string)$purchaseOrder->franchisee_id === (string)$fr->id) {
+                return in_array($purchaseOrder->status, ['Draft','Submitted']);
+            }
+        }
+        return false;
+    }
+
+    public function submit(User $user, $purchaseOrder): bool
+    {
+        if (!$user->hasRole('franchisee')) { return false; }
+        $fr = $user->franchisee;
+        return $fr && (string)$purchaseOrder->franchisee_id === (string)$fr->id && $purchaseOrder->status === 'Draft';
+    }
+
+    public function approve(User $user, $purchaseOrder): bool
+    { return $user->hasAnyRole(['admin','warehouse']); }
+
+    public function pick(User $user, $purchaseOrder): bool
+    { return $user->hasAnyRole(['admin','warehouse']); }
+
+    public function ship(User $user, $purchaseOrder): bool
+    { return $user->hasAnyRole(['admin','warehouse']); }
+
+    public function deliver(User $user, $purchaseOrder): bool
+    { return $user->hasAnyRole(['admin','warehouse']); }
+
+    public function close(User $user, $purchaseOrder): bool
+    { return $user->hasAnyRole(['admin','warehouse']); }
+
+    public function cancel(User $user, $purchaseOrder): bool
+    { return $user->hasAnyRole(['admin','warehouse']); }
 }

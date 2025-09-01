@@ -66,6 +66,8 @@ return [
         'redis' => [
             'driver' => 'redis',
             'connection' => env('REDIS_QUEUE_CONNECTION', 'default'),
+            // Default queue name; mailables in this feature explicitly set $queue = 'mail'
+            // You can override with REDIS_QUEUE or run a separate worker: php artisan queue:work --queue=mail,default
             'queue' => env('REDIS_QUEUE', 'default'),
             'retry_after' => (int) env('REDIS_QUEUE_RETRY_AFTER', 90),
             'block_for' => null,
