@@ -11,6 +11,17 @@ class ReportPdfSeeder extends Seeder
 {
     public function run(): void
     {
+        // Désactivé : Les rapports sont générés manuellement
+        // Ne pas créer de rapports factices avec des fichiers placeholder
+        
+        // Si vous voulez générer de vrais rapports de test, utilisez plutôt :
+        // php artisan tinker puis appelez le service PdfService manuellement
+        
+        $this->command->info('ReportPdfSeeder: Génération automatique désactivée - utilisez l\'interface BO pour générer les rapports');
+        return;
+
+        /*
+        // Code original commenté :
         $franchisees = Franchisee::pluck('id');
         if ($franchisees->isEmpty()) { return; }
 
@@ -32,6 +43,6 @@ class ReportPdfSeeder extends Seeder
                     ]
                 );
             }
-        }
-    }
+        }*/
+    }    
 }

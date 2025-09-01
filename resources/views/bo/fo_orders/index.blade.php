@@ -1,4 +1,9 @@
-@extends('layouts.app')
+@extends('layouts.app-shell')
+
+@section('sidebar')
+    @include('layouts.partials.sidebar')
+@endsection
+
 @section('content')
 <x-ui.page-header :title="__('ui.bo.fo_orders.index.title')">
     <x-slot:actions>

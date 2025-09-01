@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 class StockItemFactory extends Factory
 {
@@ -10,6 +11,7 @@ class StockItemFactory extends Factory
     {
         $units = ['kg','pc','L'];
         return [
+            'id' => (string) Str::ulid(),
             'sku' => strtoupper($this->faker->unique()->bothify('SKU-####')),
             'name' => $this->faker->words(2, true),
             'unit' => $this->faker->randomElement($units),

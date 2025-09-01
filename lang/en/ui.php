@@ -101,6 +101,7 @@ return array (
   'documents' => 'Documents',
   'date' => 'Date',
   'location' => 'Location',
+  'language' => 'Language',
   'revenue' => 'Revenue',
   'download' => 'Download',
   'assigned_to' => 'Assigned to',
@@ -243,6 +244,7 @@ return array (
     'quantity' => 'Quantity',
     'unit_price' => 'Unit Price',
     'total' => 'Total',
+    'order_info' => 'Order Information',
     'ratio_8020' => '80/20 Ratio',
     'from_date' => 'From Date',
     'to_date' => 'To Date',
@@ -287,6 +289,8 @@ return array (
   array (
     'active' => 'Active',
     'in_maintenance' => 'In maintenance',
+    'inmaintenance' => 'In maintenance',
+    'maintenance' => 'In maintenance',
     'retired' => 'Retired',
     'inactive' => 'Inactive',
     'draft' => 'Draft',
@@ -1023,12 +1027,44 @@ return array (
       'back_to_list' => 'Back to requests',
     ),
     'fo_orders' => array(
+      'title' => 'Franchisee Orders',
       'index' => array(
         'title' => 'Franchisee Requests',
       ),
       'show' => array(
         'title' => 'Request :ref',
       ),
+      'summary' => array(
+        'ordered_total' => 'Total ordered',
+        'picked_total' => 'Total picked',
+        'shipped_total' => 'Total shipped',
+        'delivered_total' => 'Total delivered',
+        'to_pick' => 'to pick',
+        'to_ship' => 'to ship',
+        'to_deliver' => 'to deliver',
+      ),
+      'status' => array(
+        'pending' => 'Pending',
+        'approved' => 'Approved',
+        'picked' => 'Picked',
+        'shipped' => 'Shipped',
+        'delivered' => 'Delivered',
+        'closed' => 'Closed',
+        'cancelled' => 'Cancelled',
+      ),
+      'line_status' => array(
+        'pending' => 'Pending',
+        'picked' => 'Picked',
+        'shipped' => 'Shipped',
+        'delivered' => 'Delivered',
+      ),
+      'order_lines' => 'Order Lines',
+      'picked' => 'Picked',
+      'shipped' => 'Shipped',
+      'delivered' => 'Delivered',
+      'to_pick' => 'To pick',
+      'to_ship' => 'To ship',
+      'to_deliver' => 'To deliver',
       'actions' => array(
         'approve' => 'Approve',
         'pick' => 'Pick',
@@ -1057,48 +1093,6 @@ return array (
       ),
     ),
   ),
-  'fo' => array(
-    'orders_request' => array(
-      'index' => array(
-        'title' => 'My Order Requests',
-      ),
-      'create' => array(
-        'title' => 'New Order Request',
-        'ref_preview' => 'Reference (will be assigned at save):',
-      ),
-      'edit' => array(
-        'title' => 'Edit Order Request :ref',
-      ),
-      'show' => array(
-        'title' => 'Order Request :ref',
-      ),
-      'actions' => array(
-        'new' => 'New request',
-        'submit' => 'Submit request',
-      ),
-      'flash' => array(
-        'created' => 'Order request created.',
-        'updated' => 'Order request updated.',
-        'submitted' => 'Order request submitted.',
-      ),
-      'errors' => array(
-        'invalid_transition' => 'Invalid status transition',
-      ),
-      'ratio_warning_hint' => '80/20 ratio is computed server-side; a warning will show if below 80%.',
-      'back_to_list' => 'Back to requests',
-      'export_csv' => 'Export CSV',
-      'filters' => array(
-        'title' => 'Filters',
-        'status' => 'Status',
-        'from' => 'From',
-        'to' => 'To',
-      ),
-      'statuses' => array(
-        'draft' => 'Draft',
-        'submitted' => 'Submitted',
-      ),
-    ),
-  ),
   'fo' => 
   array (
     'nav' => 
@@ -1111,6 +1105,31 @@ return array (
       'monthly_reports' => 'Monthly Reports',
       'account' => 'My Account',
       'sidebar' => 'Sidebar Navigation',
+    ),
+    'sales' => 
+    array (
+      'index' => 
+      array (
+        'title' => 'My Sales',
+        'create_new' => 'New Sale',
+        'filter' => 'Filters',
+        'from_date' => 'From Date',
+        'to_date' => 'To Date',
+        'filter_submit' => 'Filter',
+        'reset' => 'Reset',
+        'export_csv' => 'Export CSV',
+        'period' => 'Period',
+        'total_sales' => 'Total Sales',
+        'total_amount' => 'Total Amount',
+        'table' => 
+        array (
+          'date' => 'Date',
+          'items' => 'Items',
+          'total' => 'Total',
+          'actions' => 'Actions',
+        ),
+        'no_sales_found' => 'No sales found for this period.',
+      ),
     ),
     'dashboard' => 'My Dashboard',
     'dashboard_page' =>

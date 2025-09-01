@@ -14,7 +14,8 @@ return [
             'my_sales' => 'Mes ventes',
             'new_sale' => 'Nouvelle vente',
             'reports' => 'Rapports',
-            'monthly_reports' => 'Rapports mensuels'
+            'monthly_reports' => 'Rapports mensuels',
+            'account' => 'Profil'
         ],
         'dashboard' => [
             'welcome' => 'Bienvenue, :name',

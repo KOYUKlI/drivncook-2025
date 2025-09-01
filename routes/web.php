@@ -63,6 +63,9 @@ Route::get('/dashboard', function () {
     /** @var \App\Models\User $user */
     $user = \Illuminate\Support\Facades\Auth::user();
 
+    // Clear any problematic intended URLs to prevent redirect loops
+    session()->forget('url.intended');
+
     if ($user->hasRole(['admin', 'warehouse', 'fleet', 'tech'])) {
         return redirect()->route('bo.dashboard');
     }
@@ -151,7 +154,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::middleware('role:admin|warehouse')->group(function () {
             Route::get('reports/monthly', [BOReportController::class, 'monthly'])->name('reports.monthly');
             Route::post('reports/monthly/generate', [BOReportController::class, 'generate'])->name('reports.monthly.generate');
-            Route::get('reports/{id}/download', [BOReportController::class, 'download'])->name('reports.download');
+            Route::get('reports/{id}/download', [BOReportController::class, 'download'])->name('reports.download.bo');
             // 80/20 Compliance report (moved under reports)
             Route::get('reports/compliance', [BOComplianceController::class, 'index'])->name('reports.compliance');
 

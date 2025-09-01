@@ -226,7 +226,7 @@
                             {{ $report->generated_at->format('d/m/Y H:i') }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-center">
-                            <a href="{{ route('bo.reports.download', $report->id) }}" 
+                            <a href="{{ route('bo.reports.download.bo', $report->id) }}" 
                                class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                                 <svg class="-ml-0.5 mr-1.5 h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>

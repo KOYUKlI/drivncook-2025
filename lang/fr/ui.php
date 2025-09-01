@@ -176,6 +176,7 @@ return array (
   'investment_details' => 'Détails de l\'investissement',
   'learn_more' => 'En savoir plus',
   'location' => 'Localisation',
+  'language' => 'Langue',
   'login' => 'Connexion',
   'logout' => 'Déconnexion',
   'maintenance' => 
@@ -387,6 +388,7 @@ return array (
     'operational' => 'Opérationnel',
     'maintenance' => 'En maintenance',
     'in_maintenance' => 'En maintenance',
+    'inmaintenance' => 'En maintenance',
     'out_of_service' => 'Hors service',
     'retired' => 'Retiré',
   ),
@@ -410,6 +412,7 @@ return array (
     'quantity' => 'Quantité',
     'price' => 'Prix',
     'total' => 'Total',
+    'order_info' => 'Informations commande',
     'description' => 'Description',
     'type' => 'Type',
     'location' => 'Emplacement',
@@ -1020,6 +1023,72 @@ return array (
         'deleted' => 'Article supprimé',
       ),
     ),
+    'fo_orders' => array(
+      'title' => 'Commandes franchisés',
+      'index' => array(
+        'title' => 'Demandes franchisés',
+      ),
+      'show' => array(
+        'title' => 'Demande :ref',
+      ),
+      'summary' => array(
+        'ordered_total' => 'Total commandé',
+        'picked_total' => 'Total préparé',
+        'shipped_total' => 'Total expédié',
+        'delivered_total' => 'Total livré',
+        'to_pick' => 'à préparer',
+        'to_ship' => 'à expédier',
+        'to_deliver' => 'à livrer',
+      ),
+      'status' => array(
+        'pending' => 'En attente',
+        'approved' => 'Approuvé',
+        'picked' => 'Préparé',
+        'shipped' => 'Expédié',
+        'delivered' => 'Livré',
+        'closed' => 'Clôturé',
+        'cancelled' => 'Annulé',
+      ),
+      'line_status' => array(
+        'pending' => 'En attente',
+        'picked' => 'Préparé',
+        'shipped' => 'Expédié',
+        'delivered' => 'Livré',
+      ),
+      'order_lines' => 'Lignes de commande',
+      'picked' => 'Préparé',
+      'shipped' => 'Expédié',
+      'delivered' => 'Livré',
+      'to_pick' => 'À préparer',
+      'to_ship' => 'À expédier',
+      'to_deliver' => 'À livrer',
+      'actions' => array(
+        'approve' => 'Approuver',
+        'pick' => 'Préparer',
+        'ship' => 'Expédier',
+        'deliver' => 'Livrer',
+        'close' => 'Clôturer',
+        'cancel' => 'Annuler',
+      ),
+      'flash' => array(
+        'approved' => 'Commande approuvée',
+        'picked' => 'Commande préparée',
+        'shipped' => 'Commande expédiée',
+        'delivered' => 'Commande livrée',
+        'closed' => 'Commande clôturée',
+        'cancelled' => 'Commande annulée',
+      ),
+      'errors' => array(
+        'invalid_transition' => 'Transition de statut invalide',
+        'insufficient_stock' => 'Stock insuffisant pour cette expédition',
+        'ship_exceeds_order' => 'La quantité à expédier dépasse la quantité commandée',
+        'deliver_exceeds_shipped' => 'La quantité à réceptionner dépasse la quantité expédiée',
+        'warehouse_required' => 'Un entrepôt est requis pour expédier',
+      ),
+      'csv' => array(
+        'reference' => 'Référence',
+      ),
+    ),
     'purchase_orders' => 
     array (
       'title' => 'Commandes d\'Achat',
@@ -1180,6 +1249,9 @@ return array (
         'generate' => 
         array (
           'title' => 'Générer un Nouveau Rapport',
+          'description' => 'Les rapports sont générés manuellement. Sélectionnez une période pour créer un nouveau rapport PDF.',
+          'info_title' => 'Génération manuelle',
+          'info_text' => 'Chaque rapport est généré à la demande avec les données actuelles de vente. Vérifiez qu\'il n\'existe pas déjà un rapport pour cette période.',
           'button' => 'Générer',
           'franchisee' => 'Franchisé',
           'month' => 'Mois',
@@ -1202,12 +1274,9 @@ return array (
     array (
       'title' => 'Opérations',
     ),
-  ),
-  'bo_trucks' => 
-  array (
-    'create' => 
+    'warehouses' => 
     array (
-      'title' => 'Nouveau camion',
+      'title' => 'Gestion des entrepôts',
     ),
     'fields' => 
     array (
@@ -1251,6 +1320,31 @@ return array (
       'monthly_reports' => 'Rapports mensuels',
       'account' => 'Mon compte',
       'sidebar' => 'Navigation latérale',
+    ),
+    'sales' => 
+    array (
+      'index' => 
+      array (
+        'title' => 'Mes Ventes',
+        'create_new' => 'Nouvelle Vente',
+        'filter' => 'Filtres',
+        'from_date' => 'Date de début',
+        'to_date' => 'Date de fin',
+        'filter_submit' => 'Filtrer',
+        'reset' => 'Réinitialiser',
+        'export_csv' => 'Exporter CSV',
+        'period' => 'Période',
+        'total_sales' => 'Total des ventes',
+        'total_amount' => 'Montant total',
+        'table' => 
+        array (
+          'date' => 'Date',
+          'items' => 'Articles',
+          'total' => 'Total',
+          'actions' => 'Actions',
+        ),
+        'no_sales_found' => 'Aucune vente trouvée pour cette période.',
+      ),
     ),
     'dashboard' => 'Tableau de bord',
     'dashboard_page' => 
@@ -1301,6 +1395,46 @@ return array (
       array (
         'en' => 'Anglais',
         'fr' => 'Français',
+      ),
+    ),
+    'orders_request' => array(
+      'index' => array(
+        'title' => 'Mes demandes d\'approvisionnement',
+      ),
+      'create' => array(
+        'title' => 'Nouvelle demande',
+        'ref_preview' => 'Référence (attribuée à l\'enregistrement) :',
+      ),
+      'edit' => array(
+        'title' => 'Modifier la demande :ref',
+      ),
+      'show' => array(
+        'title' => 'Demande :ref',
+      ),
+      'actions' => array(
+        'new' => 'Nouvelle demande',
+        'submit' => 'Soumettre',
+      ),
+      'flash' => array(
+        'created' => 'Demande créée.',
+        'updated' => 'Demande mise à jour.',
+        'submitted' => 'Demande soumise.',
+      ),
+      'errors' => array(
+        'invalid_transition' => 'Transition de statut invalide',
+      ),
+      'ratio_warning_hint' => 'Le ratio 80/20 est calculé côté serveur; un avertissement apparaîtra s\'il est inférieur à 80%.',
+      'back_to_list' => 'Retour aux demandes',
+      'export_csv' => 'Exporter CSV',
+      'filters' => array(
+        'title' => 'Filtres',
+        'status' => 'Statut',
+        'from' => 'Du',
+        'to' => 'Au',
+      ),
+      'statuses' => array(
+        'draft' => 'Brouillon',
+        'submitted' => 'Soumis',
       ),
     ),
     'errors' => 
@@ -1732,85 +1866,6 @@ return array (
       'prepare_title' => 'Marquer comme préparée et générer le bon',
       'ship_title' => 'Expédier les quantités et générer le BL',
       'receive_title' => 'Confirmer les quantités livrées',
-    ),
-  ),
-  'bo' =>
-  array(
-    'fo_orders' => array(
-      'index' => array(
-        'title' => 'Demandes franchisés',
-      ),
-      'show' => array(
-        'title' => 'Demande :ref',
-      ),
-      'actions' => array(
-        'approve' => 'Approuver',
-        'pick' => 'Préparer',
-        'ship' => 'Expédier',
-        'deliver' => 'Livrer',
-        'close' => 'Clôturer',
-        'cancel' => 'Annuler',
-      ),
-      'flash' => array(
-        'approved' => 'Commande approuvée',
-        'picked' => 'Commande préparée',
-        'shipped' => 'Commande expédiée',
-        'delivered' => 'Commande livrée',
-        'closed' => 'Commande clôturée',
-        'cancelled' => 'Commande annulée',
-      ),
-      'errors' => array(
-        'invalid_transition' => 'Transition de statut invalide',
-        'insufficient_stock' => 'Stock insuffisant pour cette expédition',
-        'ship_exceeds_order' => 'La quantité à expédier dépasse la quantité commandée',
-        'deliver_exceeds_shipped' => 'La quantité à réceptionner dépasse la quantité expédiée',
-        'warehouse_required' => 'Un entrepôt est requis pour expédier',
-      ),
-      'csv' => array(
-        'reference' => 'Référence',
-      ),
-    ),
-  ),
-  'fo' => array(
-    'orders_request' => array(
-      'index' => array(
-        'title' => 'Mes demandes d’approvisionnement',
-      ),
-      'create' => array(
-        'title' => 'Nouvelle demande',
-        'ref_preview' => 'Référence (attribuée à l’enregistrement) :',
-      ),
-      'edit' => array(
-        'title' => 'Modifier la demande :ref',
-      ),
-      'show' => array(
-        'title' => 'Demande :ref',
-      ),
-      'actions' => array(
-        'new' => 'Nouvelle demande',
-        'submit' => 'Soumettre',
-      ),
-      'flash' => array(
-        'created' => 'Demande créée.',
-        'updated' => 'Demande mise à jour.',
-        'submitted' => 'Demande soumise.',
-      ),
-      'errors' => array(
-        'invalid_transition' => 'Transition de statut invalide',
-      ),
-      'ratio_warning_hint' => 'Le ratio 80/20 est calculé côté serveur; un avertissement apparaîtra s’il est inférieur à 80%.',
-      'back_to_list' => 'Retour aux demandes',
-      'export_csv' => 'Exporter CSV',
-      'filters' => array(
-        'title' => 'Filtres',
-        'status' => 'Statut',
-        'from' => 'Du',
-        'to' => 'Au',
-      ),
-      'statuses' => array(
-        'draft' => 'Brouillon',
-        'submitted' => 'Soumis',
-      ),
     ),
   ),
   'po' => 

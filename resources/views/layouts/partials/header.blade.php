@@ -75,6 +75,28 @@
                                 </svg>
                                 {{ __('ui.profile') }}
                             </a>
+                            
+                            <!-- Language switcher -->
+                            <hr class="border-gray-100">
+                            <div class="px-4 py-2">
+                                <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ __('ui.language') }}</span>
+                                <div class="mt-1 flex gap-1">
+                                    <form method="POST" action="{{ route('locale.switch') }}" class="inline">
+                                        @csrf
+                                        <input type="hidden" name="locale" value="fr">
+                                        <button type="submit" class="px-2 py-1 text-xs rounded {{ app()->getLocale() === 'fr' ? 'bg-orange-100 text-orange-700' : 'text-gray-600 hover:bg-gray-100' }}">
+                                            FR
+                                        </button>
+                                    </form>
+                                    <form method="POST" action="{{ route('locale.switch') }}" class="inline">
+                                        @csrf
+                                        <input type="hidden" name="locale" value="en">
+                                        <button type="submit" class="px-2 py-1 text-xs rounded {{ app()->getLocale() === 'en' ? 'bg-orange-100 text-orange-700' : 'text-gray-600 hover:bg-gray-100' }}">
+                                            EN
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <button type="submit" class="w-full text-left flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-orange-600">

@@ -125,8 +125,22 @@
     <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-6">
         <div class="px-6 py-4 border-b border-gray-200">
             <h3 class="text-lg font-medium text-gray-900">{{ __('ui.bo.reports.monthly.generate.title') }}</h3>
+            <p class="text-sm text-gray-600 mt-1">{{ __('ui.bo.reports.monthly.generate.description') }}</p>
         </div>
         <div class="p-6">
+            <div class="bg-blue-50 border border-blue-200 rounded-md p-4 mb-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h4 class="text-sm font-medium text-blue-800">{{ __('ui.bo.reports.monthly.generate.info_title') }}</h4>
+                        <p class="text-sm text-blue-700 mt-1">{{ __('ui.bo.reports.monthly.generate.info_text') }}</p>
+                    </div>
+                </div>
+            </div>
             <form method="POST" action="{{ route('bo.reports.monthly.generate') }}" class="grid grid-cols-1 gap-6 md:grid-cols-4">
                 @csrf
                 
@@ -226,7 +240,7 @@
                             {{ $report->generated_at->format('d/m/Y H:i') }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-center">
-                            <a href="{{ route('bo.reports.download', $report->id) }}" 
+                            <a href="{{ route('bo.reports.download.bo', $report->id) }}" 
                                class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                                 <svg class="-ml-0.5 mr-1.5 h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
