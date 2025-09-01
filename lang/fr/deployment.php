@@ -18,6 +18,10 @@ return [
         'location' => 'Emplacement',
         'planned_start_at' => 'Date de début prévue',
         'planned_end_at' => 'Date de fin prévue',
+    'start_date' => 'Date de début',
+    'end_date' => 'Date de fin',
+    'start_time' => 'Heure de début',
+    'end_time' => 'Heure de fin',
         'planned_date_range' => 'Date de début prévue / Date de fin prévue',
         'actual_start_at' => 'Date de début réelle',
         'actual_end_at' => 'Date de fin réelle',
@@ -67,12 +71,27 @@ return [
     
     // Errors
     'errors' => [
-        'schedule_conflict' => 'Ce déploiement est en conflit avec un autre déploiement pour ce camion.',
+        'schedule_conflict' => 'Ce camion a déjà un déploiement qui chevauche la période sélectionnée.',
         'truck_already_deployed' => 'Ce camion est déjà déployé pendant cette période.',
         'invalid_transition' => 'Transition de statut invalide.',
         'already_started' => 'Ce déploiement a déjà commencé.',
         'already_ended' => 'Ce déploiement est déjà terminé.',
         'already_cancelled' => 'Ce déploiement a déjà été annulé.',
+        'truck_unassigned' => 'Ce camion n’est associé à aucun franchisé. Assignez-le avant de planifier un déploiement.',
+        'franchisee_mismatch' => 'Le déploiement doit être planifié pour le franchisé auquel le camion est attribué.',
+    ],
+
+    // Time presets and helpers
+    'times' => [
+        'morning' => 'Matin',
+        'afternoon' => 'Après-midi',
+        'evening' => 'Soirée',
+        'all_day' => 'Journée',
+    ],
+    'quick_select' => 'Sélection rapide',
+    'same_day' => 'Même jour',
+    'placeholder' => [
+        'location' => 'Ex : Place de la République, Paris',
     ],
     
     // Filters

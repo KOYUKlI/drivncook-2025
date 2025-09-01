@@ -56,10 +56,13 @@ return array (
     'fo_sales' => 'My Sales',
     'fo_sales_create' => 'Record Sale',
     'fo_reports' => 'Reports',
+    'fo_truck' => 'My Truck',
     'login' => 'Login',
     'logout' => 'Logout',
     'profile' => 'My Profile',
   ),
+  'open_menu' => 'Open menu',
+  'close_menu' => 'Close menu',
   'audit' => 
   array (
     'title' => 'Audit Logs',
@@ -308,6 +311,7 @@ return array (
     'deployment_opened' => 'Deployment opened successfully',
     'deployment_closed' => 'Deployment closed successfully',
     'deployment_cancelled' => 'Deployment cancelled successfully',
+    'account_updated' => 'Account information updated successfully',
   ),
   'empty' => 
   array (
@@ -351,7 +355,7 @@ return array (
     'purchase_order_show' => 'Order Details',
     'reports_monthly' => 'Monthly Reports',
     'reports_compliance' => 'Compliance Report',
-    'fo_dashboard' => 'My Dashboard',
+  'fo_dashboard' => 'My Dashboard',
     'fo_sales' => 'My Sales',
     'fo_sales_create' => 'New Sale',
     'fo_reports' => 'My Reports',
@@ -666,6 +670,17 @@ return array (
   'required_documents' => 'Documents to prepare',
   'bo' => 
   array (
+    'nav' => 
+    array (
+      'dashboard' => 'Dashboard',
+      'sales' => 'Sales',
+      'my_sales' => 'My Sales',
+      'new_sale' => 'New Sale',
+      'reports' => 'Reports',
+      'monthly_reports' => 'Monthly Reports',
+      'account' => 'My Account',
+      'sidebar' => 'Sidebar Navigation',
+    ),
     'applications' => 
     array (
       'title' => 'Application Management',
@@ -970,9 +985,126 @@ return array (
   ),
   'fo' => 
   array (
+    'nav' => 
+    array (
+      'dashboard' => 'Dashboard',
+      'sales' => 'Sales',
+      'my_sales' => 'My Sales',
+      'new_sale' => 'New Sale',
+      'reports' => 'Reports',
+      'monthly_reports' => 'Monthly Reports',
+      'account' => 'My Account',
+      'sidebar' => 'Sidebar Navigation',
+    ),
     'dashboard' => 'My Dashboard',
+    'errors' => 
+    array (
+      'no_franchisee_association' => 'Your account is not linked to a franchisee yet. Please complete your profile or contact support.',
+    ),
+    'account' => 
+    array (
+      'title' => 'My Account',
+      'subtitle' => 'Manage your profile and preferences',
+      'fields' => 
+      array (
+        'phone' => 'Phone',
+        'notification_email_optin' => 'Email notifications',
+        'locale' => 'Language',
+      ),
+      'placeholders' => 
+      array (
+        'phone' => 'Your phone number',
+      ),
+      'notes' => 
+      array (
+        'email_managed_by_bo' => 'Email address can only be changed by administrators.',
+      ),
+      'actions' => 
+      array (
+        'update' => 'Update Profile',
+      ),
+      'messages' => 
+      array (
+        'updated' => 'Account information updated successfully.',
+      ),
+      'locale_options' => 
+      array (
+        'en' => 'English',
+        'fr' => 'French',
+      ),
+    ),
     'sales' => 
     array (
+      'index' => array(
+        'title' => 'My Sales',
+        'create_new' => 'New Sale',
+        'filter' => 'Filter',
+        'from_date' => 'Start Date',
+        'to_date' => 'End Date',
+        'filter_submit' => 'Filter',
+        'reset' => 'Reset',
+        'export_csv' => 'Export CSV',
+        'period' => 'Period',
+        'total_sales' => 'Total Sales',
+        'total_amount' => 'Total Amount',
+        'no_sales_found' => 'No sales found',
+        'table' => array(
+            'date' => 'Date',
+            'items' => 'Items',
+            'total' => 'Total',
+            'actions' => 'Actions',
+        ),
+      ),
+      'create' => array(
+        'title' => 'Create a Sale',
+        'back_to_list' => 'Back to List',
+        'sale_info' => 'Sale Information',
+        'sale_date' => 'Sale Date',
+        'sale_lines' => 'Sale Lines',
+        'add_line' => 'Add Line',
+        'no_lines_yet' => 'Add lines to your sale by clicking "Add Line"',
+        'custom_item' => 'Custom Item',
+        'custom_item_placeholder' => 'Custom item name',
+        'submit' => 'Save Sale',
+        'table' => array(
+            'item' => 'Item',
+            'quantity' => 'Quantity',
+            'price' => 'Unit Price',
+            'subtotal' => 'Subtotal',
+            'total' => 'Total',
+        ),
+      ),
+      'show' => array(
+        'title' => 'Sale Details',
+        'back_to_list' => 'Back to List',
+        'sale_info' => 'Sale Information',
+        'sale_id' => 'Sale ID',
+        'sale_date' => 'Sale Date',
+        'created_at' => 'Created At',
+        'total' => 'Total',
+        'sale_items' => 'Sold Items',
+        'unknown_item' => 'Unknown Item',
+        'custom_item' => 'Custom Item',
+        'table' => array(
+            'item' => 'Item',
+            'quantity' => 'Quantity',
+            'unit_price' => 'Unit Price',
+            'subtotal' => 'Subtotal',
+            'total' => 'Total',
+        ),
+      ),
+      'validation' => array(
+        'must_have_item_or_label' => 'Each line must have either a stock item or a custom label.',
+        'inactive_stock_items' => 'Some selected items are no longer active.',
+      ),
+      'flash' => array(
+        'created_successfully' => 'The sale was created successfully',
+      ),
+      'export' => array(
+        'date' => 'Date',
+        'items_count' => 'Items Count',
+        'total' => 'Total (€)',
+      ),
       'title' => 'My Sales',
       'subtitle' => 'View and manage your sales records',
       'new_sale' => 'New Sale',
@@ -1017,39 +1149,6 @@ return array (
         'description' => 'Start recording your sales to see them here.',
         'create_first' => 'Record First Sale',
       ),
-      'create' => 
-      array (
-        'title' => 'New Sale',
-        'subtitle' => 'Record a new sale transaction',
-        'location_time' => 'Location & Time',
-        'location' => 'Location',
-        'location_placeholder' => 'e.g., Place de la Mairie',
-        'coordinates' => 'Coordinates (optional)',
-        'sale_date' => 'Sale Date & Time',
-        'items' => 'Items',
-        'add_item' => 'Add Item',
-        'product' => 'Product',
-        'select_product' => 'Select a product...',
-        'quantity' => 'Quantity',
-        'line_total' => 'Line Total',
-        'item_selected' => 'item selected',
-        'items_selected' => 'items selected',
-        'subtotal' => 'Subtotal',
-        'payment_method' => 'Payment Method',
-        'payment' => 
-        array (
-          'card' => 'Credit Card',
-          'cash' => 'Cash',
-          'mobile' => 'Mobile Payment',
-        ),
-        'summary' => 'Order Summary',
-        'tax' => 'VAT',
-        'total' => 'Total',
-        'items_count' => 'Items',
-        'avg_price' => 'Avg. Price',
-        'confirm_sale' => 'Confirm Sale',
-        'cancel' => 'Cancel',
-      ),
     ),
     'reports' => 
     array (
@@ -1061,7 +1160,8 @@ return array (
         'year' => 'Year',
         'month' => 'Month',
         'all_months' => 'All months',
-  'all_franchisees' => 'All Franchisees',
+        'all_years' => 'All years',
+        'all_franchisees' => 'All Franchisees',
         'apply' => 'Filter',
         'reset' => 'Reset',
       ),
@@ -1085,6 +1185,83 @@ return array (
         'title' => 'No reports available',
         'description' => 'Your monthly reports will appear here once generated.',
         'help' => 'Reports are automatically generated at the end of each month.',
+      ),
+      'messages' => 
+      array (
+        'access_denied' => 'Access denied',
+        'file_not_found' => 'File not found',
+      ),
+    ),
+    'truck' => 
+    array (
+      'title' => 'My Truck',
+      'subtitle' => 'View and manage your assigned truck',
+      'tabs' => 
+      array (
+        'info' => 'Info',
+        'deployments' => 'Deployments',
+        'maintenance' => 'Maintenance',
+      ),
+      'sections' => 
+      array (
+        'details' => 'Truck Details',
+        'upcoming_deployments' => 'Upcoming Deployments',
+        'maintenance_history' => 'Maintenance History',
+      ),
+      'fields' => 
+      array (
+        'name' => 'Name',
+        'plate_number' => 'License Plate',
+        'make' => 'Make',
+        'model' => 'Model',
+        'year' => 'Year',
+        'status' => 'Status',
+        'commissioned_at' => 'Commissioned On',
+        'mileage_km' => 'Mileage',
+        'location' => 'Location',
+        'planned_start' => 'Planned Start',
+        'planned_end' => 'Planned End',
+        'maintenance_title' => 'Title',
+        'maintenance_type' => 'Type',
+        'created_at' => 'Created On',
+      ),
+      'messages' => 
+      array (
+        'no_franchisee' => 'You do not have a franchisee account.',
+        'no_truck_assigned' => 'No truck is currently assigned to your account.',
+        'no_upcoming_deployments' => 'No upcoming deployments are scheduled.',
+        'no_maintenance_history' => 'No maintenance history is available.',
+      ),
+    ),
+    'maintenance_request' => 
+    array (
+      'title' => 'Request Maintenance',
+      'subtitle' => 'Submit a new maintenance request',
+      'fields' => 
+      array (
+        'title' => 'Title',
+        'description' => 'Description',
+        'type' => 'Type',
+        'attachment' => 'Attachment (Optional)',
+      ),
+      'placeholders' => 
+      array (
+        'title' => 'Brief description of the issue',
+        'description' => 'Provide detailed information about the maintenance needed',
+        'select_type' => 'Select a type',
+      ),
+      'notes' => 
+      array (
+        'attachment_formats' => 'Accepted formats: PDF, DOC, JPG, PNG (max 5MB)',
+      ),
+      'actions' => 
+      array (
+        'submit' => 'Submit Request',
+      ),
+      'messages' => 
+      array (
+        'created' => 'Maintenance request submitted successfully.',
+        'failed' => 'Failed to submit maintenance request.',
       ),
     ),
   ),

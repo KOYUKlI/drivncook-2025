@@ -20,7 +20,20 @@ class TruckPolicy
      */
     public function view(User $user, Truck $truck): bool
     {
-        return $user->hasAnyRole(['admin', 'fleet']);
+        // Admin and fleet can view any truck
+        if ($user->hasAnyRole(['admin', 'fleet'])) {
+            return true;
+        }
+
+        // Franchisee can only view their assigned truck
+        if ($user->hasRole('franchisee') && $user->franchisee) {
+            return $truck->ownerships()
+                ->where('franchisee_id', $user->franchisee->id)
+                ->whereNull('ended_at')
+                ->exists();
+        }
+
+        return false;
     }
 
     /**
@@ -109,5 +122,21 @@ class TruckPolicy
     public function viewUtilizationReport(User $user): bool
     {
         return $user->hasAnyRole(['admin', 'fleet']);
+    }
+
+    /**
+     * Determine whether the user can request maintenance for the truck.
+     */
+    public function requestMaintenance(User $user, Truck $truck): bool
+    {
+        // Franchisee can only request maintenance for their assigned truck
+        if ($user->hasRole('franchisee') && $user->franchisee) {
+            return $truck->ownerships()
+                ->where('franchisee_id', $user->franchisee->id)
+                ->whereNull('ended_at')
+                ->exists();
+        }
+
+        return false;
     }
 }

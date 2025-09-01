@@ -130,6 +130,58 @@ Notes:
 
 - Seeders are idempotent; you can run seeding multiple times safely.
 - Legacy seeders are deprecated and no-op; DatabaseSeeder orchestrates the current flow.
+
+## Testing the FO (Franchisee Portal)
+
+The project includes a dedicated demo account for testing the Franchisee Portal (FO) features:
+
+```
+URL: http://localhost/fo/dashboard
+Email: demo@drivncook.test
+Password: demodemo
+```
+
+This demo account includes:
+- Pre-configured franchisee with complete profile
+- Assigned truck with details
+- Recent sales data for testing reports and statistics
+- Monthly sales reports from previous months
+
+### Requirements for proper FO testing:
+
+1. Create the storage symlink (required for PDF reports and uploads):
+   ```
+   php artisan storage:link
+   ```
+
+2. Run the scheduler for automatic report generation (in a separate terminal):
+   ```
+   php artisan schedule:work
+   ```
+
+3. Make sure to clear optimization cache after any major changes:
+   ```
+   php artisan optimize:clear
+   ```
+
+4. To verify FO routes are correctly registered:
+   ```
+   php artisan route:list --path=fo
+   ```
+
+### Available FO Features (Laravel 12.26.2)
+
+The FO interface provides franchisees with these core features:
+
+| Feature | Route | Description |
+|---------|-------|-------------|
+| Dashboard | `/fo/dashboard` | Overview with key metrics |
+| My Truck | `/fo/truck` | Truck details, maintenance requests |
+| Sales | `/fo/sales` | List and create sales transactions |
+| Reports | `/fo/reports` | Access monthly reports |
+| Account | `/fo/account` | User profile and preferences |
+
+The dedicated `FODemoSeeder` populates data for all these features to enable immediate testing without manual data entry.
 ## Laravel Sponsors
 
 We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).

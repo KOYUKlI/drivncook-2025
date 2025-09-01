@@ -4,7 +4,7 @@ return [
     // General
     'deployment' => 'Deployment',
     'deployments' => 'Deployments',
-    'schedule_deployment' => 'Schedule Deployment',
+    'schedule_deployment' => 'Schedule a deployment',
     'reschedule_deployment' => 'Reschedule Deployment',
     'open_deployment' => 'Open Deployment',
     'close_deployment' => 'Close Deployment',
@@ -18,6 +18,10 @@ return [
         'location' => 'Location',
         'planned_start_at' => 'Planned Start Date',
         'planned_end_at' => 'Planned End Date',
+        'start_date' => 'Start date',
+        'end_date' => 'End date',
+        'start_time' => 'Start time',
+        'end_time' => 'End time',
         'actual_start_at' => 'Actual Start Date',
         'actual_end_at' => 'Actual End Date',
         'status' => 'Status',
@@ -27,6 +31,17 @@ return [
         'geo_lng' => 'Longitude',
         'cancel_reason' => 'Cancellation Reason',
         'utilization' => 'Truck Utilization',
+    ],
+    'times' => [
+        'morning' => 'Morning',
+        'afternoon' => 'Afternoon',
+        'evening' => 'Evening',
+        'all_day' => 'All day',
+    ],
+    'quick_select' => 'Quick selection',
+    'same_day' => 'Same day',
+    'placeholder' => [
+        'location' => 'e.g. Place de la République, Paris',
     ],
     
     // Statuses
@@ -52,10 +67,10 @@ return [
     
     // Messages
     'messages' => [
-        'scheduled' => 'Deployment scheduled successfully.',
+    'scheduled' => 'Deployment scheduled successfully.',
         'rescheduled' => 'Deployment rescheduled successfully.',
-        'opened' => 'Deployment started successfully.',
-        'closed' => 'Deployment ended successfully.',
+    'opened' => 'Deployment opened successfully.',
+    'closed' => 'Deployment closed successfully.',
         'cancelled' => 'Deployment cancelled successfully.',
         'no_deployments' => 'No deployments found.',
         'utilization_rate' => ':rate% utilization over the last 30 days',
@@ -64,12 +79,14 @@ return [
     
     // Errors
     'errors' => [
-        'schedule_conflict' => 'This deployment conflicts with another deployment for this truck.',
+    'schedule_conflict' => 'This truck already has a deployment overlapping the selected period.',
         'truck_already_deployed' => 'This truck is already deployed during this time period.',
         'invalid_transition' => 'Invalid status transition.',
         'already_started' => 'This deployment has already started.',
         'already_ended' => 'This deployment has already ended.',
         'already_cancelled' => 'This deployment has already been cancelled.',
+    'truck_unassigned' => 'This truck has no assigned franchisee. Assign it before scheduling a deployment.',
+    'franchisee_mismatch' => 'Deployment must be scheduled for the truck’s assigned franchisee.',
     ],
     
     // Filters

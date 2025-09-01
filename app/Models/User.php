@@ -24,6 +24,9 @@ class User extends Authenticatable
         'email',
         'password',
         'franchisee_id',
+        'phone',
+        'notification_email_optin',
+        'locale',
     ];
 
     /**
@@ -46,6 +49,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'notification_email_optin' => 'boolean',
         ];
     }
 

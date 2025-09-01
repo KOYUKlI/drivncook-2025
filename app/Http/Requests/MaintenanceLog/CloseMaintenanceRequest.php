@@ -12,7 +12,8 @@ class CloseMaintenanceRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        $maintenanceLog = MaintenanceLog::findOrFail($this->route('maintenance_log'));
+        $param = $this->route('maintenanceLog');
+        $maintenanceLog = $param instanceof MaintenanceLog ? $param : MaintenanceLog::findOrFail($param);
         return $this->user()->can('close', $maintenanceLog);
     }
 

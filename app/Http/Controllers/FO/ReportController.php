@@ -3,160 +3,83 @@
 namespace App\Http\Controllers\FO;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\GenerateReportRequest;
 use App\Models\ReportPdf;
-use App\Services\PdfService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReportController extends Controller
 {
     /**
-     * Display a listing of reports.
+     * Display a listing of the reports for the current franchisee.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
     {
-        $franchiseeId = data_get(Auth::user(), 'franchisee_id');
+        $franchisee = Auth::user()->franchisee;
 
+        if (!$franchisee) {
+            return redirect()->route('fo.dashboard')
+                ->with('error', __('ui.fo.reports.messages.access_denied'));
+        }
+
+        // Parse filters
+        $year = $request->input('year');
+        $month = $request->input('month');
+
+        // Build query
         $query = ReportPdf::query()
-            ->when($franchiseeId, fn ($q) => $q->where('franchisee_id', $franchiseeId));
+            ->where('franchisee_id', $franchisee->id)
+            ->orderBy('year', 'desc')
+            ->orderBy('month', 'desc');
 
         // Apply filters
-        if ($request->filled('year')) {
-            $query->where('year', $request->get('year'));
+        if ($year) {
+            $query->where('year', $year);
+        }
+        
+        if ($month) {
+            $query->where('month', $month);
         }
 
-        if ($request->filled('month')) {
-            $query->where('month', $request->get('month'));
-        }
+        // Get available years and months for filters
+        $years = ReportPdf::where('franchisee_id', $franchisee->id)
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year');
+        
+        $months = ReportPdf::where('franchisee_id', $franchisee->id)
+            ->distinct()
+            ->orderBy('month')
+            ->pluck('month');
 
-        $reports = $query->latest('generated_at')->get();
+        // Paginate results
+        $reports = $query->paginate(10)->withQueryString();
 
-        return view('fo.reports.index', compact('reports'));
+        return view('fo.reports.index', compact('reports', 'years', 'months', 'year', 'month'));
     }
 
     /**
-     * Generate a new report based on user request.
+     * Download a specific report PDF.
+     *
+     * @param  \App\Models\ReportPdf  $reportPdf
+     * @return \Symfony\Component\HttpFoundation\StreamedResponse|\Illuminate\Http\RedirectResponse
      */
-    public function generate(GenerateReportRequest $request, PdfService $pdfService)
+    public function download(ReportPdf $reportPdf)
     {
-        $validated = $request->validated();
+        $this->authorize('view', $reportPdf);
 
-        // Mock report generation - in real app, would process based on validated parameters
-        $reportId = '01HK'.strtoupper(str()->random(20));
-
-        // Simulate processing based on report type
-        switch ($validated['report_type']) {
-            case 'sales':
-                $this->generateSalesReport($validated, $pdfService, $reportId);
-                break;
-            case 'purchase_orders':
-                $this->generatePurchaseOrdersReport($validated, $pdfService, $reportId);
-                break;
-            case 'trucks':
-                $this->generateTrucksReport($validated, $pdfService, $reportId);
-                break;
-            case 'compliance':
-                $this->generateComplianceReport($validated, $pdfService, $reportId);
-                break;
-        }
-
-        return redirect()->route('fo.reports.index')
-            ->with('success', "Rapport #{$reportId} généré avec succès en format {$validated['format']}.");
-    }
-
-    public function download(string $id)
-    {
-        $report = ReportPdf::findOrFail($id);
-        $user = Auth::user();
-
-        // Security check: ensure franchisee can only download their own reports
-        $isBackoffice = in_array(data_get($user, 'role'), ['admin', 'warehouse', 'fleet', 'tech']);
-        $ownsReport = $user && $user->franchisee_id && $user->franchisee_id === $report->franchisee_id;
-
-        if (! ($isBackoffice || $ownsReport)) {
-            abort(403, __('ui.fo.reports.messages.access_denied'));
-        }
-
-        // Check if file exists
-        if (! Storage::disk('public')->exists($report->storage_path)) {
+        if (!Storage::disk('public')->exists($reportPdf->storage_path)) {
             return redirect()->route('fo.reports.index')
                 ->with('error', __('ui.fo.reports.messages.file_not_found'));
         }
 
         return response()->download(
-            Storage::disk('public')->path($report->storage_path),
-            $report->filename ?: "rapport_{$report->month}_{$report->year}.pdf"
+            Storage::disk('public')->path($reportPdf->storage_path),
+            "rapport_mensuel_{$reportPdf->year}_{$reportPdf->month}.pdf"
         );
-    }
-
-    /**
-     * Generate sales report.
-     */
-    private function generateSalesReport(array $params, PdfService $pdfService, string $reportId): void
-    {
-        // Mock sales data generation
-        $salesData = [
-            'report_id' => $reportId,
-            'type' => 'sales',
-            'period' => $params['period_type'],
-            'total_sales' => 45000, // centimes
-            'transaction_count' => 150,
-            'average_transaction' => 300,
-        ];
-
-        // In real app: Generate actual PDF using PdfService
-    }
-
-    /**
-     * Generate purchase orders report.
-     */
-    private function generatePurchaseOrdersReport(array $params, PdfService $pdfService, string $reportId): void
-    {
-        // Mock purchase order data generation
-        $poData = [
-            'report_id' => $reportId,
-            'type' => 'purchase_orders',
-            'compliance_rate' => 85.5,
-            'total_orders' => 25,
-            'average_ratio' => 82.3,
-        ];
-
-        // In real app: Generate actual PDF using PdfService
-    }
-
-    /**
-     * Generate trucks utilization report.
-     */
-    private function generateTrucksReport(array $params, PdfService $pdfService, string $reportId): void
-    {
-        // Mock truck utilization data
-        $trucksData = [
-            'report_id' => $reportId,
-            'type' => 'trucks',
-            'utilization_rate' => 78.5,
-            'total_deployments' => 85,
-            'maintenance_days' => 12,
-        ];
-
-        // In real app: Generate actual PDF using PdfService
-    }
-
-    /**
-     * Generate compliance report.
-     */
-    private function generateComplianceReport(array $params, PdfService $pdfService, string $reportId): void
-    {
-        // Mock compliance data
-        $complianceData = [
-            'report_id' => $reportId,
-            'type' => 'compliance',
-            'overall_compliance' => 92.1,
-            'violations_count' => 3,
-            'corrective_actions' => 8,
-        ];
-
-        // In real app: Generate actual PDF using PdfService
     }
 }

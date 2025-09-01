@@ -61,10 +61,15 @@ class TruckDeploymentController extends Controller
 
         $data = $request->validated();
 
+        // Enforce deployment with the truck's assigned franchisee only
+        if (empty($truck->franchisee_id)) {
+            return back()->withErrors(['franchisee_id' => __('deployment.errors.truck_unassigned')]);
+        }
+
         $deployment = TruckDeployment::create([
             'id' => (string) Str::ulid(),
             'truck_id' => $truck->id,
-            'franchisee_id' => $data['franchisee_id'] ?? null,
+            'franchisee_id' => $truck->franchisee_id, // force link to truck owner
             'location_text' => $data['location_text'],
             'planned_start_at' => $data['planned_start_at'] ?? null,
             'planned_end_at' => $data['planned_end_at'] ?? null,

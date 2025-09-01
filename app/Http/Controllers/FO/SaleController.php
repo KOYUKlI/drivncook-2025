@@ -7,109 +7,175 @@ use App\Http\Requests\StoreSaleRequest;
 use App\Models\Sale;
 use App\Models\SaleLine;
 use App\Models\StockItem;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class SaleController extends Controller
 {
     /**
-     * Display a listing of sales.
+     * Display a listing of the sales.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Sale::class);
+
         $user = Auth::user();
-        $from = $request->input('from') ? now()->parse($request->input('from')) : now()->startOfMonth();
-        $to = $request->input('to') ? now()->parse($request->input('to')) : now();
+        $franchisee = $user->franchisee;
 
-        $query = Sale::query()->whereBetween('created_at', [$from, $to]);
-        $franchiseeId = data_get($user, 'franchisee_id');
-        if ($franchiseeId) {
-            $query->where('franchisee_id', $franchiseeId);
+        // Parse date filters
+        $fromDate = $request->input('from_date') ? Carbon::parse($request->input('from_date')) : Carbon::now()->startOfMonth();
+        $toDate = $request->input('to_date') ? Carbon::parse($request->input('to_date')) : Carbon::now()->endOfDay();
+
+        // Build query
+        $query = Sale::query()
+            ->where('franchisee_id', $franchisee->id)
+            ->whereBetween('sale_date', [$fromDate->startOfDay(), $toDate->endOfDay()])
+            ->orderBy('sale_date', 'desc');
+
+        // Handle CSV export
+        if ($request->has('export') && $request->input('export') === 'csv') {
+            return $this->exportCsv($query, $fromDate, $toDate);
         }
-        $sales = $query->with('lines')->latest()->get();
 
-        // Calculate real sales stats
-        $todaySales = Sale::whereDate('created_at', now()->toDateString())
-            ->when($franchiseeId, fn ($q) => $q->where('franchisee_id', $franchiseeId))
-            ->get();
+        // Calculate stats
+        $totalSales = $query->count();
+        $totalAmount = $query->sum('total_cents') / 100;
 
-        $weekSales = Sale::whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])
-            ->when($franchiseeId, fn ($q) => $q->where('franchisee_id', $franchiseeId))
-            ->get();
+        // Paginate results
+        $sales = $query->paginate(10)->withQueryString();
 
-        $monthSales = Sale::whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])
-            ->when($franchiseeId, fn ($q) => $q->where('franchisee_id', $franchiseeId))
-            ->get();
-
-        $stats = [
-            'period_from' => $from,
-            'period_to' => $to,
-            'count' => $sales->count(),
-            'sum_cents' => $sales->sum('total_cents'),
-            'today_sales' => $todaySales->sum('total_cents'),
-            'today_count' => $todaySales->count(),
-            'week_sales' => $weekSales->sum('total_cents'),
-            'week_count' => $weekSales->count(),
-            'month_sales' => $monthSales->sum('total_cents'),
-            'month_count' => $monthSales->count(),
-            'best_location' => 'Centre-ville', // TODO: Calculate from deployment data
-            'best_location_sales' => $monthSales->max('total_cents') ?? 0,
-        ];
-
-        return view('fo.sales.index', compact('sales', 'stats'));
+        return view('fo.sales.index', compact('sales', 'totalSales', 'totalAmount', 'fromDate', 'toDate'));
     }
 
     /**
      * Show the form for creating a new sale.
+     *
+     * @return \Illuminate\Http\Response
      */
     public function create()
     {
-        $products = StockItem::select('id', 'name', 'price_cents as price')
-            ->where('price_cents', '>', 0)
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'name' => $item->name,
-                    'price' => $item->price,
-                ];
-            });
+        $this->authorize('create', Sale::class);
 
-        return view('fo.sales.create', compact('products'));
+        $user = Auth::user();
+        $franchisee = $user->franchisee;
+        
+        // Get available stock items
+        $stockItems = StockItem::where('is_active', true)->orderBy('name')->get();
+        
+        return view('fo.sales.create', compact('stockItems'));
     }
 
     /**
-     * Store a newly created sale.
+     * Store a newly created sale in storage.
+     *
+     * @param  \App\Http\Requests\StoreSaleRequest  $request
+     * @return \Illuminate\Http\Response
      */
     public function store(StoreSaleRequest $request)
     {
-        $validated = $request->validated();
+        $this->authorize('create', Sale::class);
 
-        // Calculate total on server side
-        $total = 0;
-        foreach ($validated['items'] as $item) {
-            $total += (int) $item['quantity'] * (int) $item['unit_price'];
-        }
-
-        $sale = new Sale;
-        $sale->id = (string) Str::ulid();
-        $sale->franchisee_id = Auth::user()->franchisee_id ?? null;
-        $sale->sale_date = now()->toDateString();
-        $sale->total_cents = $total;
+        $user = Auth::user();
+        $franchisee = $user->franchisee;
+        
+        // Create sale with recalculated total
+        $sale = new Sale();
+        $sale->id = (string) Str::uuid();
+        $sale->franchisee_id = $franchisee->id;
+        $sale->sale_date = $request->input('sale_date');
+        
+        // Calculate total from lines (will be double-checked by the FormRequest)
+        $totalCents = 0;
+        
+        $sale->total_cents = $totalCents;
         $sale->save();
-
-        foreach ($validated['items'] as $item) {
-            $line = new SaleLine;
-            $line->id = (string) Str::ulid();
-            $line->sale_id = $sale->id;
-            $line->stock_item_id = null;
-            $line->qty = (int) $item['quantity'];
-            $line->unit_price_cents = (int) $item['unit_price'];
-            $line->save();
+        
+        // Create lines
+        foreach ($request->input('lines', []) as $line) {
+            $saleLine = new SaleLine();
+            $saleLine->id = (string) Str::uuid();
+            $saleLine->sale_id = $sale->id;
+            $saleLine->stock_item_id = $line['stock_item_id'] ?? null;
+            $saleLine->item_label = $line['item_label'] ?? null;
+            $saleLine->qty = $line['qty'];
+            $saleLine->unit_price_cents = $line['unit_price_cents'];
+            $saleLine->save();
+            
+            // Add to total
+            $totalCents += $line['qty'] * $line['unit_price_cents'];
         }
+        
+        // Update the sale with the calculated total
+        $sale->total_cents = $totalCents;
+        $sale->save();
+        
+        return redirect()->route('fo.sales.show', $sale->id)
+            ->with('status', __('ui.fo.sales.flash.created_successfully'));
+    }
 
-        return redirect()->route('fo.sales.index')
-            ->with('success', __('Vente enregistrée (:amount€)', ['amount' => number_format($total / 100, 2, ',', ' ')]));
+    /**
+     * Display the specified sale.
+     *
+     * @param  \App\Models\Sale  $sale
+     * @return \Illuminate\Http\Response
+     */
+    public function show(Sale $sale)
+    {
+        $this->authorize('view', $sale);
+        
+        $sale->load('lines', 'franchisee');
+        
+        return view('fo.sales.show', compact('sale'));
+    }
+
+    /**
+     * Export sales to CSV.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param \Carbon\Carbon $fromDate
+     * @param \Carbon\Carbon $toDate
+     * @return \Symfony\Component\HttpFoundation\StreamedResponse
+     */
+    protected function exportCsv($query, $fromDate, $toDate)
+    {
+        $filename = 'sales_' . $fromDate->format('Ymd') . '_' . $toDate->format('Ymd') . '.csv';
+        
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+        
+        return new StreamedResponse(function() use ($query) {
+            $handle = fopen('php://output', 'w');
+            
+            // Add UTF-8 BOM
+            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+            
+            // Add headers
+            fputcsv($handle, [
+                __('ui.fo.sales.export.date'),
+                __('ui.fo.sales.export.items_count'),
+                __('ui.fo.sales.export.total')
+            ]);
+            
+            // Get all sales for export
+            $query->chunk(100, function ($sales) use ($handle) {
+                foreach ($sales as $sale) {
+                    fputcsv($handle, [
+                        $sale->sale_date->format('Y-m-d'),
+                        $sale->lines()->count(),
+                        number_format($sale->total_cents / 100, 2)
+                    ]);
+                }
+            });
+            
+            fclose($handle);
+        }, 200, $headers);
     }
 }

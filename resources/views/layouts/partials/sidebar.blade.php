@@ -131,50 +131,11 @@
         @endrole
 
         @role('franchisee')
-            {{-- Front Office --}}
+            {{-- Front Office (TEMPORARILY REMOVED FOR REBUILD) --}}
             <div class="space-y-1">
-                <x-nav.link :href="route('fo.dashboard')" :active="request()->routeIs('fo.dashboard')" class="group transition-all duration-150 flex items-center py-2">
-                    <svg class="mr-2 h-4 w-4 text-gray-400 group-hover:text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5v6m4-6v6m4-6v6" />
-                    </svg>
-                    <span class="text-sm">{{ __('ui.dashboard') }}</span>
-                </x-nav.link>
-
-                <div x-data="{ openFoSales: {{ request()->routeIs('fo.sales.*') ? 'true' : 'false' }}, openFoReports: {{ request()->routeIs('fo.reports.*') ? 'true' : 'false' }} }">
-                    <div>
-                        <button type="button" @click="openFoSales = !openFoSales" class="w-full flex items-center justify-between text-left text-xs font-semibold uppercase tracking-wider text-gray-500 px-2 py-2 hover:text-gray-700">
-                            <span>Ventes</span>
-                            <svg class="h-4 w-4 transform transition-transform" :class="{ 'rotate-90': openFoSales }" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                        </button>
-                        <div x-show="openFoSales" x-collapse>
-                            <div class="pl-2 space-y-0.5">
-                                <x-nav.link :href="route('fo.sales.index')" :active="request()->routeIs('fo.sales.index')" class="group flex items-center py-2">
-                                    <svg class="mr-2 h-4 w-4 text-gray-400 group-hover:text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2"/></svg>
-                                    <span class="text-sm">{{ __('ui.my_sales') }}</span>
-                                </x-nav.link>
-                                <x-nav.link :href="route('fo.sales.create')" :active="request()->routeIs('fo.sales.create')" class="group flex items-center py-2">
-                                    <svg class="mr-2 h-4 w-4 text-gray-400 group-hover:text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-                                    <span class="text-sm">{{ __('ui.new_sale') }}</span>
-                                </x-nav.link>
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <button type="button" @click="openFoReports = !openFoReports" class="w-full flex items-center justify-between text-left text-xs font-semibold uppercase tracking-wider text-gray-500 px-2 py-2 hover:text-gray-700">
-                            <span>Rapports</span>
-                            <svg class="h-4 w-4 transform transition-transform" :class="{ 'rotate-90': openFoReports }" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                        </button>
-                        <div x-show="openFoReports" x-collapse>
-                            <div class="pl-2 space-y-0.5">
-                                <x-nav.link :href="route('fo.reports.index')" :active="request()->routeIs('fo.reports.*')" class="group flex items-center py-2">
-                                    <svg class="mr-2 h-4 w-4 text-gray-400 group-hover:text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18"/></svg>
-                                    <span class="text-sm">{{ __('ui.fo.reports.title') }}</span>
-                                </x-nav.link>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <p class="text-sm text-gray-500 px-2 py-2">
+                    {{ __('L\'interface franchisé est en cours de reconstruction.') }}
+                </p>
             </div>
         @endrole
     </div>
@@ -313,31 +274,9 @@
                 @endrole
 
                 @role('franchisee')
-                    <x-nav.link :href="route('fo.dashboard')" :active="request()->routeIs('fo.dashboard')" mobile>
-                        {{ __('ui.dashboard') }}
-                    </x-nav.link>
-                    <button type="button" @click="openFoSalesM = !openFoSalesM" class="w-full flex items-center justify-between text-left text-xs font-semibold uppercase tracking-wider text-gray-500 px-1 py-2">
-                        <span>Ventes</span>
-                        <svg class="h-4 w-4 transform transition-transform" :class="{ 'rotate-90': openFoSalesM }" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                    </button>
-                    <div x-show="openFoSalesM" x-collapse class="pl-2">
-                        <x-nav.link :href="route('fo.sales.index')" :active="request()->routeIs('fo.sales.*')" mobile>
-                            {{ __('ui.my_sales') }}
-                        </x-nav.link>
-                        <x-nav.link :href="route('fo.sales.create')" :active="request()->routeIs('fo.sales.create')" mobile>
-                            {{ __('ui.new_sale') }}
-                        </x-nav.link>
-                    </div>
-
-                    <button type="button" @click="openFoReportsM = !openFoReportsM" class="w-full flex items-center justify-between text-left text-xs font-semibold uppercase tracking-wider text-gray-500 px-1 py-2">
-                        <span>Rapports</span>
-                        <svg class="h-4 w-4 transform transition-transform" :class="{ 'rotate-90': openFoReportsM }" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                    </button>
-                    <div x-show="openFoReportsM" x-collapse class="pl-2">
-                        <x-nav.link :href="route('fo.reports.index')" :active="request()->routeIs('fo.reports.*')" mobile>
-                            {{ __('ui.fo.reports.title') }}
-                        </x-nav.link>
-                    </div>
+                    <p class="text-sm text-gray-500 px-1 py-2">
+                        {{ __('L\'interface franchisé est en cours de reconstruction.') }}
+                    </p>
                 @endrole
             </nav>
         </div>

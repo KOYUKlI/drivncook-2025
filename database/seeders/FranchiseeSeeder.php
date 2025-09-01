@@ -18,7 +18,13 @@ class FranchiseeSeeder extends Seeder
         ];
 
         foreach ($map as $row) {
-            $user = User::where('email', $row['email'])->first();
+            // Support both historical @dc.test and current @local.test demo users
+            $candidates = [
+                $row['email'],
+                str_replace('@dc.test', '@local.test', $row['email']),
+                str_replace('@local.test', '@dc.test', $row['email']),
+            ];
+            $user = User::whereIn('email', $candidates)->first();
             $fr = Franchisee::firstOrCreate(
                 ['email' => $row['email']],
                 [

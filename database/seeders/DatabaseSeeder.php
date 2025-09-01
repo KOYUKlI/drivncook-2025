@@ -27,5 +27,10 @@ class DatabaseSeeder extends Seeder
             SaleSeeder::class,
             ReportPdfSeeder::class,
         ]);
+        
+        // Demo data for FO testing
+        $this->call([
+            FODemoSeeder::class,
+        ]);
     }
 }

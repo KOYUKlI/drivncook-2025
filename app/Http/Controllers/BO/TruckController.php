@@ -272,7 +272,7 @@ class TruckController extends Controller
      */
     public function show(string $id)
     {
-    $truck = Truck::with(['franchisee', 'deployments', 'maintenanceLogs' => function ($q) {
+        $truck = Truck::with(['franchisee', 'deployments', 'maintenanceLogs' => function ($q) {
             if (Schema::hasColumn('maintenance_logs', 'opened_at')) {
                 $q->orderByDesc('opened_at');
             } else {
@@ -381,27 +381,11 @@ class TruckController extends Controller
         $utilization = ($seconds / (30 * 24 * 3600)) * 100;
         $utilization = max(0, min(100, round($utilization, 1)));
 
-        // KPI costs over periods
-        $now = now();
-        $sumCosts = function($days) use ($truck, $now) {
-            $from = $now->copy()->subDays($days);
-            $dateCol = Schema::hasColumn('maintenance_logs', 'opened_at') ? 'opened_at' : (Schema::hasColumn('maintenance_logs', 'started_at') ? 'started_at' : 'created_at');
-            return (int) MaintenanceLog::where('truck_id', $truck->id)
-                ->where($dateCol, '>=', $from)
-                ->sum('cost_cents');
-        };
-        $kpiCosts = [
-            '30d' => $sumCosts(30),
-            '60d' => $sumCosts(60),
-            '365d' => $sumCosts(365),
-        ];
-
         return view('bo.trucks.show', [
             'truck' => $truckData,
             'statusCounts' => $statusCounts,
             'truckModel' => $truck,
             'utilization30' => $utilization,
-            'maintenanceKpis' => $kpiCosts,
         ]);
     }
 

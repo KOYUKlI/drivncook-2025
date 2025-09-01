@@ -15,6 +15,7 @@ class FranchiseeFactory extends Factory
             'phone' => $this->faker->optional()->e164PhoneNumber(),
             'billing_address' => $this->faker->address(),
             'royalty_rate' => 0.0400,
+            'status' => 'Active',
             'created_at' => $this->faker->dateTimeBetween('-60 days', 'now', 'UTC'),
             'updated_at' => now('UTC'),
         ];

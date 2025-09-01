@@ -44,7 +44,7 @@ class AuditLogMiddleware
         try {
             AuditLog::create([
                 'id' => (string) \Illuminate\Support\Str::ulid(),
-                'user_id' => optional($request->user())->id,
+                'user_id' => $request->user() ? $request->user()->id : null,
                 'route' => $route,
                 'method' => $request->method(),
                 'action' => $request->route()?->getActionName(),
@@ -57,6 +57,7 @@ class AuditLogMiddleware
             ]);
         } catch (\Throwable $e) {
             // Never break the request flow for audit logging
+            report($e); // Log the error but don't interrupt the request flow
         }
 
         return $response;

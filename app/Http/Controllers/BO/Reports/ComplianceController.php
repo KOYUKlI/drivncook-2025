@@ -50,11 +50,21 @@ class ComplianceController extends Controller
             return new StreamedResponse(function() use ($orders, $service) {
                 $out = fopen('php://output', 'w');
                 // UTF-8 BOM for Excel compatibility
-                echo "\xEF\xBB\xBF"; 
-                
+                echo "\xEF\xBB\xBF";
+
+                $delimiter = ';'; // Excel FR friendly
+                $sanitize = function ($value) {
+                    $str = (string) ($value ?? '');
+                    // Prevent CSV injection
+                    if ($str !== '' && preg_match('/^[=+\-@]/', $str) === 1) {
+                        $str = "'".$str;
+                    }
+                    return $str;
+                };
+
                 // En-têtes professionnels en français
                 fputcsv($out, [
-                    'ID Commande',
+                    'Référence',
                     'Franchisé',
                     'Date de création',
                     'Date d\'expédition',
@@ -64,33 +74,34 @@ class ComplianceController extends Controller
                     'Statut de conformité',
                     'Articles référencés (€)',
                     'Articles hors catalogue (€)',
-                ]);
-                
+                ], $delimiter);
+
                 foreach ($orders as $po) {
                     $total = (int) ($po->computed_total_cents ?? $service->getOrderTotalCents($po));
                     $ratio = (float) ($po->corp_ratio_cached ?? $po->computed_ratio ?? 0.0);
-                    
-                    // Calcul des montants référencés et hors catalogue
-                    $referenceAmount = $total * ($ratio / 100);
+
+                    // Calcul des montants référencés et hors catalogue (en centimes)
+                    $referenceAmount = (int) round($total * ($ratio / 100));
                     $nonReferenceAmount = $total - $referenceAmount;
-                    
+
                     // Détermination du statut de conformité
                     $complianceStatus = $ratio >= 80 ? 'Conforme' : 'Non conforme';
-                    
+
                     fputcsv($out, [
-                        $po->id,
-                        $po->franchisee->name ?? 'Non défini',
+                        $sanitize($po->reference ?? $po->id),
+                        $sanitize($po->franchisee->name ?? 'Non défini'),
                         optional($po->created_at)->format('d/m/Y H:i'),
                         optional($po->shipped_at)->format('d/m/Y H:i') ?: 'Non expédiée',
                         optional($po->delivered_at)->format('d/m/Y H:i') ?: 'Non livrée',
-                        number_format($total / 100, 2, ',', ' '),
-                        number_format($ratio, 2, ',', ' '),
+                        // Use decimal comma, no thousands separators
+                        number_format($total / 100, 2, ',', ''),
+                        number_format($ratio, 2, ',', ''),
                         $complianceStatus,
-                        number_format($referenceAmount / 100, 2, ',', ' '),
-                        number_format($nonReferenceAmount / 100, 2, ',', ' '),
-                    ]);
+                        number_format($referenceAmount / 100, 2, ',', ''),
+                        number_format($nonReferenceAmount / 100, 2, ',', ''),
+                    ], $delimiter);
                 }
-                
+
                 fclose($out);
             }, 200, $headers);
         }

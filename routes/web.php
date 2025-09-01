@@ -8,9 +8,6 @@ use App\Http\Controllers\BO\StockItemController;
 use App\Http\Controllers\BO\TruckController;
 use App\Http\Controllers\BO\WarehouseController;
 use App\Http\Controllers\BO\AuditLogController;
-use App\Http\Controllers\FO\DashboardController as FODashboardController;
-use App\Http\Controllers\FO\ReportController;
-use App\Http\Controllers\FO\SaleController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Public\FranchiseApplicationController;
 use App\Http\Controllers\Public\FranchisePageController;
@@ -23,6 +20,16 @@ use Illuminate\Support\Facades\Storage;
 use Laravel\Cashier\Http\Controllers\WebhookController;
 
 Route::post('/stripe/webhook', [WebhookController::class, 'handleWebhook'])->name('cashier.webhook');
+
+// Locale switcher (web, csrf-protected)
+Route::post('/locale', function (\Illuminate\Http\Request $request) {
+    $locale = $request->input('locale');
+    if (in_array($locale, ['fr','en'])) {
+        session()->put('locale', $locale);
+        app()->setLocale($locale);
+    }
+    return redirect($request->input('redirect', url()->previous()));
+})->middleware('web')->name('locale.switch');
 
 Route::get('/reports/demo', function (PdfService $pdf) {
     $path = 'reports/demo-'.now()->format('Ym').'.pdf';
@@ -78,8 +85,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::resource('franchisees', FranchiseeController::class);
             // Audit logs viewer (admin only)
             Route::get('audit', [AuditLogController::class, 'index'])->name('audit.index');
-            // Explicit alias path for audit/index
-            Route::get('audit/index', [AuditLogController::class, 'index'])->name('audit.index.alias');
             Route::get('applications', [ApplicationController::class, 'index'])->name('applications.index');
             Route::get('applications/{application}', [ApplicationController::class, 'show'])->name('applications.show');
             Route::post('applications/{application}/status', [ApplicationController::class, 'updateStatus'])->name('applications.update-status');
@@ -99,13 +104,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::resource('trucks', TruckController::class)->only(['index', 'show']);
             // Mission C actions
             Route::post('trucks/{truck}/deploy', [TruckController::class, 'openDeployment'])->name('trucks.deploy');
-            Route::post('trucks/{truck}/maintenance/open', [TruckController::class, 'openMaintenance'])->name('trucks.maintenance.open');
-            Route::post('maintenance/{log}/close', [TruckController::class, 'closeMaintenance'])->name('maintenance.close');
+            // Maintenance (legacy simple open/close/download handled by dedicated controller)
             Route::post('trucks/{truck}/schedule-deployment', [TruckController::class, 'scheduleDeployment'])->name('trucks.schedule-deployment');
             Route::post('trucks/{truck}/deployments/{deploymentId}/open', [TruckController::class, 'openDeployment'])->name('trucks.open-deployment');
             Route::post('trucks/{truck}/deployments/{deploymentId}/close', [TruckController::class, 'closeDeployment'])->name('trucks.close-deployment');
             // Maintenance (PHASE C)
-            Route::post('trucks/{truck}/maintenance/open', [App\Http\Controllers\BO\TruckMaintenanceController::class, 'open'])->name('maintenance.open');
+            Route::post('trucks/{truck}/maintenance/open', [App\Http\Controllers\BO\TruckMaintenanceController::class, 'open'])->name('trucks.maintenance.open');
             Route::post('maintenance/{log}/close', [App\Http\Controllers\BO\TruckMaintenanceController::class, 'close'])->name('maintenance.close');
             Route::get('maintenance/{log}/download', [App\Http\Controllers\BO\TruckMaintenanceController::class, 'download'])->name('maintenance.download');
             
@@ -118,6 +122,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::put('maintenance/{maintenanceLog}', [App\Http\Controllers\MaintenanceLogController::class, 'update'])->name('maintenance.update');
             Route::post('trucks/{truck}/maintenance/schedule', [App\Http\Controllers\MaintenanceLogController::class, 'store'])->name('maintenance.schedule');
             Route::post('maintenance/{maintenanceLog}/open', [App\Http\Controllers\MaintenanceLogController::class, 'open'])->name('maintenance.open');
+            // Fallback GET to avoid 404 when users hit the URL directly; redirect to show
+            Route::get('maintenance/{maintenanceLog}/open', function (App\Models\MaintenanceLog $maintenanceLog) {
+                return redirect()->route('bo.maintenance.show', $maintenanceLog);
+            })->name('maintenance.open.fallback');
             Route::post('maintenance/{maintenanceLog}/pause', [App\Http\Controllers\MaintenanceLogController::class, 'pause'])->name('maintenance.pause');
             Route::post('maintenance/{maintenanceLog}/resume', [App\Http\Controllers\MaintenanceLogController::class, 'resume'])->name('maintenance.resume');
             Route::post('maintenance/{maintenanceLog}/close', [App\Http\Controllers\MaintenanceLogController::class, 'close'])->name('maintenance.close.enhanced');
@@ -175,13 +183,27 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     // Front Office routes (franchisees)
-    Route::middleware('role:franchisee')->prefix('fo')->name('fo.')->group(function () {
-        Route::get('/dashboard', [FODashboardController::class, 'index'])->name('dashboard');
-        Route::resource('sales', SaleController::class)->only(['index', 'create', 'store']);
-        Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
-        Route::post('/reports/generate', [ReportController::class, 'generate'])->name('reports.generate');
-        Route::get('/reports/{id}/download', [ReportController::class, 'download'])->name('reports.download');
+    Route::middleware(['auth', 'verified', 'role:franchisee'])->prefix('fo')->name('fo.')->group(function () {
+        Route::get('/dashboard', [App\Http\Controllers\FO\DashboardController::class, 'index'])->name('dashboard');
+        // Sales module
+        Route::get('/sales', [App\Http\Controllers\FO\SaleController::class, 'index'])->name('sales.index');
+        Route::get('/sales/create', [App\Http\Controllers\FO\SaleController::class, 'create'])->name('sales.create');
+        Route::post('/sales', [App\Http\Controllers\FO\SaleController::class, 'store'])->name('sales.store');
+        Route::get('/sales/{sale}', [App\Http\Controllers\FO\SaleController::class, 'show'])->name('sales.show');
+        // Reports module
+        Route::get('/reports', [App\Http\Controllers\FO\ReportController::class, 'index'])->name('reports.index');
+        Route::get('/reports/{reportPdf}/download', [App\Http\Controllers\FO\ReportController::class, 'download'])->name('reports.download');
+        // Truck module
+        Route::get('/truck', [App\Http\Controllers\FO\TruckController::class, 'show'])->name('truck.show');
+        Route::post('/truck/maintenance-request', [App\Http\Controllers\FO\TruckController::class, 'requestMaintenance'])
+            ->name('truck.maintenance-request');
+            
+        // Account module
+        Route::get('/account', [App\Http\Controllers\FO\AccountController::class, 'edit'])->name('account.edit');
+        Route::patch('/account', [App\Http\Controllers\FO\AccountController::class, 'update'])->name('account.update');
     });
+    
+    // Remove catch-all redirect to login to avoid redirect loops; let unmatched FO routes 404 instead
 
     // Profile routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

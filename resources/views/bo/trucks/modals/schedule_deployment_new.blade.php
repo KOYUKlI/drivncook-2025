@@ -14,10 +14,10 @@
     aria-modal="true"
     x-data="{
         quickTimes: [
-            { label: '{{ __('deploiement.times.morning') }}', start: '08:00', end: '12:00' },
-            { label: '{{ __('deploiement.times.afternoon') }}', start: '14:00', end: '18:00' },
-            { label: '{{ __('deploiement.times.evening') }}', start: '18:00', end: '22:00' },
-            { label: '{{ __('deploiement.times.all_day') }}', start: '08:00', end: '22:00' }
+            { label: '{{ __('deployment.times.morning') }}', start: '08:00', end: '12:00' },
+            { label: '{{ __('deployment.times.afternoon') }}', start: '14:00', end: '18:00' },
+            { label: '{{ __('deployment.times.evening') }}', start: '18:00', end: '22:00' },
+            { label: '{{ __('deployment.times.all_day') }}', start: '08:00', end: '22:00' }
         ],
         locations: [
             'Paris', 'Lyon', 'Marseille', 'Bordeaux', 'Lille', 'Toulouse', 'Nice', 'Strasbourg'
@@ -84,7 +84,7 @@
                     class="bg-white rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
                     @click="document.getElementById('schedule-deployment-modal').classList.add('hidden')"
                 >
-                    <span class="sr-only">{{ __('deploiement.close') }}</span>
+                    <span class="sr-only">{{ __('deployment.close') }}</span>
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -114,7 +114,7 @@
                     <div class="space-y-5">
                         <!-- Location with suggestions -->
                         <div>
-                            <label for="location_text" class="block text-sm font-medium text-gray-700 mb-1">{{ __('deploiement.deployment.fields.location') }} <span class="text-red-500">*</span></label>
+                            <label for="location_text" class="block text-sm font-medium text-gray-700 mb-1">{{ __('deployment.fields.location') }} <span class="text-red-500">*</span></label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -128,7 +128,7 @@
                                     id="location_text" 
                                     required
                                     class="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
-                                    placeholder="{{ __('deploiement.deployment.placeholder.location') }}"
+                                    placeholder="{{ __('deployment.placeholder.location') }}"
                                     list="location-suggestions"
                                 >
                                 <datalist id="location-suggestions">
@@ -141,7 +141,7 @@
                         
                         <!-- Quick time selection -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('deploiement.deployment.quick_select') }}</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('deployment.quick_select') }}</label>
                             <div class="flex flex-wrap gap-2">
                                 <template x-for="time in quickTimes" :key="time.label">
                                     <button 
@@ -157,7 +157,7 @@
                         <!-- Date and time selection -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">{{ __('deploiement.deployment.fields.start_date') }} <span class="text-red-500">*</span></label>
+                                <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">{{ __('deployment.fields.start_date') }} <span class="text-red-500">*</span></label>
                                 <input 
                                     type="date" 
                                     x-model="startDate"
@@ -166,7 +166,7 @@
                                 >
                             </div>
                             <div>
-                                <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1">{{ __('deploiement.deployment.fields.end_date') }} <span class="text-red-500">*</span></label>
+                                <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1">{{ __('deployment.fields.end_date') }} <span class="text-red-500">*</span></label>
                                 <div class="flex items-center gap-2">
                                     <div class="flex-1">
                                         <input 
@@ -184,7 +184,7 @@
                                             x-model="isSameDay"
                                             class="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
                                         >
-                                        <label for="same_day" class="ml-2 text-xs text-gray-700">{{ __('deploiement.deployment.same_day') }}</label>
+                                        <label for="same_day" class="ml-2 text-xs text-gray-700">{{ __('deployment.same_day') }}</label>
                                     </div>
                                 </div>
                             </div>
@@ -192,7 +192,7 @@
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label for="start_time" class="block text-sm font-medium text-gray-700 mb-1">{{ __('deploiement.deployment.fields.start_time') }} <span class="text-red-500">*</span></label>
+                                <label for="start_time" class="block text-sm font-medium text-gray-700 mb-1">{{ __('deployment.fields.start_time') }} <span class="text-red-500">*</span></label>
                                 <input 
                                     type="time" 
                                     x-model="startTime"
@@ -200,7 +200,7 @@
                                 >
                             </div>
                             <div>
-                                <label for="end_time" class="block text-sm font-medium text-gray-700 mb-1">{{ __('deploiement.deployment.fields.end_time') }} <span class="text-red-500">*</span></label>
+                                <label for="end_time" class="block text-sm font-medium text-gray-700 mb-1">{{ __('deployment.fields.end_time') }} <span class="text-red-500">*</span></label>
                                 <input 
                                     type="time" 
                                     x-model="endTime"
@@ -224,29 +224,15 @@
                         >
                         
                         <!-- Franchisee (if applicable) -->
-                        @if(auth()->user()->hasRole('admin'))
                         <div>
-                            <label for="franchisee_id" class="block text-sm font-medium text-gray-700 mb-1">{{ __('deployment.fields.franchisee') }}</label>
-                            <select 
-                                name="franchisee_id" 
-                                id="franchisee_id" 
-                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
-                            >
-                                <option value="">{{ __('ui.none') }}</option>
-                                @foreach(\App\Models\Franchisee::orderBy('name')->get() as $franchisee)
-                                    <option value="{{ $franchisee->id }}" {{ $truck->franchisee_id == $franchisee->id ? 'selected' : '' }}>
-                                        {{ $franchisee->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        @else
+                            <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('ui.labels.franchisee') }}</label>
+                            <input type="text" value="{{ optional($truck->franchisee)->name ?? __('ui.common.unassigned') }}" class="block w-full rounded-md border-gray-200 bg-gray-100 text-gray-700" disabled>
                             <input type="hidden" name="franchisee_id" value="{{ $truck->franchisee_id }}">
-                        @endif
+                        </div>
                         
                         <!-- Notes -->
                         <div>
-                            <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">{{ __('deploiement.deployment.fields.notes') }}</label>
+                            <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">{{ __('deployment.fields.notes') }}</label>
                             <textarea 
                                 name="notes" 
                                 id="notes" 

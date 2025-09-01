@@ -27,7 +27,8 @@ class ScheduleDeploymentRequest extends FormRequest
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
-            $truckId = $this->route('truck')->id;
+            $truck = $this->route('truck');
+            $truckId = $truck->id;
             
             // Check for conflicts with other deployments
             $startAt = Carbon::parse($this->planned_start_at);
@@ -38,6 +39,16 @@ class ScheduleDeploymentRequest extends FormRequest
                     'planned_start_at', 
                     __('deployment.errors.schedule_conflict')
                 );
+            }
+
+            // Enforce franchisee consistency: deployment must be for the truck's assigned franchisee
+            $assigned = $truck->franchisee_id;
+            if (!$assigned) {
+                $validator->errors()->add('franchisee_id', __('deployment.errors.truck_unassigned'));
+                return;
+            }
+            if ($this->has('franchisee_id') && $this->franchisee_id && $this->franchisee_id !== $assigned) {
+                $validator->errors()->add('franchisee_id', __('deployment.errors.franchisee_mismatch'));
             }
         });
     }

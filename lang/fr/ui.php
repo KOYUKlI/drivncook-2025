@@ -218,6 +218,7 @@ return array (
   'of_revenue' => 'du chiffre d\'affaires',
   'ongoing_costs' => 'Coûts récurrents',
   'open_menu' => 'Ouvrir le menu',
+  'close_menu' => 'Fermer le menu',
   'pending_orders' => 'Commandes en attente',
   'phone' => 'Téléphone',
   'privacy_policy' => 'Politique de confidentialité',
@@ -289,10 +290,11 @@ return array (
     'reports' => 'Rapports',
     'reports_monthly' => 'Rapports mensuels',
     'reports_compliance' => 'Rapports conformité',
-    'fo_dashboard' => 'Mon tableau de bord',
+  'fo_dashboard' => 'Mon tableau de bord',
     'fo_sales' => 'Mes ventes',
     'fo_sales_create' => 'Nouvelle vente',
     'fo_reports' => 'Mes rapports',
+    'fo_truck' => 'Mon camion',
     'logout' => 'Déconnexion',
     'profile' => 'Profil',
     'login' => 'Connexion',
@@ -530,6 +532,7 @@ return array (
     'deployment_opened' => 'Déploiement ouvert avec succès',
     'deployment_closed' => 'Déploiement clôturé avec succès',
     'deployment_cancelled' => 'Déploiement annulé avec succès',
+    'account_updated' => 'Informations du compte mises à jour avec succès',
   ),
   'misc' => 
   array (
@@ -1236,7 +1239,54 @@ return array (
   ),
   'fo' => 
   array (
+    'nav' => 
+    array (
+      'dashboard' => 'Tableau de bord',
+      'sales' => 'Ventes',
+      'my_sales' => 'Mes ventes',
+      'new_sale' => 'Nouvelle vente',
+      'reports' => 'Rapports',
+      'monthly_reports' => 'Rapports mensuels',
+      'account' => 'Mon compte',
+      'sidebar' => 'Navigation latérale',
+    ),
     'dashboard' => 'Tableau de bord',
+    'account' => 
+    array (
+      'title' => 'Mon Compte',
+      'subtitle' => 'Gérer votre profil et vos préférences',
+      'fields' => 
+      array (
+        'phone' => 'Téléphone',
+        'notification_email_optin' => 'Notifications par email',
+        'locale' => 'Langue',
+      ),
+      'placeholders' => 
+      array (
+        'phone' => 'Votre numéro de téléphone',
+      ),
+      'notes' => 
+      array (
+        'email_managed_by_bo' => 'L\'adresse email ne peut être modifiée que par les administrateurs.',
+      ),
+      'actions' => 
+      array (
+        'update' => 'Mettre à jour le profil',
+      ),
+      'messages' => 
+      array (
+        'updated' => 'Informations du compte mises à jour avec succès.',
+      ),
+      'locale_options' => 
+      array (
+        'en' => 'Anglais',
+        'fr' => 'Français',
+      ),
+    ),
+    'errors' => 
+    array (
+      'no_franchisee_association' => "Votre compte n'est pas encore lié à un franchisé. Rendez-vous sur la page Profil pour compléter vos informations ou contactez le support.",
+    ),
     'dashboard_page' => 
     array (
       'title' => 'Mon tableau de bord',
@@ -1244,6 +1294,76 @@ return array (
     ),
     'sales' => 
     array (
+      'index' => array(
+        'title' => 'Mes ventes',
+        'create_new' => 'Nouvelle vente',
+        'filter' => 'Filtrer',
+        'from_date' => 'Date de début',
+        'to_date' => 'Date de fin',
+        'filter_submit' => 'Filtrer',
+        'reset' => 'Réinitialiser',
+        'export_csv' => 'Exporter CSV',
+        'period' => 'Période',
+        'total_sales' => 'Nombre de ventes',
+        'total_amount' => 'Montant total',
+        'no_sales_found' => 'Aucune vente trouvée',
+        'table' => array(
+            'date' => 'Date',
+            'items' => 'Articles',
+            'total' => 'Total',
+            'actions' => 'Actions',
+        ),
+      ),
+      'create' => array(
+        'title' => 'Créer une vente',
+        'back_to_list' => 'Retour à la liste',
+        'sale_info' => 'Informations de vente',
+        'sale_date' => 'Date de vente',
+        'sale_lines' => 'Lignes de vente',
+        'add_line' => 'Ajouter une ligne',
+        'no_lines_yet' => 'Ajoutez des lignes à votre vente en cliquant sur "Ajouter une ligne"',
+        'custom_item' => 'Article personnalisé',
+        'custom_item_placeholder' => 'Nom de l\'article personnalisé',
+        'submit' => 'Enregistrer la vente',
+        'table' => array(
+            'item' => 'Article',
+            'quantity' => 'Quantité',
+            'price' => 'Prix unitaire',
+            'subtotal' => 'Sous-total',
+            'total' => 'Total',
+        ),
+      ),
+      'show' => array(
+        'title' => 'Détails de la vente',
+        'back_to_list' => 'Retour à la liste',
+        'sale_info' => 'Informations de vente',
+        'sale_id' => 'ID de vente',
+        'sale_date' => 'Date de vente',
+        'created_at' => 'Créée le',
+        'total' => 'Total',
+        'sale_items' => 'Articles vendus',
+        'unknown_item' => 'Article inconnu',
+        'custom_item' => 'Article personnalisé',
+        'table' => array(
+            'item' => 'Article',
+            'quantity' => 'Quantité',
+            'unit_price' => 'Prix unitaire',
+            'subtotal' => 'Sous-total',
+            'total' => 'Total',
+        ),
+      ),
+      'validation' => array(
+        'must_have_item_or_label' => 'Chaque ligne doit avoir soit un article du stock, soit un libellé personnalisé.',
+        'inactive_stock_items' => 'Certains articles sélectionnés ne sont plus actifs.',
+      ),
+      'flash' => array(
+        'created_successfully' => 'La vente a été créée avec succès',
+      ),
+      'export' => array(
+        'date' => 'Date',
+        'items_count' => 'Nombre d\'articles',
+        'total' => 'Total (€)',
+      ),
       'title' => 'Mes ventes',
       'subtitle' => 'Historique et nouvelles ventes',
       'new_sale' => 'Nouvelle vente',
@@ -1288,39 +1408,6 @@ return array (
         'description' => 'Aucune vente enregistrée',
         'create_first' => 'Créer la première vente',
       ),
-      'create' => 
-      array (
-        'title' => 'Nouvelle vente',
-        'subtitle' => 'Enregistrer une vente',
-        'location_time' => 'Lieu et heure',
-        'location' => 'Lieu',
-        'location_placeholder' => 'Où avez-vous vendu ?',
-        'coordinates' => 'Coordonnées GPS',
-        'sale_date' => 'Date de vente',
-        'items' => 'Articles vendus',
-        'add_item' => 'Ajouter un article',
-        'product' => 'Produit',
-        'select_product' => 'Sélectionner un produit',
-        'quantity' => 'Quantité',
-        'line_total' => 'Total ligne',
-        'item_selected' => 'article sélectionné',
-        'items_selected' => 'articles sélectionnés',
-        'subtotal' => 'Sous-total',
-        'payment_method' => 'Mode de paiement',
-        'payment' => 
-        array (
-          'card' => 'Carte bancaire',
-          'cash' => 'Espèces',
-          'mobile' => 'Paiement mobile',
-        ),
-        'summary' => 'Résumé',
-        'tax' => 'TVA',
-        'total' => 'Total',
-        'items_count' => 'Nombre d\'articles',
-        'avg_price' => 'Prix moyen',
-        'confirm_sale' => 'Confirmer la vente',
-        'cancel' => 'Annuler',
-      ),
     ),
     'reports' => 
     array (
@@ -1332,14 +1419,15 @@ return array (
         'year' => 'Année',
         'month' => 'Mois',
         'all_months' => 'Tous les mois',
-  'all_franchisees' => 'Tous les franchisés',
+        'all_years' => 'Toutes les années',
+        'all_franchisees' => 'Tous les franchisés',
         'apply' => 'Appliquer',
         'reset' => 'Réinitialiser',
       ),
       'table' => 
       array (
         'title' => 'Rapports disponibles',
-        'reports_count' => 'Nombre de rapports',
+        'reports_count' => '{0} aucun rapport|{1} 1 rapport|[2,*] :count rapports',
         'period' => 'Période',
         'type' => 'Type',
         'generated_at' => 'Généré le',
@@ -1355,12 +1443,84 @@ return array (
       array (
         'title' => 'Aucun rapport',
         'description' => 'Aucun rapport disponible',
-        'help' => 'Les rapports sont générés automatiquement',
+        'help' => 'Les rapports sont générés automatiquement à la fin de chaque mois',
       ),
       'messages' => 
       array (
         'access_denied' => 'Accès refusé',
         'file_not_found' => 'Fichier non trouvé',
+      ),
+    ),
+    'truck' => 
+    array (
+      'title' => 'Mon camion',
+      'subtitle' => 'Voir et gérer votre camion assigné',
+      'tabs' => 
+      array (
+        'info' => 'Informations',
+        'deployments' => 'Déploiements',
+        'maintenance' => 'Maintenance',
+      ),
+      'sections' => 
+      array (
+        'details' => 'Détails du camion',
+        'upcoming_deployments' => 'Déploiements à venir',
+        'maintenance_history' => 'Historique de maintenance',
+      ),
+      'fields' => 
+      array (
+        'name' => 'Nom',
+        'plate_number' => 'Immatriculation',
+        'make' => 'Marque',
+        'model' => 'Modèle',
+        'year' => 'Année',
+        'status' => 'Statut',
+        'commissioned_at' => 'Mise en service',
+        'mileage_km' => 'Kilométrage',
+        'location' => 'Emplacement',
+        'planned_start' => 'Début prévu',
+        'planned_end' => 'Fin prévue',
+        'maintenance_title' => 'Titre',
+        'maintenance_type' => 'Type',
+        'created_at' => 'Créé le',
+      ),
+      'messages' => 
+      array (
+        'no_franchisee' => 'Vous n\'avez pas de compte franchisé.',
+        'no_truck_assigned' => 'Aucun camion n\'est actuellement assigné à votre compte.',
+        'no_upcoming_deployments' => 'Aucun déploiement à venir n\'est planifié.',
+        'no_maintenance_history' => 'Aucun historique de maintenance disponible.',
+      ),
+    ),
+    'maintenance_request' => 
+    array (
+      'title' => 'Demande de maintenance',
+      'subtitle' => 'Soumettre une nouvelle demande de maintenance',
+      'fields' => 
+      array (
+        'title' => 'Titre',
+        'description' => 'Description',
+        'type' => 'Type',
+        'attachment' => 'Pièce jointe (Optionnel)',
+      ),
+      'placeholders' => 
+      array (
+        'title' => 'Brève description du problème',
+        'description' => 'Fournir des informations détaillées sur la maintenance nécessaire',
+        'select_type' => 'Sélectionner un type',
+      ),
+      'notes' => 
+      array (
+        'attachment_formats' => 'Formats acceptés : PDF, DOC, JPG, PNG (max 5Mo)',
+      ),
+      'actions' => 
+      array (
+        'submit' => 'Soumettre la demande',
+      ),
+      'messages' => 
+      array (
+        'created' => 'Demande de maintenance soumise avec succès.',
+        'failed' => 'Échec de la soumission de la demande de maintenance.',
       ),
     ),
   ),

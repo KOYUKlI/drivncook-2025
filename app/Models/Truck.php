@@ -59,6 +59,45 @@ class Truck extends Model
                 $model->code = 'TRK-' . $suffix;
             }
         });
+
+        // Maintain ownership history on create/update when franchisee changes
+        static::saved(function (self $model) {
+            // Only proceed if column exists (safe for older schemas)
+            if (!Schema::hasColumn($model->getTable(), 'franchisee_id')) {
+                return;
+            }
+
+            // Detect changes on franchisee_id
+            if ($model->wasChanged('franchisee_id') || $model->wasRecentlyCreated) {
+                // Close previous active ownership if any
+                if (class_exists(\App\Models\TruckOwnership::class) && Schema::hasTable('truck_ownerships')) {
+                    /** @var \App\Models\TruckOwnership|null $active */
+                    $active = \App\Models\TruckOwnership::where('truck_id', $model->id)
+                        ->whereNull('ended_at')
+                        ->first();
+                    if ($active && $active->franchisee_id !== $model->franchisee_id) {
+                        $active->ended_at = now();
+                        $active->save();
+                    }
+
+                    // If there is a current owner, ensure an active record exists
+                    if ($model->franchisee_id) {
+                        $exists = \App\Models\TruckOwnership::where('truck_id', $model->id)
+                            ->whereNull('ended_at')
+                            ->where('franchisee_id', $model->franchisee_id)
+                            ->exists();
+                        if (! $exists) {
+                            \App\Models\TruckOwnership::create([
+                                'id' => (string) Str::ulid(),
+                                'truck_id' => $model->id,
+                                'franchisee_id' => $model->franchisee_id,
+                                'started_at' => now(),
+                            ]);
+                        }
+                    }
+                }
+            }
+        });
     }
 
     /**
@@ -67,6 +106,14 @@ class Truck extends Model
     public function franchisee(): BelongsTo
     {
         return $this->belongsTo(Franchisee::class);
+    }
+
+    /**
+     * Ownership history records.
+     */
+    public function ownerships(): HasMany
+    {
+        return $this->hasMany(TruckOwnership::class);
     }
 
     /**
